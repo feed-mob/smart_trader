@@ -37,3 +37,7 @@
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
+
+task_plan.md
+progress.md
+findings.md
