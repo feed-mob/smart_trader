@@ -1,0 +1,134 @@
+<% content_for :title, "Login - SmartTrader" %>
+<% content_for :head do %>
+  <meta name="google-signin-client_id" content="<%= ENV['OAUTH_GOOGLE_CLIENT_ID'] %>">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+<% end %>
+
+<div class="login-container">
+  <!-- Animated Background -->
+  <div class="login-background">
+    <div class="login-background__gradient"></div>
+    <div class="login-background__grid"></div>
+    <div class="login-background__particles"></div>
+  </div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+    <!-- Logo Section -->
+    <div class="login-logo">
+      <div class="login-logo__icon">
+        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background Circle with Gradient -->
+          <defs>
+            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#06b6d4"/>
+              <stop offset="100%" style="stop-color:#8b5cf6"/>
+            </linearGradient>
+          </defs>
+          <circle cx="40" cy="40" r="36" stroke="url(#logoGradient)" stroke-width="2" fill="none"/>
+          <circle cx="40" cy="40" r="30" stroke="url(#logoGradient)" stroke-width="1" fill="none" opacity="0.5"/>
+          <!-- Bull/Trading Icon -->
+          <path d="M28 45L32 35C34 30 38 28 44 28C50 28 54 32 56 38L60 45M35 28V20M45 28V22M38 45H50M44 38V52" stroke="url(#logoGradient)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Chart Indicators -->
+          <path d="M20 55L30 48L38 52L48 40L58 46" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+          <path d="M22 57L32 50L40 54L50 42L60 48" stroke="#8b5cf6" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+        </svg>
+      </div>
+      <h1 class="login-logo__title">SmartTrader</h1>
+      <p class="login-logo__slogan">Everything is Agent</p>
+    </div>
+
+    <!-- Divider -->
+    <div class="login-divider">
+      <span>Continue with</span>
+    </div>
+
+    <!-- Google Sign In Button -->
+    <%
+      google_client_id = ENV['OAUTH_GOOGLE_CLIENT_ID']
+      if google_client_id.present?
+    %>
+    <div id="google-signin-button" class="google-signin-btn">
+      <span class="google-signin-btn__icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+      </span>
+      <span>Sign in with Google</span>
+    </div>
+    <% else %>
+    <button type="button" class="google-signin-btn" disabled>
+      <span class="google-signin-btn__icon">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#6b7280" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#6b7280" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#6b7280" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#6b7280" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+      </span>
+      <span>Google Sign In Not Configured</span>
+    </button>
+    <% end %>
+
+    <!-- Divider -->
+    <div class="login-divider">
+      <span>Platform Features</span>
+    </div>
+
+    <!-- Feature Highlights -->
+    <div class="feature-highlights">
+      <div class="feature-item">
+        <div class="feature-item__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <div class="feature-item__title">AI Trading</div>
+        <div class="feature-item__desc">AI-powered trading agents</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20V10"/>
+            <path d="M18 20V4"/>
+            <path d="M6 20v-4"/>
+          </svg>
+        </div>
+        <div class="feature-item__title">Real-time</div>
+        <div class="feature-item__desc">Market signals & alerts</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-item__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12h20"/>
+            <path d="M12 2v20"/>
+            <circle cx="12" cy="12" r="6"/>
+          </svg>
+        </div>
+        <div class="feature-item__title">Smart Analysis</div>
+        <div class="feature-item__desc">Market sentiment insight</div>
+      </div>
+    </div>
+
+    <!-- Security Badge -->
+    <div class="security-badge">
+      <svg class="security-badge__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      <span>Secure authentication powered by Google</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      <p class="login-footer__text">
+        By signing in, you agree to our <a href="#" class="login-footer__link">Terms of Service</a> and <a href="#" class="login-footer__link">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<%= javascript_include_tag "sessions", defer: true %>

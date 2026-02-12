@@ -8,3 +8,8 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Import page-specific styles */
+@import "sessions";
+@import "home";
+
