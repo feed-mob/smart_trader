@@ -45,6 +45,9 @@ gem "image_processing", "~> 1.2"
 # A framework for building reusable, testable & encapsulated view components
 gem "view_component"
 
+# Google Sign-In authentication
+gem "google_sign_in"
+
 group :development, :test do
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false
