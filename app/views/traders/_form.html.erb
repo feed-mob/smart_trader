@@ -1,0 +1,73 @@
+<%= form_with(model: trader, class: "trader-form") do |form| %>
+  <% if trader.errors.any? %>
+    <div class="form-errors">
+      <h3 class="form-errors__title"><%= pluralize(trader.errors.count, "个错误") %> 需要修复:</h3>
+      <ul class="form-errors__list">
+        <% trader.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= form.label :name, "名称", class: "form-label" %>
+    <%= form.text_field :name, class: "form-input", placeholder: "例如：巴菲特风格", maxlength: 100 %>
+    <span class="form-hint">给操盘手起个名字，便于识别</span>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :risk_level, "风险等级", class: "form-label" %>
+    <%= form.select :risk_level,
+        options_for_select([
+          ["保守型 - 注重本金保护", "conservative"],
+          ["平衡型 - 风险与收益兼顾", "balanced"],
+          ["激进型 - 追求高收益", "aggressive"]
+        ], trader.risk_level),
+        {},
+        class: "form-select" %>
+    <span class="form-hint">选择操盘手的风险偏好</span>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :initial_capital, "初始资金", class: "form-label" %>
+    <div class="form-input-group">
+      <span class="form-input-prefix">¥</span>
+      <%= form.number_field :initial_capital, class: "form-input form-input--with-prefix", min: 0, step: 0.01 %>
+    </div>
+    <span class="form-hint">操盘手的起始资金（默认 ¥100,000）</span>
+  </div>
+
+  <div class="form-group">
+    <%= form.label :status, "状态", class: "form-label" %>
+    <%= form.select :status,
+        options_for_select([
+          ["启用", "active"],
+          ["停用", "inactive"]
+        ], trader.status),
+        {},
+        class: "form-select" %>
+  </div>
+
+  <div class="form-group form-group--full">
+    <%= form.label :description, "投资风格描述", class: "form-label" %>
+    <%= form.text_area :description,
+        class: "form-textarea",
+        placeholder: "描述您的投资风格，例如：\n我是稳健型投资者，注重长期价值投资。我喜欢持有优质蓝筹股，追求稳定的分红收益。我会严格控制仓位，保留足够的现金应对市场波动。",
+        rows: 5,
+        maxlength: 2000 %>
+    <span class="form-hint">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="form-hint__icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M12 16v-4"></path>
+        <path d="M12 8h.01"></path>
+      </svg>
+      AI 将根据描述自动生成个性化的交易策略。描述越详细，策略越精准。
+    </span>
+  </div>
+
+  <div class="form-actions">
+    <%= form.submit class: "btn btn-primary" %>
+    <%= link_to "取消", traders_path, class: "btn btn-ghost" %>
+  </div>
+<% end %>

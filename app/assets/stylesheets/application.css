@@ -12,4 +12,5 @@
 /* Import page-specific styles */
 @import "sessions";
 @import "home";
+@import "traders";
 

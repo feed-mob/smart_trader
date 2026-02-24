@@ -1,0 +1,36 @@
+<% content_for :title, "编辑 #{@trader.name} - SmartTrader" %>
+
+<div class="traders-container">
+  <!-- Animated Background -->
+  <div class="traders-background">
+    <div class="traders-background__gradient"></div>
+    <div class="traders-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="traders-header">
+    <div class="traders-header__left">
+      <%= link_to @trader, class: "traders-logo" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      <% end %>
+      <h1 class="traders-header__title">编辑 <%= @trader.name %></h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="traders-main">
+    <div class="form-container">
+      <div class="form-card">
+        <div class="form-card__header">
+          <h2 class="form-card__title">修改操盘手信息</h2>
+          <p class="form-card__subtitle">修改投资风格描述后，AI 将重新生成交易策略</p>
+        </div>
+
+        <%= render "form", trader: @trader %>
+      </div>
+    </div>
+  </main>
+</div>

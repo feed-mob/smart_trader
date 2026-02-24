@@ -48,6 +48,9 @@ gem "view_component"
 # Google Sign-In authentication
 gem "google_sign_in"
 
+# RubyLLM for AI-powered strategy generation
+gem "ruby_llm"
+
 group :development, :test do
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false

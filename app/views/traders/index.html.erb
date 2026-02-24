@@ -1,0 +1,109 @@
+<% content_for :title, "操盘手管理 - SmartTrader" %>
+
+<div class="traders-container">
+  <!-- Animated Background -->
+  <div class="traders-background">
+    <div class="traders-background__gradient"></div>
+    <div class="traders-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="traders-header">
+    <div class="traders-header__left">
+      <%= link_to root_path, class: "traders-logo" do %>
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 22L16 17C17 16 19 15 22 15C25 15 27 17 28 19L30 22" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      <% end %>
+      <h1 class="traders-header__title">操盘手管理</h1>
+    </div>
+    <div class="traders-header__right">
+      <%= link_to "新建操盘手", new_trader_path, class: "btn btn-primary" %>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="traders-main">
+    <% if notice.present? %>
+      <div class="alert alert-success">
+        <%= notice %>
+      </div>
+    <% end %>
+
+    <% if alert.present? %>
+      <div class="alert alert-error">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <% if @traders.any? %>
+      <div class="traders-grid">
+        <% @traders.each do |trader| %>
+          <div class="trader-card" data-risk="<%= trader.risk_level %>">
+            <div class="trader-card__header">
+              <div class="trader-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <span class="trader-card__risk-badge trader-card__risk-badge--<%= trader.risk_level %>">
+                <%= trader.display_risk_level %>
+              </span>
+            </div>
+
+            <h3 class="trader-card__name"><%= trader.name %></h3>
+
+            <div class="trader-card__stats">
+              <div class="trader-card__stat">
+                <span class="trader-card__stat-label">初始资金</span>
+                <span class="trader-card__stat-value"><%= number_to_currency(trader.initial_capital, unit: "¥", precision: 0) %></span>
+              </div>
+              <div class="trader-card__stat">
+                <span class="trader-card__stat-label">当前资金</span>
+                <span class="trader-card__stat-value"><%= number_to_currency(trader.current_capital_value, unit: "¥", precision: 0) %></span>
+              </div>
+              <div class="trader-card__stat">
+                <span class="trader-card__stat-label">盈亏</span>
+                <span class="trader-card__stat-value <%= trader.profit_loss >= 0 ? 'positive' : 'negative' %>">
+                  <%= trader.profit_loss >= 0 ? '+' : '' %><%= number_to_currency(trader.profit_loss, unit: "¥", precision: 0) %>
+                  <small>(<%= trader.profit_loss_percent >= 0 ? '+' : '' %><%= trader.profit_loss_percent %>%)</small>
+                </span>
+              </div>
+            </div>
+
+            <div class="trader-card__status">
+              <span class="status-indicator status-indicator--<%= trader.status %>"></span>
+              <%= trader.display_status %>
+            </div>
+
+            <% if trader.trading_strategy.present? %>
+              <div class="trader-card__strategy">
+                <span class="strategy-label">策略:</span>
+                <span class="strategy-name"><%= trader.trading_strategy.name %></span>
+              </div>
+            <% end %>
+
+            <div class="trader-card__actions">
+              <%= link_to "查看详情", trader, class: "btn btn-secondary" %>
+              <%= link_to "编辑", edit_trader_path(trader), class: "btn btn-ghost" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="traders-empty">
+        <div class="traders-empty__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h3 class="traders-empty__title">还没有操盘手</h3>
+        <p class="traders-empty__text">创建你的第一个 AI 操盘手，开始智能投资之旅</p>
+        <%= link_to "创建操盘手", new_trader_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </main>
+</div>
