@@ -1,0 +1,142 @@
+<% content_for :title, "#{@trader.name} - SmartTrader" %>
+
+<div class="traders-container">
+  <!-- Animated Background -->
+  <div class="traders-background">
+    <div class="traders-background__gradient"></div>
+    <div class="traders-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="traders-header">
+    <div class="traders-header__left">
+      <%= link_to traders_path, class: "traders-logo" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      <% end %>
+      <h1 class="traders-header__title"><%= @trader.name %></h1>
+    </div>
+    <div class="traders-header__right">
+      <%= link_to "编辑", edit_trader_path(@trader), class: "btn btn-secondary" %>
+      <%= button_to "删除", @trader, method: :delete, class: "btn btn-danger", data: { turbo_confirm: "确定要删除这个操盘手吗？" } %>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="traders-main">
+    <% if notice.present? %>
+      <div class="alert alert-success">
+        <%= notice %>
+      </div>
+    <% end %>
+
+    <!-- Trader Info Card -->
+    <div class="trader-detail">
+      <div class="trader-detail__section">
+        <h2 class="trader-detail__section-title">基本信息</h2>
+        <div class="trader-detail__grid">
+          <div class="trader-detail__item">
+            <span class="trader-detail__label">风险等级</span>
+            <span class="trader-detail__value">
+              <span class="risk-badge risk-badge--<%= @trader.risk_level %>"><%= @trader.display_risk_level %></span>
+            </span>
+          </div>
+          <div class="trader-detail__item">
+            <span class="trader-detail__label">状态</span>
+            <span class="trader-detail__value">
+              <span class="status-indicator status-indicator--<%= @trader.status %>"></span>
+              <%= @trader.display_status %>
+            </span>
+          </div>
+          <div class="trader-detail__item">
+            <span class="trader-detail__label">初始资金</span>
+            <span class="trader-detail__value"><%= number_to_currency(@trader.initial_capital, unit: "¥", precision: 2) %></span>
+          </div>
+          <div class="trader-detail__item">
+            <span class="trader-detail__label">当前资金</span>
+            <span class="trader-detail__value"><%= number_to_currency(@trader.current_capital_value, unit: "¥", precision: 2) %></span>
+          </div>
+          <div class="trader-detail__item">
+            <span class="trader-detail__label">盈亏</span>
+            <span class="trader-detail__value <%= @trader.profit_loss >= 0 ? 'positive' : 'negative' %>">
+              <%= @trader.profit_loss >= 0 ? '+' : '' %><%= number_to_currency(@trader.profit_loss, unit: "¥", precision: 2) %>
+            </span>
+          </div>
+          <div class="trader-detail__item">
+            <span class="trader-detail__label">收益率</span>
+            <span class="trader-detail__value <%= @trader.profit_loss_percent >= 0 ? 'positive' : 'negative' %>">
+              <%= @trader.profit_loss_percent >= 0 ? '+' : '' %><%= @trader.profit_loss_percent %>%
+            </span>
+          </div>
+        </div>
+
+        <% if @trader.description.present? %>
+          <div class="trader-detail__description">
+            <h3 class="trader-detail__description-title">投资风格描述</h3>
+            <p class="trader-detail__description-text"><%= @trader.description %></p>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Trading Strategy Section -->
+      <% if @strategy.present? %>
+        <div class="trader-detail__section">
+          <h2 class="trader-detail__section-title">
+            交易策略
+            <span class="strategy-source strategy-source--<%= @strategy.generated_by %>">
+              <%= { "llm" => "AI 生成", "manual" => "手动配置", "default_template" => "默认模板" }[@strategy.generated_by] %>
+            </span>
+          </h2>
+
+          <div class="strategy-card">
+            <h3 class="strategy-card__name"><%= @strategy.name %></h3>
+            <% if @strategy.description.present? %>
+              <p class="strategy-card__description"><%= @strategy.description %></p>
+            <% end %>
+
+            <div class="strategy-card__params">
+              <div class="strategy-param">
+                <span class="strategy-param__label">风险等级</span>
+                <span class="strategy-param__value">
+                  <span class="risk-badge risk-badge--<%= @strategy.risk_level %>"><%= { "conservative" => "保守", "balanced" => "平衡", "aggressive" => "激进" }[@strategy.risk_level] %></span>
+                </span>
+              </div>
+              <div class="strategy-param">
+                <span class="strategy-param__label">最大持仓数</span>
+                <span class="strategy-param__value"><%= @strategy.max_positions %> 个资产</span>
+              </div>
+              <div class="strategy-param">
+                <span class="strategy-param__label">买入信号阈值</span>
+                <span class="strategy-param__value"><%= (@strategy.buy_signal_threshold * 100).to_i %>%</span>
+                <span class="strategy-param__hint">（数值越高越严格）</span>
+              </div>
+              <div class="strategy-param">
+                <span class="strategy-param__label">单资产最大仓位</span>
+                <span class="strategy-param__value"><%= (@strategy.max_position_size * 100).to_i %>%</span>
+              </div>
+              <div class="strategy-param">
+                <span class="strategy-param__label">最小现金保留</span>
+                <span class="strategy-param__value"><%= (@strategy.min_cash_reserve * 100).to_i %>%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="trader-detail__section">
+          <h2 class="trader-detail__section-title">交易策略</h2>
+          <div class="strategy-empty">
+            <p>暂无交易策略，请编辑操盘手信息以生成策略</p>
+            <%= link_to "编辑操盘手", edit_trader_path(@trader), class: "btn btn-secondary" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Back Link -->
+    <div class="trader-actions">
+      <%= link_to "返回列表", traders_path, class: "btn btn-ghost" %>
+    </div>
+  </main>
+</div>

@@ -550,6 +550,24 @@
   font-weight: 500;
   cursor: not-allowed;
   transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.module-card__action--active {
+  cursor: pointer;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(139, 92, 246, 0.15));
+  border-color: rgba(6, 182, 212, 0.3);
+  color: var(--color-accent-primary);
+}
+
+.module-card__action--active:hover {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(139, 92, 246, 0.25));
+  border-color: rgba(6, 182, 212, 0.5);
+  transform: translateY(-1px);
+}
+
+.module-card__action--active:hover svg {
+  transform: translateX(4px);
 }
 
 .module-card__action svg {
