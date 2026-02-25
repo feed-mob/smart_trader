@@ -2,22 +2,33 @@
 
 class StrategyGeneratorService
   SYSTEM_INSTRUCTIONS = <<~PROMPT
-    你是一位专业的投资顾问。根据投资者的描述，生成一套适合的交易策略参数。
+    你是一位专业的投资顾问。根据投资者的风险偏好和市场环境，生成适合的交易策略参数。
 
-    请分析投资者的风险偏好、投资目标和交易风格，生成以下参数：
+    市场环境说明：
+    - normal: 正常市场环境，稳定运行
+    - volatile: 高波动市场，价格剧烈波动
+    - crash: 崩盘市场，价格大幅下跌
+    - bubble: 泡沫市场，价格非理性上涨
 
+    风险偏好说明：
+    - conservative: 保守型，注重本金安全
+    - balanced: 平衡型，平衡风险与收益
+    - aggressive: 激进型，追求高收益
+
+    请根据给定的风险偏好和市场环境，生成以下参数：
     1. 策略名称（简短描述，如"稳健价值投资策略"）
-    2. 风险等级（conservative/balanced/aggressive）
-    3. 最大持仓数（2-5个资产）
-    4. 买入信号阈值（0.3-0.7，数值越高越严格）
-    5. 单个资产最大仓位（0.3-0.7，即30%-70%）
-    6. 最小现金保留比例（0.05-0.4，即5%-40%）
-    7. 策略说明（1-2句话）
+    2. 最大持仓数（2-5个资产）
+    3. 买入信号阈值（0.3-0.7，数值越高越严格）
+    4. 单个资产最大仓位（0.3-0.7，即30%-70%）
+    5. 最小现金保留比例（0.05-0.4，即5%-40%）
+    6. 策略说明（1-2句话，针对当前市场环境）
 
     注意：
     - 参数必须在合理范围内
     - 保守型投资者：持仓少、阈值高、仓位小、现金多
     - 激进型投资者：持仓多、阈值低、仓位大、现金少
+    - 崩盘时：保守型应防守保本，激进型应逆向买入
+    - 泡沫时：保守型应获利了结，激进型可趋势跟随
   PROMPT
 
   def initialize(description, risk_level: nil)
@@ -25,52 +36,72 @@ class StrategyGeneratorService
     @risk_level = risk_level
   end
 
+  # Generate a single strategy (for backward compatibility)
   def call
-    return fallback_strategy if @description.blank?
+    generate_strategies.first || fallback_strategies.first
+  end
 
-    generate_with_ai
+  # Generate strategies for all market conditions
+  def generate_strategies
+    if @description.present?
+      generate_all_with_ai
+    else
+      fallback_strategies
+    end
   end
 
   private
 
-  def generate_with_ai
+  def generate_all_with_ai
+    strategies = []
+    TradingStrategy.market_conditions.keys.each do |market_condition|
+      strategies << generate_single_strategy_with_ai(market_condition)
+    end
+    strategies
+  end
+
+  def generate_single_strategy_with_ai(market_condition)
     ai_service = AiChatService.new(
       instructions: SYSTEM_INSTRUCTIONS,
       temperature: 0.3,
       max_tokens: 500
     )
 
-    response = ai_service.ask(user_prompt)
-    parse_llm_response(response)
+    response = ai_service.ask(user_prompt_for(market_condition))
+    parse_llm_response(response, market_condition)
   end
 
-  def user_prompt
+  def user_prompt_for(market_condition)
     <<~PROMPT
       投资者描述：
       "#{@description}"
 
+      风险偏好：#{@risk_level || 'balanced'}
+      市场环境：#{market_condition}
+
       请严格按照以下 JSON 格式返回策略参数，不要添加任何 markdown 标记或其他文字：
-      {"name":"策略名称","risk_level":"conservative","max_positions":3,"buy_signal_threshold":0.5,"max_position_size":0.5,"min_cash_reserve":0.2,"description":"策略说明"}
+      {"name":"策略名称","max_positions":3,"buy_signal_threshold":0.5,"max_position_size":0.5,"min_cash_reserve":0.2,"description":"针对#{market_condition}市场的策略说明"}
     PROMPT
   end
 
-  def parse_llm_response(content)
+  def parse_llm_response(content, market_condition)
     clean_content = content.to_s.gsub(/```json\s*|\s*```/i, "").strip
     json_match = clean_content.match(/\{[^{}]*\}/)
 
     data = JSON.parse(json_match[0])
-    build_strategy_params(data)
+    build_strategy_params(data, market_condition)
   end
 
-  def build_strategy_params(data)
+  def build_strategy_params(data, market_condition)
     {
       name: sanitize_name(data["name"]),
-      risk_level: sanitize_risk_level(data["risk_level"]),
+      risk_level: @risk_level || sanitize_risk_level(data["risk_level"]),
       max_positions: sanitize_max_positions(data["max_positions"]),
       buy_signal_threshold: sanitize_threshold(data["buy_signal_threshold"], 0.3, 0.7),
       max_position_size: sanitize_threshold(data["max_position_size"], 0.3, 0.7),
       min_cash_reserve: sanitize_threshold(data["min_cash_reserve"], 0.05, 0.4),
       description: sanitize_description(data["description"]),
+      market_condition: market_condition,
       generated_by: :llm
     }
   end
@@ -96,24 +127,24 @@ class StrategyGeneratorService
     desc.to_s.strip[0..499].presence || "AI 根据投资风格描述自动生成"
   end
 
-  def fallback_strategy
-    detected_risk = @risk_level || detect_risk_level_from_description
-    template = TradingStrategy.template_for_risk_level(detected_risk)
-    template.attributes.except("id", "created_at", "updated_at").merge(generated_by: :default_template)
+  def fallback_strategies
+    TradingStrategy.market_conditions.keys.map do |market_condition|
+      build_matrix_strategy(market_condition)
+    end
   end
 
-  def detect_risk_level_from_description
-    text = @description.to_s.downcase
-
-    conservative_keywords = %w[稳健 保守 安全 长期 价值 保护 本金 稳定 分红]
-    aggressive_keywords = %w[激进 高收益 快速 进出 机会 风险 高回报 成长]
-
-    conservative_score = conservative_keywords.count { |k| text.include?(k) }
-    aggressive_score = aggressive_keywords.count { |k| text.include?(k) }
-
-    return :conservative if conservative_score > aggressive_score
-    return :aggressive if aggressive_score > conservative_score
-
-    :balanced
+  def build_matrix_strategy(market_condition)
+    matrix_params = TradingStrategy.strategy_for(@risk_level || :balanced, market_condition)
+    {
+      name: matrix_params[:name],
+      risk_level: @risk_level || :balanced,
+      max_positions: matrix_params[:max_positions],
+      buy_signal_threshold: matrix_params[:buy_signal_threshold],
+      max_position_size: matrix_params[:max_position_size],
+      min_cash_reserve: matrix_params[:min_cash_reserve],
+      description: matrix_params[:description],
+      market_condition: market_condition,
+      generated_by: :matrix
+    }
   end
 end

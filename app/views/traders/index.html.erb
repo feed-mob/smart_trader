@@ -78,10 +78,11 @@
               <%= trader.display_status %>
             </div>
 
-            <% if trader.trading_strategy.present? %>
+            <% if trader.default_strategy.present? %>
               <div class="trader-card__strategy">
                 <span class="strategy-label">策略:</span>
-                <span class="strategy-name"><%= trader.trading_strategy.name %></span>
+                <span class="strategy-name"><%= trader.default_strategy.name %></span>
+                <span class="strategy-count">(<%= trader.trading_strategies.count %>种市场环境)</span>
               </div>
             <% end %>
 

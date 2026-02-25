@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Trader < ApplicationRecord
-  has_one :trading_strategy, dependent: :destroy
+  has_many :trading_strategies, dependent: :destroy
 
   # Enums
   enum :risk_level, { conservative: 0, balanced: 1, aggressive: 2 }
@@ -46,6 +46,28 @@ class Trader < ApplicationRecord
 
   def display_risk_level
     { "conservative" => "保守", "balanced" => "平衡", "aggressive" => "激进" }[risk_level]
+  end
+
+  # Get strategy for a specific market condition
+  def strategy_for(market_condition)
+    trading_strategies.find_by(market_condition: market_condition)
+  end
+
+  # Get all strategies grouped by market condition
+  def strategies_by_market_condition
+    trading_strategies.index_by(&:market_condition)
+  end
+
+  # Check if all strategies exist for all market conditions
+  def has_all_strategies?
+    TradingStrategy.market_conditions.keys.all? do |condition|
+      strategy_for(condition).present?
+    end
+  end
+
+  # Get first available strategy (for display purposes)
+  def default_strategy
+    strategy_for(:normal) || trading_strategies.first
   end
 
   private

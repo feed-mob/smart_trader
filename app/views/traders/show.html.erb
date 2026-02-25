@@ -80,58 +80,63 @@
         <% end %>
       </div>
 
-      <!-- Trading Strategy Section -->
-      <% if @strategy.present? %>
-        <div class="trader-detail__section">
-          <h2 class="trader-detail__section-title">
-            交易策略
-            <span class="strategy-source strategy-source--<%= @strategy.generated_by %>">
-              <%= { "llm" => "AI 生成", "manual" => "手动配置", "default_template" => "默认模板" }[@strategy.generated_by] %>
-            </span>
-          </h2>
+      <!-- Multi-Strategy Matrix Section -->
+      <div class="trader-detail__section">
+        <h2 class="trader-detail__section-title">
+          策略矩阵
+          <span class="strategy-matrix-hint">（AI 将根据市场环境自动选择策略）</span>
+        </h2>
 
-          <div class="strategy-card">
-            <h3 class="strategy-card__name"><%= @strategy.name %></h3>
-            <% if @strategy.description.present? %>
-              <p class="strategy-card__description"><%= @strategy.description %></p>
+        <% if @strategies.any? %>
+          <!-- Strategy Cards Grid -->
+          <div class="strategy-matrix-grid">
+            <% @strategies.each do |strategy| %>
+              <div class="strategy-card">
+                <div class="strategy-card__header">
+                  <h3 class="strategy-card__name"><%= strategy.name %></h3>
+                  <span class="strategy-card__condition strategy-card__condition--<%= strategy.market_condition %>">
+                    <%= strategy.display_market_condition %>
+                  </span>
+                </div>
+
+                <% if strategy.description.present? %>
+                  <p class="strategy-card__description"><%= strategy.description %></p>
+                <% end %>
+
+                <div class="strategy-card__params">
+                  <div class="strategy-param">
+                    <span class="strategy-param__label">最大持仓数</span>
+                    <span class="strategy-param__value"><%= strategy.max_positions %> 个资产</span>
+                  </div>
+                  <div class="strategy-param">
+                    <span class="strategy-param__label">买入信号阈值</span>
+                    <span class="strategy-param__value"><%= (strategy.buy_signal_threshold * 100).to_i %>%</span>
+                  </div>
+                  <div class="strategy-param">
+                    <span class="strategy-param__label">单资产最大仓位</span>
+                    <span class="strategy-param__value"><%= (strategy.max_position_size * 100).to_i %>%</span>
+                  </div>
+                  <div class="strategy-param">
+                    <span class="strategy-param__label">最小现金保留</span>
+                    <span class="strategy-param__value"><%= (strategy.min_cash_reserve * 100).to_i %>%</span>
+                  </div>
+                </div>
+
+                <div class="strategy-card__footer">
+                  <span class="strategy-source strategy-source--<%= strategy.generated_by %>">
+                    <%= strategy.display_generated_by %>
+                  </span>
+                </div>
+              </div>
             <% end %>
-
-            <div class="strategy-card__params">
-              <div class="strategy-param">
-                <span class="strategy-param__label">风险等级</span>
-                <span class="strategy-param__value">
-                  <span class="risk-badge risk-badge--<%= @strategy.risk_level %>"><%= { "conservative" => "保守", "balanced" => "平衡", "aggressive" => "激进" }[@strategy.risk_level] %></span>
-                </span>
-              </div>
-              <div class="strategy-param">
-                <span class="strategy-param__label">最大持仓数</span>
-                <span class="strategy-param__value"><%= @strategy.max_positions %> 个资产</span>
-              </div>
-              <div class="strategy-param">
-                <span class="strategy-param__label">买入信号阈值</span>
-                <span class="strategy-param__value"><%= (@strategy.buy_signal_threshold * 100).to_i %>%</span>
-                <span class="strategy-param__hint">（数值越高越严格）</span>
-              </div>
-              <div class="strategy-param">
-                <span class="strategy-param__label">单资产最大仓位</span>
-                <span class="strategy-param__value"><%= (@strategy.max_position_size * 100).to_i %>%</span>
-              </div>
-              <div class="strategy-param">
-                <span class="strategy-param__label">最小现金保留</span>
-                <span class="strategy-param__value"><%= (@strategy.min_cash_reserve * 100).to_i %>%</span>
-              </div>
-            </div>
           </div>
-        </div>
-      <% else %>
-        <div class="trader-detail__section">
-          <h2 class="trader-detail__section-title">交易策略</h2>
+        <% else %>
           <div class="strategy-empty">
             <p>暂无交易策略，请编辑操盘手信息以生成策略</p>
             <%= link_to "编辑操盘手", edit_trader_path(@trader), class: "btn btn-secondary" %>
           </div>
-        </div>
-      <% end %>
+        <% end %>
+      </div>
     </div>
 
     <!-- Back Link -->
