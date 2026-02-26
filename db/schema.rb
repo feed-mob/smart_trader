@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_24_085906) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_25_121135) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,6 +31,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_24_085906) do
     t.datetime "created_at", null: false
     t.text "description"
     t.integer "generated_by", default: 0
+    t.integer "market_condition", default: 0, null: false
     t.decimal "max_position_size", precision: 3, scale: 2, default: "0.5"
     t.integer "max_positions", default: 3
     t.decimal "min_cash_reserve", precision: 3, scale: 2, default: "0.2"
@@ -38,7 +39,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_24_085906) do
     t.integer "risk_level", default: 1
     t.bigint "trader_id", null: false
     t.datetime "updated_at", null: false
-    t.index ["trader_id"], name: "index_trading_strategies_on_trader_id", unique: true
+    t.index ["trader_id", "market_condition"], name: "index_trading_strategies_on_trader_id_and_market_condition", unique: true
   end
 
   create_table "users", force: :cascade do |t|

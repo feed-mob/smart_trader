@@ -9,7 +9,7 @@ class TradersController < ApplicationController
   end
 
   def show
-    @strategy = @trader.trading_strategy
+    @strategies = @trader.trading_strategies.order(:market_condition)
   end
 
   def new
@@ -22,7 +22,7 @@ class TradersController < ApplicationController
     @trader = Trader.new(trader_params)
 
     if @trader.save
-      generate_strategy_for(@trader)
+      generate_strategies_for(@trader)
       redirect_to @trader, notice: "操盘手创建成功"
     else
       render :new, status: :unprocessable_entity
@@ -31,7 +31,7 @@ class TradersController < ApplicationController
 
   def update
     if @trader.update(trader_params)
-      regenerate_strategy_if_needed(@trader)
+      regenerate_strategies_if_needed(@trader)
       redirect_to @trader, notice: "操盘手更新成功"
     else
       render :edit, status: :unprocessable_entity
@@ -53,27 +53,19 @@ class TradersController < ApplicationController
     params.require(:trader).permit(:name, :risk_level, :initial_capital, :status, :description)
   end
 
-  def generate_strategy_for(trader)
-    strategy_params = StrategyGeneratorService.new(
-      trader.description,
-      risk_level: trader.risk_level
-    ).call
+  def generate_strategies_for(trader)
+    service = StrategyGeneratorService.new(trader.description, risk_level: trader.risk_level)
+    strategies = service.generate_strategies
 
-    trader.create_trading_strategy(strategy_params)
+    strategies.each do |strategy_params|
+      trader.trading_strategies.create(strategy_params)
+    end
   end
 
-  def regenerate_strategy_if_needed(trader)
-    return unless trader.saved_change_to_description?
+  def regenerate_strategies_if_needed(trader)
+    return unless trader.saved_change_to_description? || trader.saved_change_to_risk_level?
 
-    trader.trading_strategy&.destroy
-    generate_strategy_for(trader)
-  end
-
-  def current_user
-    @current_user ||= User.find_by(id: session[:user_id])
-  end
-
-  def require_user
-    redirect_to login_path, alert: "请先登录" unless current_user
+    trader.trading_strategies.destroy_all
+    generate_strategies_for(trader)
   end
 end
