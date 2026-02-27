@@ -1,0 +1,335 @@
+<%# AI Analysis page %>
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="mb-6">
+    <%= link_to '← 返回', asset_path(@asset),
+          class: "text-blue-600 hover:text-blue-700 font-medium" %>
+
+    <div class="flex items-center justify-between mt-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">
+          <%= @asset.symbol %> AI 分析
+        </h1>
+        <p class="text-lg text-gray-600"><%= @asset.name %></p>
+      </div>
+      <span class="px-3 py-1 rounded text-sm font-medium <%= asset_type_badge(@asset.asset_type) %>">
+        <%= @asset.asset_type.upcase %>
+      </span>
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div class="mb-8 bg-white rounded-lg shadow p-4">
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">分析选项</h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          分析时长（小时）
+        </label>
+        <div class="flex gap-4">
+          <% [24, 48, 72, 168].each do |hours| %>
+            <%= link_to "#{hours}小时", analysis_asset_path(@asset, hours:),
+                  class: "px-4 py-2 rounded-lg #{hours == @analysis_hours ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
+          <% end %>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          分析模式
+        </label>
+        <div class="space-y-2">
+          <label class="flex items-center">
+            <input type="radio" name="mode" value="full" checked class="mr-2">
+            <span class="text-gray-700">完整 AI 分析（多 Agent）</span>
+          </label>
+          <label class="flex items-center">
+            <input type="radio" name="mode" value="quick" class="mr-2">
+            <span class="text-gray-700">快速信号（无 LLM）</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <button onclick="runAnalysis()"
+                class="w-full bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+          开始分析
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div id="analysis-loading" class="hidden mb-8">
+    <div class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <p class="mt-4 text-gray-600">AI 分析中，请稍候...</p>
+    </div>
+  </div>
+
+  <!-- Results Container -->
+  <div id="analysis-results" class="hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Trend Analysis Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3m0 6h0a6 6H7a6 6 0 0 6v6a6 6 0 0 6 6H7a6 6 0 0 6zm6 0l6-6 3 3a6 6 6 0 0 6h6a6 6 0 0 6H7a6 6 0 0 6z"/>
+          </svg>
+          趋势分析
+        </h3>
+
+        <div class="space-y-4">
+          <div>
+            <p class="text-sm text-gray-500">趋势方向</p>
+            <div id="trend-direction" class="text-2xl font-bold"></div>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">支撑位</p>
+            <div id="support-level" class="text-xl font-semibold"></div>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">阻力位</p>
+            <div id="resistance-level" class="text-xl font-semibold"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trading Signal Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7a7 7 0 0 7-3a7 7-2 2-2V7a2 2 2 2h7a2 2 0 0 7zm10-7a7 7-7v6h3a3 3 0 0-3h6a3 3 0 0H7a3 3 0 0zm7 7v6a3 3 0 0 6H7a3 3 0 0v-3H4a7-7 2-2 2z"/>
+          </svg>
+          交易信号
+        </h3>
+
+        <div class="space-y-4">
+          <div>
+            <p class="text-sm text-gray-500">推荐操作</p>
+            <div id="trading-signal" class="text-4xl font-bold py-2 px-4 rounded-lg"></div>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">置信度</p>
+            <div id="signal-confidence" class="text-xl font-semibold"></div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+          <p class="text-sm text-blue-800 font-medium">
+            ⚠️ 交易有风险，请谨慎操作。本分析仅供参考，不构成投资建议。
+          </p>
+        </div>
+      </div>
+
+      <!-- Risk Assessment Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h9v11h4v11a2 2 2 9H2a9 9 0 0-9v4a2 2 2 2h7a2 2 0 0 7z"/>
+          </svg>
+          风险评估
+        </h3>
+
+        <div class="space-y-3">
+          <div>
+            <p class="text-sm text-gray-500">波动性</p>
+            <div id="volatility-level" class="text-lg font-semibold"></div>
+          </div>
+          <div>
+            <p class="text-sm text-gray-500">流动性</p>
+            <div id="liquidity-level" class="text-lg font-semibold"></div>
+          </div>
+        </div>
+
+        <div id="risk-factors" class="mt-4">
+          <p class="text-sm text-gray-500 mb-2">风险因素</p>
+          <div id="factors-list" class="space-y-1"></div>
+        </div>
+      </div>
+
+      <!-- AI Insight Card -->
+      <div class="bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg shadow p-6 text-white">
+        <h3 class="text-xl font-semibold mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 3.993L5.995 6.793V5.5c0-1.415-.88-2.392-2.39-2.392-2H8c0-2.21 0-1.79.874-2.42L2.92 6.043c.037 1.272 2.079 2.079 2.699 4.502c1.055.268 1.268 1.345 2.197.398 2.004 2.004-2.251.564 2.252 2.197.398 2.253 1.447 3.56 3.56 3.56z"/>
+          </svg>
+          AI 深度洞察
+        </h3>
+
+        <div id="ai-insight" class="space-y-3">
+          <p class="text-white/80 text-sm">
+            点击"开始分析"后，AI 将提供详细的市场分析。
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const assetId = <%= @asset.id %>;
+  const analysisHours = <%= @analysis_hours %>;
+
+  function runAnalysis() {
+    const loadingDiv = document.getElementById('analysis-loading');
+    const resultsDiv = document.getElementById('analysis-results');
+
+    // Show loading
+    loadingDiv.classList.remove('hidden');
+    resultsDiv.classList.add('hidden');
+
+    // Get selected mode
+    const mode = document.querySelector('input[name="mode"]:checked')?.value || 'full';
+    const hours = document.querySelector('input[type="radio"]:checked')?.value
+      ? parseInt(document.querySelector('input[type="radio"]:checked').value.replace('小时', ''))
+      : analysisHours;
+
+    // Run analysis
+    fetch(`/api/v1/assets/${assetId}/analyze?hours=${hours}${mode === 'quick' ? '&quick=true' : ''}`)
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          displayAnalysisResults(result.data, mode === 'quick');
+        } else {
+          loadingDiv.classList.add('hidden');
+          alert('分析失败: ' + (result.error || '未知错误'));
+        }
+      })
+      .catch(error => {
+        loadingDiv.classList.add('hidden');
+        alert('网络错误: ' + error.message);
+      });
+  }
+
+  function displayAnalysisResults(data, isQuick) {
+    const loadingDiv = document.getElementById('analysis-loading');
+    const resultsDiv = document.getElementById('analysis-results');
+
+    // Hide loading, show results
+    loadingDiv.classList.add('hidden');
+    resultsDiv.classList.remove('hidden');
+
+    if (isQuick) {
+      displayQuickResults(data);
+    } else {
+      displayFullResults(data);
+    }
+  }
+
+  function displayQuickResults(data) {
+    // Trend Direction
+    const trendMap = {
+      bullish: '看涨 ↗',
+      bearish: '看跌 ↘',
+      neutral: '中性 →'
+    };
+    const trendColors = {
+      bullish: 'text-green-600',
+      bearish: 'text-red-600',
+      neutral: 'text-gray-600'
+    };
+
+    document.getElementById('trend-direction').textContent = trendMap[data.trend_direction] || '未知';
+    document.getElementById('trend-direction').className = `text-3xl font-bold ${trendColors[data.trend_direction] || 'text-gray-600'}`;
+
+    // Trading Signal
+    const signalColors = {
+      buy: 'bg-green-500 text-white',
+      sell: 'bg-red-500 text-white',
+      hold: 'bg-yellow-500 text-white'
+    };
+    const signalMap = {
+      buy: '买入',
+      sell: '卖出',
+      hold: '持有'
+    };
+
+    const signalDiv = document.getElementById('trading-signal');
+    signalDiv.textContent = signalMap[data.trading_signal] || '持有';
+    signalDiv.className = `text-4xl font-bold py-2 px-4 rounded-lg ${signalColors[data.trading_signal] || 'bg-gray-500 text-white'}`;
+
+    document.getElementById('signal-confidence').textContent = data.confidence ? data.confidence.toUpperCase() : '-';
+
+    // Hide sections not available in quick mode
+    document.getElementById('resistance-level').textContent = '-';
+    document.getElementById('support-level').textContent = '-';
+    document.getElementById('volatility-level').textContent = data.volatility ? data.volatility.toFixed(2) : '-';
+    document.getElementById('liquidity-level').textContent = data.volume_avg ? formatVolume(data.volume_avg) : '-';
+    document.getElementById('factors-list').innerHTML = '<p class="text-gray-500">快速模式仅提供基础技术分析</p>';
+  }
+
+  function displayFullResults(data) {
+    // Trend Direction
+    const trendMap = {
+      bullish: '看涨 ↗',
+      bearish: '看跌 ↘',
+      neutral: '中性 →'
+    };
+    const trendColors = {
+      bullish: 'text-green-600',
+      bearish: 'text-red-600',
+      neutral: 'text-gray-600'
+    };
+
+    document.getElementById('trend-direction').textContent = trendMap[data.trend_direction] || '未知';
+    document.getElementById('trend-direction').className = `text-3xl font-bold ${trendColors[data.trend_direction] || 'text-gray-600'}`;
+
+    // Support & Resistance
+    document.getElementById('support-level').textContent = `$${data.support_level?.toFixed(2) || '-'}`;
+    document.getElementById('resistance-level').textContent = `$${data.resistance_level?.toFixed(2) || '-'}`;
+
+    // Trading Signal
+    const signalColors = {
+      buy: 'bg-green-500 text-white',
+      sell: 'bg-red-500 text-white',
+      hold: 'bg-yellow-500 text-white'
+    };
+    const signalMap = {
+      buy: '买入',
+      sell: '卖出',
+      hold: '持有'
+    };
+
+    const signalDiv = document.getElementById('trading-signal');
+    signalDiv.textContent = signalMap[data.trading_signal] || '持有';
+    signalDiv.className = `text-4xl font-bold py-2 px-4 rounded-lg ${signalColors[data.trading_signal] || 'bg-gray-500 text-white'}`;
+
+    document.getElementById('signal-confidence').textContent = data.confidence ? data.confidence.toUpperCase() : '-';
+
+    // Risk Assessment
+    const volatilityMap = {
+      low: '低',
+      medium: '中',
+      high: '高',
+      extreme: '极高'
+    };
+    document.getElementById('volatility-level').textContent = volatilityMap[data.volatility_level] || '-';
+    document.getElementById('liquidity-level').textContent = data.volume_avg ? formatVolume(data.volume_avg) : '-';
+
+    // Risk Factors
+    const factorsList = document.getElementById('factors-list');
+    if (data.risk_factors && data.risk_factors.length > 0) {
+      factorsList.innerHTML = data.risk_factors.map(factor =>
+        `<div class="flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>${factor}</div>`
+      ).join('');
+    } else {
+      factorsList.innerHTML = '<p class="text-gray-500">无特别风险因素</p>';
+    }
+
+    // AI Insight
+    const insightDiv = document.getElementById('ai-insight');
+    if (data.analysis) {
+      insightDiv.innerHTML = `<p class="text-white/90 text-sm whitespace-pre-wrap">${data.analysis}</p>`;
+    }
+  }
+
+  function formatVolume(volume) {
+    if (!volume) return 'N/A';
+    if (volume >= 1000000000) return `${(volume / 1000000000).toFixed(1)}B`;
+    if (volume >= 1000000) return `${(volume / 1000000).toFixed(1)}M`;
+    if (volume >= 1000) return `${(volume / 1000).toFixed(1)}K`;
+    return volume.toString();
+  }
+</script>

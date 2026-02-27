@@ -1,0 +1,198 @@
+<%# Asset detail page with chart %>
+<div data-controller="assets"
+     data-assets-asset-id-value="<%= @asset.id %>"
+     data-assets-symbol-value="<%= @asset.symbol %>">
+
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-6">
+      <%= link_to '← 返回列表', assets_path,
+            class: "text-blue-600 hover:text-blue-700 font-medium" %>
+
+      <div class="flex items-center justify-between mt-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900"><%= @asset.symbol %></h1>
+          <p class="text-lg text-gray-600"><%= @asset.name %></p>
+        </div>
+        <span class="px-3 py-1 rounded text-sm font-medium
+                    <%= asset_type_badge(@asset.asset_type) %>">
+          <%= @asset.asset_type.upcase %>
+        </span>
+      </div>
+    </div>
+
+    <!-- Current Price Card -->
+    <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm text-gray-500 mb-1">当前价格</p>
+        <p class="text-4xl font-bold text-gray-900" data-assets-target="price">
+          <%= number_to_currency(@asset.current_price) %>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm text-gray-500 mb-1">24小时变化</p>
+        <% if @asset.latest_snapshot && @asset.latest_snapshot.change_percent %>
+          <p class="text-4xl font-bold <%= change_color_class(@asset.latest_snapshot.change_percent) %>"
+             data-assets-target="change">
+            <%= format_change_percent(@asset.latest_snapshot.change_percent) %>
+          </p>
+        <% else %>
+          <p class="text-4xl text-gray-400">-</p>
+        <% end %>
+      </div>
+
+      <div class="bg-white rounded-lg shadow p-6">
+        <p class="text-sm text-gray-500 mb-1">最后更新</p>
+        <p class="text-2xl font-semibold text-gray-700">
+          <%= @asset.last_updated&.strftime('%Y-%m-%d %H:%M') || 'N/A' %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Timeframe Selector -->
+    <div class="mb-8 flex items-center gap-4">
+      <span class="text-gray-600">时间范围：</span>
+      <% ['1h', '6h', '24h', '7d', '30d'].each do |tf| %>
+        <%= link_to timeframe_label(tf), asset_path(@asset, timeframe: tf),
+              class: "px-4 py-2 rounded-lg #{active_timeframe_class(tf)}" %>
+      <% end %>
+    </div>
+
+    <!-- Chart Container -->
+    <div class="mb-8 bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">价格走势图</h2>
+      <div id="chart-container" class="h-80 w-full" data-assets-target="chart">
+        <p class="text-center text-gray-500 py-32">加载图表数据...</p>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="mb-8 bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">统计信息</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div>
+          <p class="text-sm text-gray-500">总快照数</p>
+          <p class="text-lg font-semibold text-gray-900"><%= @asset.snapshots.count %></p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">最低价格</p>
+          <p class="text-lg font-semibold text-gray-900">
+            <%= number_to_currency(@snapshots&.min(:price)) %>
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">最高价格</p>
+          <p class="text-lg font-semibold text-gray-900">
+            <%= number_to_currency(@snapshots&.max(:price)) %>
+          </p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">平均价格</p>
+          <p class="text-lg font-semibold text-gray-900">
+            <%= number_to_currency(@snapshots&.average(:price)) %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Analysis Section -->
+    <div class="mb-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-white mb-4">AI 分析</h2>
+
+      <div class="mb-4">
+        <%= link_to '运行完整 AI 分析', analysis_asset_path(@asset),
+              class: "bg-white text-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold transition-colors" %>
+      </div>
+
+      <div id="quick-signal-container" class="bg-white/20 rounded-lg p-4">
+        <p class="text-sm text-gray-700 mb-2">
+          <span class="font-medium">交易信号：</span>
+          <span id="trend-indicator" data-assets-target="trend">加载中...</span>
+        </p>
+        <p class="text-sm text-gray-600">
+          置信度：<span id="confidence-level">-</span>
+        </p>
+      </div>
+
+      <div class="mt-4">
+        <%= link_to '刷新分析', analysis_asset_path(@asset),
+              class: "text-white/80 hover:text-white text-sm font-medium" %>
+      </div>
+    </div>
+
+    <!-- Recent Snapshots Table -->
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">最近快照 (<%= @timeframe %>)</h2>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">时间</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">价格</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">变化</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">成交量</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white">
+            <% @snapshots.each do |snapshot| %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= snapshot.captured_at&.strftime('%m-%d %H:%M') %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                  <%= number_to_currency(snapshot.price) %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm <%= change_color_class(snapshot.change_percent) %>">
+                  <%= format_change_percent(snapshot.change_percent) %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                  <%= number_to_human(snapshot.volume) %>
+                </td>
+              </tr>
+            <% end %>
+            <% if @snapshots.empty? %>
+              <tr>
+                <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                  该时间范围内无数据
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if @snapshots.length > 0 %>
+        <div class="mt-4 text-sm text-gray-500">
+          显示最近 <%= [@snapshots.count, 200].min %> 条记录
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-4">
+      <%= link_to '返回列表', assets_path,
+            class: "bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded transition-colors" %>
+      <%= link_to '刷新数据', asset_path(@asset, timeframe: @timeframe),
+            class: "bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded transition-colors" %>
+    </div>
+  </div>
+</div>
+
+<script>
+  function asset_type_badge(type) {
+    const badges = {
+      crypto: 'bg-orange-100 text-orange-800',
+      stock: 'bg-blue-100 text-blue-800',
+      commodity: 'bg-yellow-100 text-yellow-800'
+    };
+    return badges[type] || 'bg-gray-100 text-gray-800';
+  }
+
+  function active_timeframe_class(tf) {
+    return tf === '<%= @timeframe %>'
+      ? 'bg-blue-500 text-white'
+      : 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+  }
+</script>

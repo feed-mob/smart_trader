@@ -1,0 +1,145 @@
+<%# Asset list page %>
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">资产列表</h1>
+    <p class="text-gray-600 mt-2">实时市场数据监控</p>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="mb-6 flex flex-wrap gap-4">
+    <button onclick="window.location.href='/api/v1/assets/health'"
+            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded transition-colors">
+      健康检查
+    </button>
+    <button onclick="triggerCollection()"
+            class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded transition-colors">
+      触发数据采集
+    </button>
+    <a href="/sidekiq"
+       class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded transition-colors">
+      Sidekiq 面板
+    </a>
+  </div>
+
+  <!-- Top Assets by Volume -->
+  <div class="mb-8 bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">按成交量排名</h2>
+    <div id="top-assets-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <p class="text-gray-500 col-span-full">加载中...</p>
+    </div>
+  </div>
+
+  <!-- All Assets Grid -->
+  <div class="mb-8 bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">所有资产</h2>
+    <div id="assets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @assets.each do |asset| %>
+        <div class="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+             onclick="window.location.href='<%= asset_path(asset) %>'">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900"><%= asset.symbol %></h3>
+              <p class="text-sm text-gray-500"><%= asset.name %></p>
+            </div>
+            <span class="px-2 py-1 rounded text-xs font-medium
+                  <%= asset_type_badge(asset.asset_type) %>">
+              <%= asset.asset_type.upcase %>
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-gray-500">当前价格</p>
+              <p class="text-xl font-bold text-gray-900">
+                <%= number_to_currency(asset.current_price) %>
+              </p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">24小时变化</p>
+              <% if asset.latest_snapshot && asset.latest_snapshot.change_percent %>
+                <p class="text-lg font-semibold <%= change_color_class(asset.latest_snapshot.change_percent) %>">
+                  <%= format_change_percent(asset.latest_snapshot.change_percent) %>
+                </p>
+              <% else %>
+                <p class="text-lg text-gray-400">-</p>
+              <% end %>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">最后更新</p>
+            <p class="text-sm text-gray-700">
+              <%= asset.last_updated&.strftime('%Y-%m-%d %H:%M') || 'N/A' %>
+            </p>
+          </div>
+
+          <div class="mt-4">
+            <%= link_to "查看详情", asset_path(asset),
+                class: "text-blue-600 hover:text-blue-700 font-medium" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load top assets by volume
+  async function loadTopAssets() {
+    try {
+      const response = await fetch('/api/v1/assets/top_by_volume?limit=9');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const container = document.getElementById('top-assets-container');
+        container.innerHTML = result.data.map(asset => `
+          <div class="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
+               onclick="window.location.href='/assets/${asset.id}'">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900">${asset.symbol}</h3>
+                <p class="text-sm text-gray-500">${asset.name}</p>
+              </div>
+              <span class="px-2 py-1 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                ${asset.asset_type.toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">当前价格</p>
+              <p class="text-xl font-bold text-gray-900">$${asset.current_price?.toFixed(2) || 'N/A'}</p>
+            </div>
+          </div>
+        `).join('');
+      }
+    } catch (error) {
+      console.error('Error loading top assets:', error);
+    }
+  }
+
+  // Trigger data collection
+  async function triggerCollection() {
+    try {
+      const response = await fetch('/api/v1/assets/collect', { method: 'POST' });
+      const result = await response.json();
+
+      if (result.success) {
+        alert('数据采集已触发！任务将很快开始。');
+      } else {
+        alert('触发失败: ' + (result.error || '未知错误'));
+      }
+    } catch (error) {
+      console.error('Error triggering collection:', error);
+      alert('网络错误，请稍后重试');
+    }
+  }
+
+  // Load on page ready
+  document.addEventListener('DOMContentLoaded', loadTopAssets);
+
+  // Helper functions
+  function formatChangePercent(value) {
+    if (!value) return '';
+    const sign = value >= 0 ? '+' : '';
+    return `text-green-600` : 'text-red-600'`;
+  }
+</script>

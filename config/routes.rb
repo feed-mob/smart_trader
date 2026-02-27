@@ -21,6 +21,11 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "home#index"
 
+  # Asset management (Phase 6)
+  resources :assets, only: [:index, :show] do
+    get :analysis, on: :member
+  end
+
   # API routes (Phase 4 & 5)
   namespace :api do
     namespace :v1 do
