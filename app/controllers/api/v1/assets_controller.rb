@@ -151,6 +151,70 @@ module Api
         }, status: :internal_server_error
       end
 
+      # GET /api/v1/assets/:id/analyze - Get AI-powered asset analysis
+      def analyze
+        asset = Asset.find(params[:id])
+
+        hours = (params[:hours] || 48).to_i.clamp(1, 168)
+
+        result = if params[:quick] == "true"
+          # Quick analysis without LLM
+          SwarmAssetAnalyzerService.quick_signal(asset)
+        else
+          # Full multi-agent AI analysis
+          SwarmAssetAnalyzerService.analyze(asset)
+        end
+
+        render json: {
+          success: true,
+          data: result,
+          asset_id: asset.id,
+          symbol: asset.symbol,
+          hours: hours,
+          analysis_type: params[:quick] == "true" ? "quick" : "full",
+          timestamp: Time.current.iso8601
+        }
+      rescue ActiveRecord::RecordNotFound
+        render json: {
+          success: false,
+          error: "Asset not found",
+          code: "ASSET_NOT_FOUND"
+        }, status: :not_found
+      rescue StandardError => e
+        render json: {
+          success: false,
+          error: e.message,
+          code: "ANALYSIS_FAILED"
+        }, status: :internal_server_error
+      end
+
+      # GET /api/v1/assets/:id/signal - Get trading signal
+      def signal
+        asset = Asset.find(params[:id])
+
+        result = AIDataAnalyzerService.generate_trading_signals(asset)
+
+        render json: {
+          success: true,
+          data: result,
+          asset_id: asset.id,
+          symbol: asset.symbol,
+          timestamp: Time.current.iso8601
+        }
+      rescue ActiveRecord::RecordNotFound
+        render json: {
+          success: false,
+          error: "Asset not found",
+          code: "ASSET_NOT_FOUND"
+        }, status: :not_found
+      rescue StandardError => e
+        render json: {
+          success: false,
+          error: e.message,
+          code: "SIGNAL_GENERATION_FAILED"
+        }, status: :internal_server_error
+      end
+
       private
 
       # Calculate time range based on timeframe parameter

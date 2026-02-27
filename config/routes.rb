@@ -21,14 +21,16 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "home#index"
 
-  # API routes (Phase 4)
+  # API routes (Phase 4 & 5)
   namespace :api do
     namespace :v1 do
       resources :assets, only: [:index, :show] do
         get :snapshots, on: :member
         get :latest, on: :member
+        get :analyze, on: :member
+        get :signal, on: :member
       end
-      # Custom collection routes
+      # Custom collection and analysis routes
       get :top_by_volume, to: "assets#top_by_volume"
       get :health, to: "assets#health"
       post :collect, to: "assets#collect"

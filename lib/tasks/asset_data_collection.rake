@@ -197,4 +197,87 @@ namespace :asset_data_collection do
 
     puts "Job completed in #{(end_time - start_time).round(2)} seconds"
   end
+
+  desc "Analyze asset using AI"
+  task :analyze, [:symbol] => :environment do |_t, args|
+    symbol = args[:symbol] || "BTC"
+
+    puts "Analyzing #{symbol} using AI..."
+
+    asset = Asset.find_by(symbol: symbol)
+    unless asset
+      puts "Error: Asset with symbol '#{symbol}' not found"
+      next
+    end
+
+    hours = (ENV["HOURS"] || 48).to_i
+    use_swarm = ENV["USE_SWARM"] != "false"
+
+    puts "Analysis type: #{use_swarm ? 'Full Swarm' : 'Quick Signal'}"
+    puts "Hours of data: #{hours}"
+
+    start_time = Time.current
+
+    if use_swarm
+      result = SwarmAssetAnalyzerService.analyze(asset)
+    else
+      result = AIDataAnalyzerService.generate_trading_signals(asset)
+    end
+
+    end_time = Time.current
+
+    if result[:success] || !result[:error]
+      puts "Analysis completed in #{(end_time - start_time).round(2)} seconds"
+      puts "Trend Direction: #{result[:trend_direction]}"
+      puts "Trading Signal: #{result[:trading_signal]}"
+      puts "Support Level: $#{result[:support_level]}"
+      puts "Resistance Level: $#{result[:resistance_level]}"
+      puts "Confidence: #{result[:confidence]}"
+    else
+      puts "Analysis failed: #{result[:error]}"
+    end
+  end
+
+  desc "Analyze all assets using AI"
+  task analyze_all: :environment do
+    puts "Analyzing all assets using AI..."
+
+    assets = Asset.all
+    results = {}
+
+    assets.each do |asset|
+      begin
+        result = SwarmAssetAnalyzerService.analyze(asset)
+        results[asset.symbol] = result[:success] ? result : { error: result[:error] }
+
+        symbol_status = result[:success] ? "✓" : "✗"
+        puts "  #{symbol_status} #{asset.symbol}: #{result[:trend_direction] || 'N/A'}"
+      rescue StandardError => e
+        results[asset.symbol] = { error: e.message }
+        puts "  ✗ #{asset.symbol}: #{e.message}"
+      end
+    end
+
+    puts "\nAnalysis complete for #{results.size} assets"
+    puts "Success: #{results.values.count { |r| r[:success] || !r[:error] }}"
+    puts "Failed: #{results.values.count { |r| r[:error] }}"
+  end
+
+  desc "Generate batch AI analysis (quick signals for all assets)"
+  task quick_signals: :environment do
+    puts "Generating quick trading signals for all assets..."
+
+    results = SwarmAssetAnalyzerService.analyze_batch(Asset.all)
+
+    puts "\nQuick Signals Generated:"
+    results[:data].each do |symbol, result|
+      next if result[:error]
+
+      puts "  #{symbol}:"
+      puts "    Signal: #{result[:trading_signal]}"
+      puts "    Confidence: #{result[:confidence]}"
+      puts "    Price: $#{result[:current_price]}"
+    end
+  end
 end
+
