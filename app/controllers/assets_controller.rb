@@ -4,7 +4,7 @@
 class AssetsController < ApplicationController
   # GET /assets - List all assets
   def index
-    @assets = Asset.all.includes(:latest_snapshot)
+    @assets = Asset.all.includes(:snapshots)
   end
 
   # GET /assets/:id - Show asset detail page
