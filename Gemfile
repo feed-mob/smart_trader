@@ -51,6 +51,15 @@ gem "google_sign_in"
 # RubyLLM for AI-powered strategy generation
 gem "ruby_llm"
 
+# HTTP client for external API calls
+gem "httparty"
+
+# Redis for caching
+gem "redis"
+
+# Swarm SDK v2 for multi-agent coordination
+gem "swarm_sdk", github: "parruda/swarm"
+
 group :development, :test do
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
   gem "bundler-audit", require: false
