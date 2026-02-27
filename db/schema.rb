@@ -10,9 +10,33 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_25_121135) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_27_071430) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "asset_snapshots", force: :cascade do |t|
+    t.bigint "asset_id", null: false
+    t.datetime "captured_at", null: false
+    t.decimal "change_percent", precision: 8, scale: 4
+    t.datetime "created_at", null: false
+    t.decimal "price", precision: 15, scale: 2, null: false
+    t.datetime "updated_at", null: false
+    t.decimal "volume", precision: 20
+    t.index ["asset_id", "captured_at"], name: "index_asset_snapshots_on_asset_id_and_captured_at"
+    t.index ["asset_id"], name: "index_asset_snapshots_on_asset_id"
+    t.index ["captured_at"], name: "index_asset_snapshots_on_captured_at"
+  end
+
+  create_table "assets", force: :cascade do |t|
+    t.string "asset_type", null: false
+    t.datetime "created_at", null: false
+    t.decimal "current_price", precision: 15, scale: 2
+    t.datetime "last_updated"
+    t.string "name", null: false
+    t.string "symbol", null: false
+    t.datetime "updated_at", null: false
+    t.index ["symbol"], name: "index_assets_on_symbol", unique: true
+  end
 
   create_table "traders", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -55,5 +79,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_25_121135) do
     t.index ["google_id"], name: "index_users_on_google_id", unique: true
   end
 
+  add_foreign_key "asset_snapshots", "assets"
   add_foreign_key "trading_strategies", "traders"
 end
