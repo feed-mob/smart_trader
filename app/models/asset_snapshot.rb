@@ -8,4 +8,7 @@ class AssetSnapshot < ApplicationRecord
 
   scope :recent, ->(hours = 24) { where(captured_at: hours.hours.ago..Time.current) }
   scope :by_asset, ->(asset_id) { where(asset_id: asset_id) }
+  scope :latest_first, -> { order(captured_at: :desc) }
+  scope :with_volume, -> { where.not(volume: nil) }
+  scope :oldest_first, -> { order(captured_at: :asc) }
 end

@@ -1,0 +1,40 @@
+# Sidekiq Server Configuration
+# This file configures the Sidekiq worker process
+
+# Concurrency: number of threads per process
+# Can be overridden by SIDEKIQ_CONCURRENCY environment variable
+:concurrency: 5
+
+# Queue priorities and concurrency limits
+:queues:
+  - default
+  - asset_collection
+  - mailers
+
+# Logging
+:logfile: ./log/sidekiq.log
+:log_format: json
+
+# PID file location (for monitoring)
+:pidfile: ./tmp/pids/sidekiq.pid
+
+# Namespace for Redis keys
+# Uncomment to use a Redis namespace:
+# :namespace: smart_trader
+
+# Redis configuration (uses ENV['REDIS_URL'] by default)
+# :redis:
+#   url: redis://localhost:6379/0
+
+# Scheduler configuration (for sidekiq-cron)
+:scheduler:
+  :enabled: true
+  :dynamic: false
+
+# Process timeout in seconds
+:timeout: 30
+
+# Process lifecycle hooks
+# :on_start: # Called before the worker starts
+# :on_stop:  # Called before the worker stops
+# :on_shutdown: # Called when the worker is shutting down

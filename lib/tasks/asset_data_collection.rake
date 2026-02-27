@@ -174,4 +174,27 @@ namespace :asset_data_collection do
       puts "Swarm test failed: #{result[:error]}"
     end
   end
+
+  desc "Enqueue asset data collection job (one-time)"
+  task enqueue: :environment do
+    puts "Enqueuing asset data collection job..."
+
+    job = AssetDataCollectionJob.perform_later
+
+    puts "Job enqueued with ID: #{job.job_id}"
+    puts "Job will execute according to sidekiq_schedule.yml"
+  end
+
+  desc "Run asset data collection job immediately (synchronous)"
+  task run_now: :environment do
+    puts "Running asset data collection job immediately..."
+
+    start_time = Time.current
+
+    AssetDataCollectionJob.perform_now
+
+    end_time = Time.current
+
+    puts "Job completed in #{(end_time - start_time).round(2)} seconds"
+  end
 end
