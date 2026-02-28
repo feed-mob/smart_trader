@@ -1,0 +1,105 @@
+<% content_for :title, "编辑 #{@factor.name} - SmartTrader" %>
+
+<div class="factor-edit-container">
+  <!-- Header -->
+  <header class="factor-edit-header">
+    <div class="factor-edit-header__left">
+      <%= link_to admin_factor_definition_path(@factor), class: "btn btn-ghost btn-sm" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 mr-1">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        返回详情
+      <% end %>
+    </div>
+    <div class="factor-edit-header__right">
+      <h1 class="factor-edit-header__title">编辑因子</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="factor-edit-main">
+    <% if @factor.errors.any? %>
+      <div class="alert alert-error">
+        <ul>
+          <% @factor.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= form_with model: @factor, url: admin_factor_definition_path(@factor), class: "factor-form" do |f| %>
+      <div class="factor-form-grid">
+        <!-- Basic Info Card -->
+        <div class="factor-form-card">
+          <div class="factor-form-card__header">
+            <h2 class="factor-form-card__title">基本信息</h2>
+          </div>
+
+          <div class="factor-form-card__body">
+            <div class="form-group">
+              <%= f.label :name, "因子名称", class: "form-label" %>
+              <%= f.text_field :name, class: "form-input" %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :description, "因子描述", class: "form-label" %>
+              <%= f.text_area :description, rows: 4, class: "form-textarea" %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :category, "分类", class: "form-label" %>
+              <%= f.select :category, FactorDefinition.categories_for_select, {}, class: "form-select" %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :active, "状态", class: "form-label" %>
+              <label class="form-toggle">
+                <%= f.check_box :active %>
+                <span class="form-toggle__slider"></span>
+                <span class="form-toggle__label"><%= @factor.active? ? '启用' : '禁用' %></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Parameters Card -->
+        <div class="factor-form-card">
+          <div class="factor-form-card__header">
+            <h2 class="factor-form-card__title">参数配置</h2>
+          </div>
+
+          <div class="factor-form-card__body">
+            <div class="form-group">
+              <%= f.label :weight, "默认权重", class: "form-label" %>
+              <div class="form-input-with-suffix">
+                <%= f.number_field :weight, step: 0.01, min: 0, max: 1, class: "form-input" %>
+                <span class="form-suffix">%</span>
+              </div>
+              <p class="form-hint">权重范围: 0 - 1 (如 0.20 表示 20%)</p>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :update_frequency, "更新频率", class: "form-label" %>
+              <div class="form-input-with-suffix">
+                <%= f.number_field :update_frequency, min: 1, class: "form-input" %>
+                <span class="form-suffix">分钟</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :parameters, "计算参数 (JSON)", class: "form-label" %>
+              <%= f.text_area :parameters, value: @factor.parameters.to_json, rows: 3, class: "form-textarea font-mono" %>
+              <p class="form-hint">例如: {"days": 20, "threshold": 1.5}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="factor-form-actions">
+        <%= link_to "取消", admin_factor_definition_path(@factor), class: "btn btn-ghost" %>
+        <%= f.submit "保存更改", class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </main>
+</div>

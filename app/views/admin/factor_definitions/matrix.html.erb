@@ -1,0 +1,127 @@
+<% content_for :title, "因子矩阵 - SmartTrader" %>
+
+<div class="factor-matrix-container">
+  <!-- Header -->
+  <header class="factor-matrix-header">
+    <div class="factor-matrix-header__left">
+      <%= link_to admin_factor_definitions_path, class: "factor-back-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-back-link__icon">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>返回列表</span>
+      <% end %>
+      <h1 class="factor-matrix-header__title">因子矩阵</h1>
+    </div>
+    <div class="factor-matrix-header__right">
+      <span class="factor-matrix-header__info">
+        更新时间: <%= @factor_values.first&.calculated_at&.strftime('%Y-%m-%d %H:%M') || '暂无数据' %>
+      </span>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="factor-matrix-main">
+    <% if @assets.empty? %>
+      <div class="factor-matrix-empty">
+        <div class="factor-matrix-empty__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
+          </svg>
+        </div>
+        <h3 class="factor-matrix-empty__title">暂无资产数据</h3>
+        <p class="factor-matrix-empty__text">请先添加资产并采集数据</p>
+      </div>
+    <% elsif @factor_values.empty? %>
+      <div class="factor-matrix-empty">
+        <div class="factor-matrix-empty__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <h3 class="factor-matrix-empty__title">暂无因子数据</h3>
+        <p class="factor-matrix-empty__text">请先运行因子计算任务</p>
+        <%= button_to "计算因子", "#", class: "btn btn-primary", disabled: true %>
+      </div>
+    <% else %>
+      <div class="factor-matrix-table-wrapper">
+        <table class="factor-matrix-table">
+          <thead>
+            <tr>
+              <th class="factor-matrix-table__header factor-matrix-table__header--asset">资产</th>
+              <% @factors.each do |factor| %>
+                <th class="factor-matrix-table__header">
+                  <span class="factor-matrix-table__factor-name"><%= factor.name %></span>
+                  <span class="factor-matrix-table__factor-weight">(<%= factor.display_weight %>)</span>
+                </th>
+              <% end %>
+              <th class="factor-matrix-table__header factor-matrix-table__header--score">综合评分</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @assets.each do |asset| %>
+              <tr class="factor-matrix-table__row">
+                <td class="factor-matrix-table__cell factor-matrix-table__cell--asset">
+                  <div class="factor-matrix-asset">
+                    <span class="factor-matrix-asset__symbol"><%= asset.symbol %></span>
+                    <span class="factor-matrix-asset__name"><%= asset.name %></span>
+                  </div>
+                </td>
+                <%
+                  asset_values = @values_by_asset[asset.id] || {}
+                  total_score = 0
+                  total_weight = 0
+                %>
+                <% @factors.each do |factor| %>
+                  <%
+                    factor_value = asset_values[factor.id]
+                    normalized_value = factor_value&.normalized_value || 0
+                    score = normalized_value * factor.weight
+                    total_score += score
+                    total_weight += factor.weight
+                  %>
+                  <td class="factor-matrix-table__cell">
+                    <% if factor_value %>
+                      <div class="factor-matrix-value <%= factor_value_class(normalized_value) %>">
+                        <span class="factor-matrix-value__score"><%= normalized_value.round(2) %></span>
+                        <span class="factor-matrix-value__percentile"><%= factor_value.percentile&.round(0) || '-' %>%</span>
+                      </div>
+                    <% else %>
+                      <div class="factor-matrix-value factor-matrix-value--empty">
+                        <span>-</span>
+                      </div>
+                    <% end %>
+                  </td>
+                <% end %>
+                <td class="factor-matrix-table__cell factor-matrix-table__cell--score">
+                  <% composite_score = total_weight > 0 ? (total_score / total_weight) : 0 %>
+                  <div class="factor-matrix-composite <%= factor_value_class(composite_score) %>">
+                    <span class="factor-matrix-composite__value"><%= composite_score.round(2) %></span>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Legend -->
+      <div class="factor-matrix-legend">
+        <div class="factor-matrix-legend__item">
+          <span class="factor-matrix-legend__color factor-matrix-legend__color--positive"></span>
+          <span>正分 (> 0.3)</span>
+        </div>
+        <div class="factor-matrix-legend__item">
+          <span class="factor-matrix-legend__color factor-matrix-legend__color--neutral"></span>
+          <span>中性 (-0.3 ~ 0.3)</span>
+        </div>
+        <div class="factor-matrix-legend__item">
+          <span class="factor-matrix-legend__color factor-matrix-legend__color--negative"></span>
+          <span>负分 (< -0.3)</span>
+        </div>
+      </div>
+    <% end %>
+  </main>
+</div>
