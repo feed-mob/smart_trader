@@ -1,0 +1,96 @@
+<%= turbo_frame_tag "recommendation" do %>
+  <%# 检查是否有有效数据（即使有 error key，只要有 market_analysis 就显示） %>
+  <% has_valid_data = recommendation.present? && recommendation[:market_analysis].present? %>
+
+  <% if has_valid_data %>
+  <!-- Market Analysis -->
+  <div class="recommendation-summary">
+    <div class="recommendation-summary__item">
+      <span class="recommendation-summary__label">市场分析</span>
+      <span class="recommendation-summary__value"><%= recommendation[:market_analysis] %></span>
+    </div>
+    <div class="recommendation-summary__item">
+      <span class="recommendation-summary__label">配置摘要</span>
+      <span class="recommendation-summary__value"><%= recommendation[:summary] %></span>
+    </div>
+  </div>
+
+  <!-- Allocations Table -->
+  <div class="data-table-wrapper">
+    <table class="data-table data-table--allocations">
+      <thead>
+        <tr>
+          <th>资产</th>
+          <th>操作</th>
+          <th>比例</th>
+          <th>金额 (USD)</th>
+          <th>数量</th>
+          <th>理由</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if recommendation[:allocations]&.any? %>
+          <% recommendation[:allocations].each do |allocation| %>
+            <tr>
+              <td><strong><%= allocation[:symbol] %></strong></td>
+              <td>
+                <span class="action-badge action-badge--<%= allocation[:action] %>">
+                  <%= allocation[:action].upcase %>
+                </span>
+              </td>
+              <td><%= allocation[:allocation_percent] %>%</td>
+              <td><%= number_to_currency(allocation[:amount_usd], unit: "$", precision: 0) %></td>
+              <td><%= allocation[:shares]&.round(4) %></td>
+              <td class="text-small"><%= allocation[:reason] %></td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="6" class="text-center text-muted">暂无配置建议</td>
+          </tr>
+        <% end %>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2"><strong>现金保留</strong></td>
+          <td><%= recommendation[:cash_reserve]&.dig(:percent) %>%</td>
+          <td><%= number_to_currency(recommendation[:cash_reserve]&.dig(:amount_usd), unit: "$", precision: 0) %></td>
+          <td colspan="2"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Detailed Reasoning -->
+  <% if recommendation[:detailed_reasoning].present? %>
+    <div class="detailed-reasoning">
+      <h3 class="detailed-reasoning__title">配置理由详解</h3>
+      <p class="detailed-reasoning__content"><%= recommendation[:detailed_reasoning] %></p>
+    </div>
+  <% end %>
+
+  <!-- Strategy Selection Reason (for Strategies section) - hidden here, moved to Strategies section via JS -->
+  <% if recommendation[:strategy_selection_reason].present? %>
+    <div class="strategy-reason" data-recommendation-target="strategyReason" style="display: none;">
+      <strong>AI判断:</strong> <%= recommendation[:strategy_selection_reason] %>
+    </div>
+  <% end %>
+
+  <!-- Store selected strategy for Strategies section -->
+  <template data-recommendation-target="selectedStrategy">
+    <%= recommendation[:selected_strategy] %>
+  </template>
+
+<% elsif recommendation&.dig(:error).present? %>
+  <div class="alert alert-error">
+    <p>AI生成失败: <%= recommendation[:error] %></p>
+    <% if recommendation[:error_detail].present? %>
+      <p class="text-small"><%= recommendation[:error_detail] %></p>
+    <% end %>
+  </div>
+<% else %>
+  <div class="empty-state">
+    <p>AI配置生成中...</p>
+  </div>
+<% end %>
+<% end %>

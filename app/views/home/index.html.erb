@@ -171,7 +171,43 @@
         <% end %>
       </div>
 
-      <!-- Module 4: Asset Data Collection -->
+      <!-- Module 4: AI Analysis -->
+      <div class="module-card" data-module="ai-analysis" data-complexity="4">
+        <div class="module-card__header">
+          <div class="module-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z"></path>
+              <circle cx="7.5" cy="14.5" r="1.5"></circle>
+              <circle cx="16.5" cy="14.5" r="1.5"></circle>
+            </svg>
+          </div>
+          <span class="module-card__number">04</span>
+        </div>
+        <h3 class="module-card__title">AI Analysis</h3>
+        <p class="module-card__subtitle">AI 智能分析</p>
+        <div class="module-card__tech">
+          <span class="tech-badge">LLM</span>
+          <span class="tech-badge">AI</span>
+        </div>
+        <div class="module-card__complexity complexity-4"></div>
+        <div class="module-card__description">
+          AI 驱动的智能分析引擎，提供市场洞察和投资决策支持
+        </div>
+        <div class="module-card__features">
+          <span class="feature-tag">Deep Analysis</span>
+          <span class="feature-tag">Insights</span>
+          <span class="feature-tag">AI Reports</span>
+        </div>
+        <%= link_to ai_analysis_path, class: "module-card__action module-card__action--active" do %>
+          进入模块
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        <% end %>
+      </div>
+
+      <!-- Module 5: Asset Data Collection -->
       <div class="module-card" data-module="asset-data" data-complexity="3">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -179,7 +215,7 @@
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
             </svg>
           </div>
-          <span class="module-card__number">04</span>
+          <span class="module-card__number">05</span>
         </div>
         <h3 class="module-card__title">Asset Data Collection</h3>
         <p class="module-card__subtitle">资产动态信息采集</p>
@@ -205,7 +241,7 @@
         <% end %>
       </div>
 
-      <!-- Module 5: Portfolio Dashboard -->
+      <!-- Module 6: Portfolio Dashboard -->
       <div class="module-card" data-module="portfolio" data-complexity="2">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -215,7 +251,7 @@
               <line x1="6" y1="20" x2="6" y2="16"></line>
             </svg>
           </div>
-          <span class="module-card__number">05</span>
+          <span class="module-card__number">06</span>
         </div>
         <h3 class="module-card__title">Portfolio Dashboard</h3>
         <p class="module-card__subtitle">操盘手资产管理页面</p>
@@ -240,7 +276,7 @@
         </button>
       </div>
 
-      <!-- Module 6: Investment Info -->
+      <!-- Module 7: Investment Info -->
       <div class="module-card" data-module="investment-info" data-complexity="3">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -252,7 +288,7 @@
               <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
           </div>
-          <span class="module-card__number">06</span>
+          <span class="module-card__number">07</span>
         </div>
         <h3 class="module-card__title">Investment Info</h3>
         <p class="module-card__subtitle">投资信息 Skill</p>
@@ -277,7 +313,7 @@
         </button>
       </div>
 
-      <!-- Module 7: Market Sentiment -->
+      <!-- Module 8: Market Sentiment -->
       <div class="module-card" data-module="market-sentiment" data-complexity="3">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -288,7 +324,7 @@
               <line x1="15" y1="9" x2="15.01" y2="9"></line>
             </svg>
           </div>
-          <span class="module-card__number">07</span>
+          <span class="module-card__number">08</span>
         </div>
         <h3 class="module-card__title">Market Sentiment</h3>
         <p class="module-card__subtitle">市场情绪指数</p>
@@ -314,7 +350,7 @@
         </button>
       </div>
 
-      <!-- Module 8: Auto Allocation -->
+      <!-- Module 9: Auto Allocation -->
       <div class="module-card" data-module="auto-allocation" data-complexity="4">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -323,7 +359,7 @@
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
           </div>
-          <span class="module-card__number">08</span>
+          <span class="module-card__number">09</span>
         </div>
         <h3 class="module-card__title">Auto Allocation</h3>
         <p class="module-card__subtitle">定时资产配置任务</p>
@@ -349,7 +385,7 @@
         </button>
       </div>
 
-      <!-- Module 9: Performance Ranking -->
+      <!-- Module 10: Performance Ranking -->
       <div class="module-card" data-module="performance" data-complexity="2">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -362,7 +398,7 @@
               <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
             </svg>
           </div>
-          <span class="module-card__number">09</span>
+          <span class="module-card__number">10</span>
         </div>
         <h3 class="module-card__title">Performance Ranking</h3>
         <p class="module-card__subtitle">资产配置盈亏排名</p>
@@ -387,7 +423,7 @@
         </button>
       </div>
 
-      <!-- Module 10: Investor Personas -->
+      <!-- Module 11: Investor Personas -->
       <div class="module-card" data-module="investor-personas" data-complexity="2">
         <div class="module-card__header">
           <div class="module-card__icon">
@@ -398,7 +434,7 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
           </div>
-          <span class="module-card__number">10</span>
+          <span class="module-card__number">11</span>
         </div>
         <h3 class="module-card__title">Investor Personas</h3>
         <p class="module-card__subtitle">投资人性格模板 Skill</p>

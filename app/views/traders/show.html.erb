@@ -19,6 +19,7 @@
       <h1 class="traders-header__title"><%= @trader.name %></h1>
     </div>
     <div class="traders-header__right">
+      <%= link_to "AI配置建议", trader_allocation_preview_path(@trader), class: "btn btn-primary" %>
       <%= link_to "编辑", edit_trader_path(@trader), class: "btn btn-secondary" %>
       <%= button_to "删除", @trader, method: :delete, class: "btn btn-danger", data: { turbo_confirm: "确定要删除这个操盘手吗？" } %>
     </div>

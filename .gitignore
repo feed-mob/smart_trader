@@ -40,6 +40,8 @@
 
 .DS_Store
 
+.swarm
+
 task_plan.md
 progress.md
 findings.md

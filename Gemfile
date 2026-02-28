@@ -25,12 +25,6 @@ gem "jbuilder"
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
-# Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
-gem "solid_cache"
-gem "sidekiq"
-gem "sidekiq-cron"
-gem "solid_cable"
-
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
@@ -58,11 +52,17 @@ gem "ruby_llm"
 # HTTP client for external API calls
 gem "httparty"
 
-# Redis for caching
+# Redis for Sidekiq
 gem "redis"
 
-# Swarm SDK v2 for multi-agent coordination
+# Sidekiq for background jobs
+gem "sidekiq"
+gem "sidekiq-scheduler"
+
+# Swarm SDK for multi-agent AI coordination
 gem "swarm_sdk", github: "parruda/swarm"
+gem 'swarm_memory'  # Separate gem
+gem 'informers'     # Required for semantic search
 
 group :development, :test do
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)
@@ -86,3 +86,5 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 end
+
+gem "retriable", "~> 3.2"

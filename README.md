@@ -45,6 +45,11 @@ rails db:migrate
 
 5. 启动服务
 ```bash
+bin/dev
+```
+
+或分开运行:
+```bash
 rails server
 ```
 
@@ -58,13 +63,6 @@ rails server
 
 ## 开发工具
 
-项目集成了以下开发工具:
-
-- `pry-byebug`: 调试工具
-- `pry-rails`: Rails 控制台增强
-- `rubocop-rails-omakase`: 代码风格检查
-- `brakeman`: 安全漏洞扫描
-- `bundler-audit`: 依赖安全审计
 
 ## 因子系统初始化
 
@@ -75,14 +73,6 @@ rails server
 ```bash
 bundle exec rails runner db/seeds/factor_definitions.rb
 ```
-
-这将创建 6 个默认因子：
-- 动量因子 (momentum) - 权重 20%
-- 波动率因子 (volatility) - 权重 15%
-- 贝塔因子 (beta) - 权重 15%
-- 成交量比率因子 (volume_ratio) - 权重 20%
-- 情绪因子 (sentiment) - 权重 15%
-- 趋势因子 (trend) - 权重 15%
 
 ### 2. 初始化 Mock 数据 (开发/测试环境)
 

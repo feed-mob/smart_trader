@@ -18,23 +18,32 @@
 # PID file location (for monitoring)
 :pidfile: ./tmp/pids/sidekiq.pid
 
-# Namespace for Redis keys
-# Uncomment to use a Redis namespace:
-# :namespace: smart_trader
-
-# Redis configuration (uses ENV['REDIS_URL'] by default)
-# :redis:
-#   url: redis://localhost:6379/0
-
-# Scheduler configuration (for sidekiq-cron)
-:scheduler:
-  :enabled: true
-  :dynamic: false
-
 # Process timeout in seconds
 :timeout: 30
 
-# Process lifecycle hooks
-# :on_start: # Called before the worker starts
-# :on_stop:  # Called before the worker stops
-# :on_shutdown: # Called when the worker is shutting down
+# Sidekiq-Scheduler Configuration
+:scheduler:
+  :listened_queues_only: true
+  :dynamic: true
+
+# Schedule definitions (loaded by sidekiq-scheduler)
+:schedule:
+  # 资产数据拉取 - 每小时执行
+  fetch_assets:
+    cron: "0 * * * *"
+    class: "FetchAssetsJob"
+    queue: default
+    description: "每小时拉取资产价格数据"
+
+  # 因子计算 - 每小时执行（资产拉取后15分钟）
+  factor_calculation:
+    cron: "15 * * * *"
+    class: "CalculateFactorsJob"
+    queue: default
+    description: "每小时计算交易因子"
+
+  fetch_asset:
+    cron: "15 * * * *"
+    class: "AssetDataCollectionJob"
+    queue: default
+    description: "get assets"
