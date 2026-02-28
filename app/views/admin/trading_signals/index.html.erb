@@ -1,0 +1,205 @@
+<% content_for :title, "交易信号" %>
+
+<div class="signals-container">
+  <!-- Background -->
+  <div class="signals-background">
+    <div class="signals-background__gradient"></div>
+    <div class="signals-background__grid"></div>
+  </div>
+  <!-- Header -->
+  <div class="signals-header">
+    <div class="signals-header__left">
+      <%= link_to root_path, class: "signals-home-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      <% end %>
+      <div>
+        <h1 class="signals-header__title">交易信号</h1>
+        <p class="signals-header__subtitle">AI 生成的交易信号列表</p>
+      </div>
+    </div>
+    <div class="signals-header__right">
+      <%= link_to admin_factor_definitions_path, class: "signals-btn signals-btn--secondary" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        因子管理
+      <% end %>
+      <%= button_to generate_all_admin_trading_signals_path, method: :post, class: "signals-btn signals-btn--primary", data: { turbo_confirm: "确定要为所有资产生成信号吗？" } do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        生成全部信号
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="signals-stats">
+    <div class="stat-card stat-card--total">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:total] %></span>
+        <span class="stat-card__label">总信号数</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card--buy">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+          <polyline points="16 7 22 7 22 13"></polyline>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:buy] %></span>
+        <span class="stat-card__label">买入信号</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card--sell">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline>
+          <polyline points="16 17 22 17 22 11"></polyline>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:sell] %></span>
+        <span class="stat-card__label">卖出信号</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card--high">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+          <path d="M2 17l10 5 10-5"></path>
+          <path d="M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:high_confidence] %></span>
+        <span class="stat-card__label">高置信度</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="signals-filters">
+    <%= form_with url: admin_trading_signals_path, method: :get, local: true, class: "signals-filters__form" do |f| %>
+      <div class="filter-group">
+        <label class="filter-label">信号类型</label>
+        <%= f.select :signal_type, options_for_select([["全部", ""], ["买入", "buy"], ["卖出", "sell"], ["持有", "hold"]], params[:signal_type]), {}, class: "filter-select" %>
+      </div>
+      <div class="filter-group">
+        <%= f.submit "筛选", class: "signals-btn signals-btn--small" %>
+        <%= link_to "重置", admin_trading_signals_path, class: "signals-btn signals-btn--small signals-btn--outline" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Latest Signals Section -->
+  <% if @latest_signals.any? %>
+  <div class="signals-section">
+    <h2 class="signals-section__title">最新信号概览</h2>
+    <div class="signals-latest-grid">
+      <% @latest_signals.each do |signal| %>
+      <div class="signal-latest-card signal-latest-card--<%= signal.signal_type %>">
+        <div class="signal-latest-card__header">
+          <span class="signal-latest-card__asset"><%= signal.asset.symbol %></span>
+          <span class="signal-latest-card__type signal-badge signal-badge--<%= signal.signal_type %>">
+            <%= signal.signal_type_label %>
+          </span>
+        </div>
+        <div class="signal-latest-card__confidence">
+          <div class="confidence-bar">
+            <div class="confidence-bar__fill" style="width: <%= signal.confidence_percentage %>%"></div>
+          </div>
+          <span class="confidence-value"><%= signal.confidence_percentage %>%</span>
+        </div>
+        <p class="signal-latest-card__reasoning"><%= truncate(signal.reasoning, length: 60) %></p>
+        <div class="signal-latest-card__footer">
+          <span class="signal-latest-card__time"><%= time_ago_in_words(signal.generated_at) %>前</span>
+          <%= link_to "详情", admin_trading_signal_path(signal), class: "signal-latest-card__link" %>
+        </div>
+      </div>
+      <% end %>
+    </div>
+  </div>
+  <% end %>
+
+  <!-- Signals Table -->
+  <div class="signals-section">
+    <h2 class="signals-section__title">全部信号记录</h2>
+    <div class="signals-table-wrapper">
+      <table class="signals-table">
+        <thead>
+          <tr>
+            <th>资产</th>
+            <th>信号类型</th>
+            <th>置信度</th>
+            <th>原因说明</th>
+            <th>关键因子</th>
+            <th>生成时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @signals.each do |signal| %>
+          <tr class="signals-table__row signals-table__row--<%= signal.signal_type %>">
+            <td>
+              <div class="asset-cell">
+                <span class="asset-symbol"><%= signal.asset.symbol %></span>
+                <span class="asset-name"><%= signal.asset.name %></span>
+              </div>
+            </td>
+            <td>
+              <span class="signal-badge signal-badge--<%= signal.signal_type %>">
+                <%= signal.signal_type_label %>
+              </span>
+            </td>
+            <td>
+              <div class="confidence-cell">
+                <div class="confidence-mini-bar">
+                  <div class="confidence-mini-bar__fill confidence-mini-bar__fill--<%= signal.confidence_level %>" style="width: <%= signal.confidence_percentage %>%"></div>
+                </div>
+                <span><%= signal.confidence_percentage %>%</span>
+              </div>
+            </td>
+            <td>
+              <span class="reasoning-text"><%= truncate(signal.reasoning, length: 50) %></span>
+            </td>
+            <td>
+              <div class="key-factors">
+                <% signal.key_factors.first(2).each do |factor| %>
+                <span class="key-factor-tag"><%= factor %></span>
+                <% end %>
+              </div>
+            </td>
+            <td>
+              <span class="time-cell"><%= signal.generated_at.strftime("%m-%d %H:%M") %></span>
+            </td>
+            <td>
+              <%= link_to "查看", admin_trading_signal_path(signal), class: "action-link" %>
+            </td>
+          </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if @signals.respond_to?(:total_pages) %>
+    <div class="pagination">
+      <%= paginate @signals %>
+    </div>
+    <% end %>
+  </div>
+</div>

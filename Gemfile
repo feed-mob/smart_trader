@@ -45,6 +45,9 @@ gem "image_processing", "~> 1.2"
 # A framework for building reusable, testable & encapsulated view components
 gem "view_component"
 
+# Pagination
+gem "kaminari"
+
 # Google Sign-In authentication
 gem "google_sign_in"
 
