@@ -95,7 +95,7 @@ class AssetDataCollectionJob < ApplicationJob
     )
 
     # Create snapshot
-    asset.snapshots.create!(
+    asset.asset_snapshots.create!(
       price: price_data[:price],
       change_percent: price_data[:change_percent],
       volume: price_data[:volume],
@@ -111,7 +111,7 @@ class AssetDataCollectionJob < ApplicationJob
 
     assets.each do |asset|
       begin
-        SwarmDataCollectorService.analyze_asset_data(asset.symbol, asset.snapshots.recent(24))
+        SwarmDataCollectorService.analyze_asset_data(asset.symbol, asset.asset_snapshots.recent(24))
       rescue StandardError => e
         Rails.logger.warn "[AssetDataCollectionJob] Swarm analysis failed for #{asset.symbol}: #{e.message}"
       end

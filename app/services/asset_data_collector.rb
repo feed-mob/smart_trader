@@ -78,10 +78,10 @@ class AssetDataCollector
 
     historical_data.each do |data_point|
       # Check if snapshot already exists for this timestamp
-      existing = asset.snapshots.where(captured_at: data_point[:timestamp]).first
+      existing = asset.asset_snapshots.where(captured_at: data_point[:timestamp]).first
 
       if existing.nil?
-        asset.snapshots.create!(
+        asset.asset_snapshots.create!(
           price: data_point[:price],
           change_percent: calculate_change_percent(data_point),
           volume: data_point[:volume],
@@ -110,7 +110,7 @@ class AssetDataCollector
 
     # Check assets with no recent data
     stale_assets = assets.reject do |asset|
-      asset.snapshots.where("captured_at > ?", recent_threshold).exists?
+      asset.asset_snapshots.where("captured_at > ?", recent_threshold).exists?
     end
 
     {
@@ -127,7 +127,7 @@ class AssetDataCollector
 
   # Create a snapshot with the collected data
   def self.create_snapshot(asset, price_data, technical_data)
-    snapshot = asset.snapshots.create!(
+    snapshot = asset.asset_snapshots.create!(
       price: price_data[:price],
       change_percent: price_data[:change_percent],
       volume: price_data[:volume],

@@ -49,7 +49,7 @@ class SwarmAssetDataCollector
       )
 
       # Create snapshot
-      snapshot = asset.snapshots.create!(
+      snapshot = asset.asset_snapshots.create!(
         price: parsed_data[:price],
         change_percent: parsed_data[:change_percent],
         volume: parsed_data[:volume],

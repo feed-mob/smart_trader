@@ -4,7 +4,10 @@
 class AssetsController < ApplicationController
   # GET /assets - List all assets
   def index
-    @assets = Asset.all.includes(:snapshots)
+    # GET /assets - List all assets
+  def index
+    @assets = Asset.all.includes(:asset_snapshots)
+  end
   end
 
   # GET /assets/:id - Show asset detail page
@@ -14,7 +17,7 @@ class AssetsController < ApplicationController
     # Get snapshots based on timeframe parameter
     timeframe = params[:timeframe] || "24h"
 
-    @snapshots = @asset.snapshots
+    @snapshots = @asset.asset_snapshots
                         .where(captured_at: parse_timeframe(timeframe))
                         .order(captured_at: :desc)
                         .limit(200)

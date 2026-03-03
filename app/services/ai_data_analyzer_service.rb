@@ -25,7 +25,7 @@ class AIDataAnalyzerService
       Rails.logger.info "[AIDataAnalyzer] Analyzing trend for #{asset.symbol} (#{hours}h)"
 
       # Get recent snapshots
-      snapshots = asset.snapshots
+      snapshots = asset.asset_snapshots
                          .where(captured_at: hours.hours.ago..Time.current)
                          .order(captured_at: :asc)
 
@@ -71,7 +71,7 @@ class AIDataAnalyzerService
     # @param asset [Asset] The asset to analyze
     # @return [Hash] Trading signals
     def generate_trading_signals(asset)
-      snapshots = asset.snapshots.recent(48)
+      snapshots = asset.asset_snapshots.recent(48)
       return build_empty_signals if snapshots.empty?
 
       # Calculate basic indicators

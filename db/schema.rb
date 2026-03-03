@@ -16,8 +16,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_033628) do
 
   create_table "asset_snapshots", force: :cascade do |t|
     t.bigint "asset_id", null: false
-    t.decimal "change_percent", precision: 8,  scale: 4
     t.datetime "captured_at", null: false
+    t.decimal "change_percent", precision: 8, scale: 4
     t.datetime "created_at", null: false
     t.decimal "price", precision: 15, scale: 2, null: false
     t.datetime "updated_at", null: false
@@ -28,12 +28,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_033628) do
   end
 
   create_table "assets", force: :cascade do |t|
+    t.string "asset_type", null: false
     t.datetime "created_at", null: false
     t.decimal "current_price", precision: 15, scale: 2
     t.datetime "last_updated"
     t.string "name", null: false
     t.string "symbol", null: false
-    t.string "asset_type", null: false
     t.datetime "updated_at", null: false
     t.index ["symbol"], name: "index_assets_on_symbol", unique: true
   end
@@ -45,6 +45,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_033628) do
     t.string "code", null: false
     t.datetime "created_at", null: false
     t.text "description"
+    t.string "name", null: false
     t.jsonb "parameters", default: {}
     t.integer "sort_order", default: 0
     t.integer "update_frequency", default: 60
@@ -58,13 +59,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_033628) do
   create_table "factor_values", force: :cascade do |t|
     t.bigint "asset_id", null: false
     t.datetime "calculated_at", null: false
+    t.datetime "created_at", null: false
     t.bigint "factor_definition_id", null: false
     t.decimal "normalized_value", precision: 10, scale: 6
     t.decimal "percentile", precision: 5, scale: 2
-    t.decimal "percentile_rank", precision: 5, scale: 2
     t.decimal "raw_value", precision: 15, scale: 6
     t.datetime "updated_at", null: false
-    t.index ["asset_id", "calculated_at"], name: "idx_factor_values_unique", unique: true
+    t.index ["asset_id", "factor_definition_id", "calculated_at"], name: "idx_factor_values_unique", unique: true
     t.index ["asset_id"], name: "index_factor_values_on_asset_id"
     t.index ["calculated_at"], name: "index_factor_values_on_calculated_at"
     t.index ["factor_definition_id"], name: "index_factor_values_on_factor_definition_id"
@@ -74,11 +75,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_033628) do
     t.datetime "created_at", null: false
     t.decimal "current_capital", precision: 15, scale: 2
     t.text "description"
-    t.decimal "initial_capital", precision: 15, scale: 2
+    t.decimal "initial_capital", precision: 15, scale: 2, default: "100000.0"
     t.string "name", null: false
     t.integer "risk_level", default: 0
     t.integer "status", default: 0
     t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_traders_on_status"
   end
 
   create_table "trading_signals", force: :cascade do |t|
@@ -104,6 +106,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_033628) do
     t.integer "generated_by", default: 0
     t.integer "market_condition", default: 0, null: false
     t.decimal "max_position_size", precision: 3, scale: 2, default: "0.5"
+    t.integer "max_positions", default: 3
     t.decimal "min_cash_reserve", precision: 3, scale: 2, default: "0.2"
     t.string "name", null: false
     t.integer "risk_level", default: 1

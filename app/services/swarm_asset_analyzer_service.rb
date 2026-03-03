@@ -66,7 +66,7 @@ class SwarmAssetAnalyzerService
 
     # Build asset context for swarm
     def build_asset_context(asset)
-      recent_snapshots = asset.snapshots.recent(48)
+      recent_snapshots = asset.asset_snapshots.recent(48)
 
       if recent_snapshots.empty?
         return build_empty_context(asset)

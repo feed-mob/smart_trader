@@ -41,7 +41,7 @@ module Api
       def snapshots
         asset = Asset.find(params[:id])
 
-        snapshots = asset.snapshots
+        snapshots = asset.asset_snapshots
                            .where(captured_at: timeframe_range)
                            .order(captured_at: :desc)
                            .limit(100)
