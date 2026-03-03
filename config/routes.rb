@@ -44,4 +44,24 @@ Rails.application.routes.draw do
 
   # Trader management
   resources :traders
+
+  # Admin namespace
+  namespace :admin do
+    resources :factor_definitions do
+      member do
+        post :toggle
+      end
+      collection do
+        get :matrix
+        get :correlations
+      end
+    end
+
+    resources :trading_signals, only: %i[index show] do
+      collection do
+        post :generate
+        post :generate_all
+      end
+    end
+  end
 end

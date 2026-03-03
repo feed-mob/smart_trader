@@ -1,12 +1,24 @@
-class Asset < ApplicationRecord
-  has_many :snapshots, class_name: "AssetSnapshot", dependent: :destroy
+# frozen_string_literal: true
 
+class Asset < ApplicationRecord
+  has_many :asset_snapshots, dependent: :destroy
+  has_many :factor_values, dependent: :destroy
+
+  # Validations
   validates :symbol, presence: true, uniqueness: true
   validates :name, presence: true
-  validates :asset_type, presence: true, inclusion: { in: ["crypto", "stock", "commodity"] }
-  validates :current_price, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :asset_type, presence: true
 
+  # Scopes
+  scope :active, -> { where(active: true) }
+  scope :by_type, ->(type) { where(asset_type: type) }
+
+  # Instance methods
   def latest_snapshot
-    snapshots.order(captured_at: :desc).first
+    asset_snapshots.order(captured_at: :desc).first
+  end
+
+  def snapshots_in_period(hours: 24)
+    asset_snapshots.where('captured_at > ?', hours.hours.ago).order(captured_at: :asc)
   end
 end

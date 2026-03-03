@@ -1,0 +1,137 @@
+<% content_for :title, "因子相关性 - SmartTrader" %>
+
+<div class="factor-correlation-container">
+  <!-- Header -->
+  <header class="factor-correlation-header">
+    <div class="factor-correlation-header__left">
+      <%= link_to admin_factor_definitions_path, class: "factor-back-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-back-link__icon">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        <span>返回列表</span>
+      <% end %>
+      <h1 class="factor-correlation-header__title">因子相关性分析</h1>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="factor-correlation-main">
+    <!-- Correlation Matrix -->
+    <div class="factor-correlation-card">
+      <div class="factor-correlation-card__header">
+        <h2 class="factor-correlation-card__title">相关性矩阵</h2>
+      </div>
+
+      <div class="factor-correlation-card__body">
+        <div class="factor-correlation-table-wrapper">
+          <table class="factor-correlation-table">
+            <thead>
+              <tr>
+                <th class="factor-correlation-table__header factor-correlation-table__header--label"></th>
+                <% @factors.each do |factor| %>
+                  <th class="factor-correlation-table__header">
+                    <span class="factor-correlation-table__factor-name"><%= factor.name %></span>
+                  </th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% @factors.each do |factor_a| %>
+                <tr class="factor-correlation-table__row">
+                  <td class="factor-correlation-table__cell factor-correlation-table__cell--label">
+                    <span class="factor-correlation-table__row-name"><%= factor_a.name %></span>
+                  </td>
+                  <% @factors.each do |factor_b| %>
+                    <%
+                      correlation = @correlation_matrix[factor_a.id][factor_b.id] || 0
+                      cell_class = correlation_cell_class(correlation)
+                    %>
+                    <td class="factor-correlation-table__cell">
+                      <div class="factor-correlation-value <%= cell_class %>">
+                        <span class="factor-correlation-value__number"><%= correlation.round(2) %></span>
+                      </div>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- High Correlation Warnings -->
+    <% if @high_correlations.any? %>
+      <div class="factor-correlation-card factor-correlation-card--warning">
+        <div class="factor-correlation-card__header">
+          <h2 class="factor-correlation-card__title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-correlation-card__warning-icon">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            高相关性警告 (>0.6)
+          </h2>
+        </div>
+
+        <div class="factor-correlation-card__body">
+          <div class="factor-correlation-warnings">
+            <% @high_correlations.each do |item| %>
+              <div class="factor-correlation-warning">
+                <div class="factor-correlation-warning__factors">
+                  <span class="factor-correlation-warning__factor"><%= item[:factor_a].name %></span>
+                  <span class="factor-correlation-warning__arrow">↔</span>
+                  <span class="factor-correlation-warning__factor"><%= item[:factor_b].name %></span>
+                </div>
+                <div class="factor-correlation-warning__value">
+                  <span class="factor-correlation-warning__correlation <%= item[:correlation] > 0 ? 'positive' : 'negative' %>">
+                    <%= item[:correlation] > 0 ? '+' : '' %><%= item[:correlation].round(2) %>
+                  </span>
+                </div>
+                <div class="factor-correlation-warning__suggestion">
+                  建议降低其中一个因子的权重
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="factor-correlation-card factor-correlation-card--success">
+        <div class="factor-correlation-card__body">
+          <div class="factor-correlation-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-correlation-success__icon">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>所有因子相关性均在合理范围内</span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Legend -->
+    <div class="factor-correlation-legend">
+      <div class="factor-correlation-legend__item">
+        <span class="factor-correlation-legend__color factor-correlation-legend__color--high-positive"></span>
+        <span>强正相关 (>0.6)</span>
+      </div>
+      <div class="factor-correlation-legend__item">
+        <span class="factor-correlation-legend__color factor-correlation-legend__color--low-positive"></span>
+        <span>弱正相关 (0.3~0.6)</span>
+      </div>
+      <div class="factor-correlation-legend__item">
+        <span class="factor-correlation-legend__color factor-correlation-legend__color--neutral"></span>
+        <span>无相关 (-0.3~0.3)</span>
+      </div>
+      <div class="factor-correlation-legend__item">
+        <span class="factor-correlation-legend__color factor-correlation-legend__color--low-negative"></span>
+        <span>弱负相关 (-0.6~-0.3)</span>
+      </div>
+      <div class="factor-correlation-legend__item">
+        <span class="factor-correlation-legend__color factor-correlation-legend__color--high-negative"></span>
+        <span>强负相关 (<-0.6)</span>
+      </div>
+    </div>
+  </main>
+</div>

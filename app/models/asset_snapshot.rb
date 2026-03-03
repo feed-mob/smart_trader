@@ -1,14 +1,18 @@
+# frozen_string_literal: true
+
 class AssetSnapshot < ApplicationRecord
   belongs_to :asset
 
-  validates :price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validates :change_percent, numericality: true, allow_nil: true
-  validates :volume, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  # Validations
+  validates :price, presence: true, numericality: { greater_than: 0 }
   validates :captured_at, presence: true
 
-  scope :recent, ->(hours = 24) { where(captured_at: hours.hours.ago..Time.current) }
+  # Scopes
+  scope :recent, ->(hours = 24) { where('captured_at > ?', hours.hours.ago) }
   scope :by_asset, ->(asset_id) { where(asset_id: asset_id) }
-  scope :latest_first, -> { order(captured_at: :desc) }
-  scope :with_volume, -> { where.not(volume: nil) }
-  scope :oldest_first, -> { order(captured_at: :asc) }
+
+  # Class methods
+  def self.latest_for_asset(asset)
+    where(asset: asset).order(captured_at: :desc).first
+  end
 end
