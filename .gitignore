@@ -43,3 +43,10 @@
 task_plan.md
 progress.md
 findings.md
+
+# Ignore Redis database files
+dump.rdb
+appendonly.aof
+
+# Ignore Claude memory files
+.claude/memory/*

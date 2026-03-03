@@ -40,7 +40,17 @@ class AssetDataCollector
     return nil unless price_data
 
     # Fetch optional technical indicators from TradingView
-    technical_data = TradingViewClient.get_technical_indicators(asset.symbol) if TradingViewClient.enabled?
+    # Note: TradingViewClient is not required - we skip it if not available
+    technical_data = nil
+    begin
+      tv_client = Object.const_get("::TradingViewClient") rescue nil
+      if tv_client&.enabled?
+        technical_data = tv_client.get_technical_indicators(asset.symbol)
+      end
+    rescue NameError
+      # TradingViewClient not available, continue without it
+      Rails.logger.debug "[AssetDataCollector] TradingViewClient not available"
+    end
 
     # Update asset with current price
     asset.update!(
