@@ -1,0 +1,201 @@
+<% content_for :title, "AI配置建议 - #{@trader.name} - SmartTrader" %>
+
+<div class="traders-container">
+  <!-- Animated Background -->
+  <div class="traders-background">
+    <div class="traders-background__gradient"></div>
+    <div class="traders-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="traders-header">
+    <div class="traders-header__left">
+      <%= link_to @trader, class: "traders-logo" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      <% end %>
+      <h1 class="traders-header__title">AI配置建议</h1>
+    </div>
+    <div class="traders-header__right">
+      <%= link_to "返回操盘手", @trader, class: "btn btn-secondary" %>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="traders-main">
+    <!-- Trader Info Summary -->
+    <div class="preview-section">
+      <div class="preview-section__header">
+        <h2 class="preview-section__title">操盘手信息</h2>
+      </div>
+      <div class="trader-summary">
+        <div class="trader-summary__item">
+          <span class="trader-summary__label">名称</span>
+          <span class="trader-summary__value"><%= @preview[:trader][:name] %></span>
+        </div>
+        <div class="trader-summary__item">
+          <span class="trader-summary__label">风险偏好</span>
+          <span class="trader-summary__value">
+            <span class="risk-badge risk-badge--<%= @preview[:trader][:risk_level] %>">
+              <%= @preview[:trader][:display_risk_level] %>
+            </span>
+          </span>
+        </div>
+        <div class="trader-summary__item">
+          <span class="trader-summary__label">可用资金</span>
+          <span class="trader-summary__value"><%= number_to_currency(@preview[:trader][:current_capital], unit: "$", precision: 2) %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Recommendation Section -->
+    <div class="preview-section preview-section--highlight" data-controller="recommendation">
+      <div class="preview-section__header">
+        <h2 class="preview-section__title">AI 配置建议</h2>
+      </div>
+
+      <%= turbo_frame_tag "recommendation", src: recommendation_trader_allocation_preview_path(@trader), loading: :lazy do %>
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>AI 正在分析市场数据，请稍候...</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Strategies Section -->
+    <div class="preview-section">
+      <div class="preview-section__header">
+        <h2 class="preview-section__title">使用的策略 (Strategies)</h2>
+      </div>
+      <% if @preview[:strategies].any? %>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>市场环境</th>
+                <th>策略名称</th>
+                <th>最大持仓</th>
+                <th>买入阈值</th>
+                <th>单资产上限</th>
+                <th>现金保留</th>
+                <th>状态</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @preview[:strategies].each do |strategy| %>
+                <tr data-strategy-market-condition="<%= strategy[:market_condition] %>">
+                  <td><%= strategy[:display_market_condition] %></td>
+                  <td><%= strategy[:name] %></td>
+                  <td><%= strategy[:max_positions] %> 个</td>
+                  <td><%= (strategy[:buy_signal_threshold] * 100).to_i %>%</td>
+                  <td><%= (strategy[:max_position_size] * 100).to_i %>%</td>
+                  <td><%= (strategy[:min_cash_reserve] * 100).to_i %>%</td>
+                  <td></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <!-- AI判断会通过 JavaScript 动态添加 -->
+      <% else %>
+        <div class="empty-state">
+          <p>暂无策略数据</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Signals Section -->
+    <div class="preview-section">
+      <div class="preview-section__header">
+        <h2 class="preview-section__title">使用的信号 (Signals)</h2>
+      </div>
+      <% if @preview[:signals].any? %>
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>资产</th>
+                <th>信号</th>
+                <th>置信度</th>
+                <th>理由</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @preview[:signals].each do |signal| %>
+                <tr>
+                  <td>
+                    <strong><%= signal[:symbol] %></strong>
+                    <span class="text-muted"><%= signal[:name] %></span>
+                  </td>
+                  <td>
+                    <span class="signal-badge signal-badge--<%= signal[:signal_type] %>">
+                      <%= signal[:signal_type].upcase %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="confidence-bar">
+                      <div class="confidence-bar__fill" style="width: <%= (signal[:confidence] || 0) * 100 %>%"></div>
+                      <span class="confidence-bar__text"><%= ((signal[:confidence] || 0) * 100).round(1) %>%</span>
+                    </div>
+                  </td>
+                  <td class="text-small"><%= signal[:reasoning] %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <p>暂无信号数据</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Factors Section -->
+    <div class="preview-section">
+      <div class="preview-section__header">
+        <h2 class="preview-section__title">使用的因子 (Factors)</h2>
+      </div>
+      <% if @preview[:factors].any? && @preview[:factors].any? { |f| f[:factors].any? } %>
+        <div class="data-table-wrapper">
+          <table class="data-table data-table--scrollable">
+            <thead>
+              <tr>
+                <th>资产</th>
+                <% @preview[:factors].first[:factors].each do |factor| %>
+                  <th><%= factor[:name] %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <% @preview[:factors].each do |asset_factors| %>
+                <tr>
+                  <td><strong><%= asset_factors[:symbol] %></strong></td>
+                  <% asset_factors[:factors].each do |factor| %>
+                    <td>
+                      <span class="factor-value <%= factor[:value].to_f >= 0 ? 'positive' : 'negative' %>">
+                        <%= factor[:value].to_f >= 0 ? '+' : '' %><%= factor[:value] %>
+                      </span>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="empty-state">
+          <p>暂无因子数据</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="preview-actions">
+      <%= link_to "返回操盘手", @trader, class: "btn btn-secondary" %>
+      <%= link_to "返回列表", traders_path, class: "btn btn-ghost" %>
+    </div>
+  </main>
+</div>

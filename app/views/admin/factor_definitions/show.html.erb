@@ -132,80 +132,9 @@
 
         <div class="factor-detail-card__body">
           <div class="factor-formula">
-            <% case @factor.code %>
-            <% when 'momentum' %>
-              <div class="factor-formula__item">
-                <h4>计算公式</h4>
-                <code>Momentum = (当前价格 - N日前价格) / N日前价格</code>
-              </div>
-              <div class="factor-formula__item">
-                <h4>评分规则</h4>
-                <ul>
-                  <li>涨幅 0-50% → 评分 0 到 +1</li>
-                  <li>跌幅 0-50% → 评分 0 到 -1</li>
-                </ul>
-              </div>
-            <% when 'volatility' %>
-              <div class="factor-formula__item">
-                <h4>计算公式</h4>
-                <code>Volatility = √(Σ(日收益率 - 平均收益率)² / (N-1))</code>
-              </div>
-              <div class="factor-formula__item">
-                <h4>评分规则</h4>
-                <ul>
-                  <li>低波动 → 正分（风险低）</li>
-                  <li>高波动 → 负分（风险高）</li>
-                </ul>
-              </div>
-            <% when 'beta' %>
-              <div class="factor-formula__item">
-                <h4>计算公式</h4>
-                <code>Beta = Cov(资产收益率, 基准收益率) / Var(基准收益率)</code>
-              </div>
-              <div class="factor-formula__item">
-                <h4>基准选择</h4>
-                <ul>
-                  <li>加密货币：BTC</li>
-                  <li>股票：S&P 500 (SPY)</li>
-                  <li>商品：GLD</li>
-                </ul>
-              </div>
-              <div class="factor-formula__item">
-                <h4>评分规则</h4>
-                <ul>
-                  <li>Beta ≈ 1 → 正分（与市场同步）</li>
-                  <li>Beta 偏离1 → 负分（波动异常）</li>
-                </ul>
-              </div>
-            <% when 'volume_ratio' %>
-              <div class="factor-formula__item">
-                <h4>计算公式</h4>
-                <code>VR = 上涨日平均成交量 / 下跌日平均成交量</code>
-              </div>
-              <div class="factor-formula__item">
-                <h4>评分规则</h4>
-                <ul>
-                  <li>VR > 1.5 → 正分（大资金流入）</li>
-                  <li>VR < 0.8 → 负分（资金流出）</li>
-                  <li>0.8-1.5 → 中性</li>
-                </ul>
-              </div>
-            <% when 'trend' %>
-              <div class="factor-formula__item">
-                <h4>计算公式</h4>
-                <code>Trend = 线性回归斜率 (N日价格序列)</code>
-              </div>
-              <div class="factor-formula__item">
-                <h4>评分规则</h4>
-                <ul>
-                  <li>斜率 > 0 → 正分（上升趋势）</li>
-                  <li>斜率 < 0 → 负分（下降趋势）</li>
-                </ul>
-              </div>
-            <% when 'sentiment' %>
-              <div class="factor-formula__item">
-                <h4>计算方式</h4>
-                <p>基于市场涨跌幅分布计算，反映市场整体情绪</p>
+            <% if @factor.formula.present? %>
+              <div class="factor-formula__content">
+                <%= simple_format(@factor.formula, class: "factor-formula__text") %>
               </div>
             <% else %>
               <p class="factor-empty-text">暂无计算说明</p>

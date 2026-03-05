@@ -88,6 +88,7 @@
 
             <div class="trader-card__actions">
               <%= link_to "查看详情", trader, class: "btn btn-secondary" %>
+              <%= link_to "AI配置建议", trader_allocation_preview_path(trader), class: "btn btn-outline" %>
               <%= link_to "编辑", edit_trader_path(trader), class: "btn btn-ghost" %>
             </div>
           </div>

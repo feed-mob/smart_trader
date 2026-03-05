@@ -1,3 +1,5 @@
+require "sidekiq/web"
+
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -41,9 +43,21 @@ Rails.application.routes.draw do
       post :collect, to: "assets#collect"
     end
   end
+  # Sidekiq Web UI
+  mount Sidekiq::Web => "/sidekiq"
 
   # Trader management
-  resources :traders
+  resources :traders do
+    resource :allocation_preview, only: [:show] do
+      get :recommendation, on: :collection
+    end
+  end
+
+  # AI Analysis
+  get 'ai_analysis', to: 'ai_analysis#new', as: :new_ai_analysis
+  post 'ai_analysis', to: 'ai_analysis#create', as: :ai_analysis
+  get 'ai_analysis/result', to: 'ai_analysis#show', as: :ai_analysis_result
+  post 'ai_analysis/quick', to: 'ai_analysis#quick_analysis', as: :quick_ai_analysis
 
   # Admin namespace
   namespace :admin do
