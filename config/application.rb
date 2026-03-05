@@ -38,5 +38,8 @@ module SmartTrader
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Set active support isolation level to :fiber for SwarmSDK compatibility
+    config.active_support.isolation_level = :fiber
   end
 end

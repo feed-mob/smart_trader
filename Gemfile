@@ -27,7 +27,8 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
-gem "solid_queue"
+gem "sidekiq"
+gem "sidekiq-cron"
 gem "solid_cable"
 
 # Reduces boot times through caching; required in config/boot.rb
@@ -53,6 +54,15 @@ gem "google_sign_in"
 
 # RubyLLM for AI-powered strategy generation
 gem "ruby_llm"
+
+# HTTP client for external API calls
+gem "httparty"
+
+# Redis for caching
+gem "redis"
+
+# Swarm SDK v2 for multi-agent coordination
+gem "swarm_sdk", github: "parruda/swarm"
 
 group :development, :test do
   # Audits gems for known security defects (use config/bundler-audit.yml to ignore issues)

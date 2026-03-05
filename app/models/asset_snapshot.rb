@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class AssetSnapshot < ApplicationRecord
+  self.table_name = 'asset_snapshots'
   belongs_to :asset
 
   # Validations

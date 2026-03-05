@@ -1,0 +1,340 @@
+<% content_for :title, "资产数据采集 - SmartTrader" %>
+
+<div class="assets-container">
+  <!-- Animated Background -->
+  <div class="assets-background">
+    <div class="assets-background__gradient"></div>
+    <div class="assets-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="assets-header">
+    <div class="assets-header__left">
+      <%= link_to root_path, class: "assets-logo" do %>
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 22L16 17C17 16 19 15 22 15C25 15 27 17 28 19L30 22" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      <% end %>
+      <h1 class="assets-header__title">资产数据采集</h1>
+    </div>
+    <div class="assets-header__right">
+      <div class="header-actions">
+        <button onclick="triggerCollection()" class="btn btn-primary btn--icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          触发采集
+        </button>
+        <%= link_to "/sidekiq", class: "btn btn-secondary btn--icon", target: "_blank", rel: "noopener" do %>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          任务队列
+        <% end %>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="assets-main">
+    <% if notice.present? %>
+      <div class="alert alert-success">
+        <%= notice %>
+      </div>
+    <% end %>
+
+    <% if alert.present? %>
+      <div class="alert alert-error">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <!-- Stats Overview -->
+    <section class="stats-overview">
+      <div class="stat-card stat-card--primary">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value"><%= @assets.count %></span>
+          <span class="stat-card__label">监控资产</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--success">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value"><%= AssetSnapshot.count %></span>
+          <span class="stat-card__label">数据快照</span>
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--info">
+        <div class="stat-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+        </div>
+        <div class="stat-card__content">
+          <span class="stat-card__value" id="collection-status">运行中</span>
+          <span class="stat-card__label">采集状态</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Assets Section -->
+    <section class="assets-section">
+      <div class="assets-section__header">
+        <h2 class="assets-section__title">热门资产</h2>
+        <p class="assets-section__subtitle">按成交量排名</p>
+      </div>
+      <div id="top-assets-container" class="assets-grid assets-grid--featured">
+        <div class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>加载热门资产数据...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- All Assets Section -->
+    <section class="assets-section">
+      <div class="assets-section__header">
+        <h2 class="assets-section__title">所有资产</h2>
+        <p class="assets-section__subtitle">实时市场数据监控</p>
+      </div>
+
+      <% if @assets.any? %>
+        <div class="assets-grid">
+          <% @assets.each do |asset| %>
+            <div class="asset-card" onclick="window.location.href='<%= asset_path(asset) %>'">
+              <div class="asset-card__header">
+                <div class="asset-card__icon">
+                  <% case asset.asset_type.to_s.downcase %>
+                  <% when 'crypto' %>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="8"></circle>
+                      <path d="M12 2v2"></path>
+                      <path d="M12 20v2"></path>
+                      <path d="M4.93 4.93l1.41 1.41"></path>
+                      <path d="M17.66 17.66l1.41 1.41"></path>
+                      <path d="M2 12h2"></path>
+                      <path d="M20 12h2"></path>
+                      <path d="M4.93 19.07l1.41-1.41"></path>
+                      <path d="M17.66 6.34l1.41-1.41"></path>
+                    </svg>
+                  <% when 'stock' %>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 21h18"></path>
+                      <path d="M5 21V7l8-4 8 4v14"></path>
+                      <path d="M8 21V12"></path>
+                      <path d="M12 21V12"></path>
+                      <path d="M16 21V12"></path>
+                    </svg>
+                  <% when 'forex' %>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="6" x2="12" y2="18"></line>
+                      <line x1="6" y1="12" x2="18" y2="12"></line>
+                    </svg>
+                  <% else %>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="16"></line>
+                      <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                  <% end %>
+                </div>
+                <span class="asset-card__type-badge asset-card__type-badge--<%= asset.asset_type %>">
+                  <%= asset.asset_type.upcase %>
+                </span>
+              </div>
+
+              <h3 class="asset-card__symbol"><%= asset.symbol %></h3>
+              <p class="asset-card__name"><%= asset.name %></p>
+
+              <div class="asset-card__price">
+                <span class="asset-card__price-value" data-asset-id="<%= asset.id %>">
+                  <%= number_to_currency(asset.current_price, precision: 4) %>
+                </span>
+              </div>
+
+              <% if asset.latest_snapshot && asset.latest_snapshot.change_percent %>
+                <div class="asset-card__change">
+                  <span class="asset-card__change-value <%= asset.latest_snapshot.change_percent >= 0 ? 'positive' : 'negative' %>">
+                    <%= asset.latest_snapshot.change_percent >= 0 ? '+' : '' %><%= asset.latest_snapshot.change_percent.round(2) %>%
+                  </span>
+                  <span class="asset-card__change-label">24小时</span>
+                </div>
+              <% else %>
+                <div class="asset-card__change">
+                  <span class="asset-card__change-value">-</span>
+                  <span class="asset-card__change-label">24小时</span>
+                </div>
+              <% end %>
+
+              <div class="asset-card__meta">
+                <span class="asset-card__updated">
+                  <%= asset.last_updated&.strftime('%H:%M') || '--:--' %>
+                </span>
+                <span class="asset-card__snapshots">
+                  <%= asset.asset_snapshots.count %> 快照
+                </span>
+              </div>
+
+              <div class="asset-card__action">
+                <span class="asset-card__action-text">查看详情</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="assets-empty">
+          <div class="assets-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+          <h3 class="assets-empty__title">暂无资产数据</h3>
+          <p class="assets-empty__text">等待数据采集任务开始...</p>
+          <button onclick="triggerCollection()" class="btn btn-primary">
+            立即触发采集
+          </button>
+        </div>
+      <% end %>
+    </section>
+  </main>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast toast--hidden">
+    <span id="toast-icon"></span>
+    <span id="toast-message"></span>
+  </div>
+</div>
+
+<script>
+  // Load top assets by volume
+  async function loadTopAssets() {
+    try {
+      const response = await fetch('/api/v1/assets/top_by_volume?limit=6');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const container = document.getElementById('top-assets-container');
+        if (result.data.length === 0) {
+          container.innerHTML = '<div class="empty-state">暂无热门资产数据</div>';
+          return;
+        }
+
+        container.innerHTML = result.data.map(asset => createTopAssetCard(asset)).join('');
+      }
+    } catch (error) {
+      console.error('Error loading top assets:', error);
+      document.getElementById('top-assets-container').innerHTML = '<div class="error-state">加载失败</div>';
+    }
+  }
+
+  function createTopAssetCard(asset) {
+    const changeClass = asset.change_percent >= 0 ? 'positive' : 'negative';
+    const changeSign = asset.change_percent >= 0 ? '+' : '';
+    const changePercent = asset.change_percent ? `${changeSign}${asset.change_percent.toFixed(2)}%` : '-';
+
+    return `
+      <div class="asset-card asset-card--featured" onclick="window.location.href='/assets/${asset.id}'">
+        <div class="asset-card__header">
+          <div class="asset-card__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <span class="asset-card__type-badge asset-card__type-badge--${asset.asset_type}">
+            ${asset.asset_type.toUpperCase()}
+          </span>
+        </div>
+        <h3 class="asset-card__symbol">${asset.symbol}</h3>
+        <p class="asset-card__name">${asset.name}</p>
+        <div class="asset-card__price">
+          <span class="asset-card__price-value">$${asset.current_price?.toFixed(4) || 'N/A'}</span>
+        </div>
+        <div class="asset-card__change">
+          <span class="asset-card__change-value ${changeClass}">${changePercent}</span>
+          <span class="asset-card__change-label">24小时</span>
+        </div>
+        <div class="asset-card__meta">
+          <span class="asset-card__updated">热</span>
+          <span class="asset-card__snapshots">TOP</span>
+        </div>
+        <div class="asset-card__action">
+          <span class="asset-card__action-text">查看详情</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </div>
+      </div>
+    `;
+  }
+
+  // Trigger data collection
+  async function triggerCollection() {
+    try {
+      const response = await fetch('/api/v1/assets/collect', { method: 'POST' });
+      const result = await response.json();
+
+      if (result.success) {
+        showToast('数据采集已触发！', 'success');
+        // Reload after a short delay
+        setTimeout(() => location.reload(), 2000);
+      } else {
+        showToast('触发失败: ' + (result.error || '未知错误'), 'error');
+      }
+    } catch (error) {
+      console.error('Error triggering collection:', error);
+      showToast('网络错误，请稍后重试', 'error');
+    }
+  }
+
+  // Toast notification
+  function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastIcon = document.getElementById('toast-icon');
+    const toastMessage = document.getElementById('toast-message');
+
+    toastMessage.textContent = message;
+    toast.className = 'toast toast--visible';
+
+    const icons = {
+      success: '✓',
+      error: '✕',
+      info: 'ℹ'
+    };
+    toastIcon.textContent = icons[type] || icons.info;
+    toast.style.setProperty('--toast-color', type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#06b6d4');
+
+    setTimeout(() => {
+      toast.className = 'toast toast--hidden';
+    }, 3000);
+  }
+
+  // Load on page ready
+  document.addEventListener('DOMContentLoaded', () => {
+    loadTopAssets();
+  });
+</script>

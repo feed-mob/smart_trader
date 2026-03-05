@@ -13,6 +13,6 @@
 @import "sessions";
 @import "home";
 @import "traders";
+@import "assets";
 @import "factor_definitions";
 @import "trading_signals";
-

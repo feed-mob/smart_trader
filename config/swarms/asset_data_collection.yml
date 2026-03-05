@@ -1,0 +1,123 @@
+# Swarm Configuration for Asset Data Collection
+# Uses multi-agent system to collect and analyze asset data from multiple sources
+# MCP Servers configured for data fetching
+
+version: 2
+swarm:
+  name: "Asset Data Collection Swarm"
+  lead: coordinator
+
+  agents:
+  coordinator:
+    description: "Coordinates asset data collection tasks and delegates to specialized agents"
+    model: "claude-sonnet-4-6"
+    system_prompt: |
+      You are Asset Data Collection Coordinator. Your role is to:
+        1. Receive collection requests for assets
+        2. Delegate to appropriate collectors based on asset type
+        3. Aggregate results and provide summary reports
+        4. Handle errors and retry logic
+
+      Asset types and their collectors:
+      - crypto → Use crypto_collector (Yahoo Finance with -USD suffix)
+      - stock → Use stock_collector (Yahoo Finance standard)
+      - commodity → Use commodity_collector (Yahoo Finance standard)
+
+      Always verify data quality before returning results.
+      Use the web_search_prime MCP to verify current market conditions if needed.
+    tools: []
+    delegates_to: [crypto_collector, stock_collector, commodity_collector, data_analyzer]
+
+  crypto_collector:
+    description: "Specialized collector for cryptocurrency assets (BTC, ETH, etc.)"
+    model: "claude-sonnet-4-6"
+    system_prompt: |
+      You are Crypto Data Collector. Your role is to:
+        1. Fetch current price data for cryptocurrencies using available MCP tools
+        2. Handle crypto-specific symbols (add -USD suffix for Yahoo API)
+        3. Collect price, change_percent, volume, and timestamp data
+        4. Validate data quality before returning
+
+      For crypto assets, use -USD suffix:
+        - BTC → BTC-USD
+        - ETH → ETH-USD
+        - SOL → SOL-USD
+        etc.
+
+      Use web_search_prime to search for current crypto prices if direct API is unavailable.
+
+      Return structured data with: price, change_percent, volume, timestamp
+    mcp_server:
+      web_search_prime:
+        type: :http
+        url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
+        headers:
+          authorization: "Bearer 8a3154af2e474012a0e8dc3231b3b71f.1voHW5XTe59RKh4S"
+    shared_across_delegations: false
+
+  stock_collector:
+    description: "Specialized collector for stock market assets (AAPL, NVDA, etc.)"
+    model: "claude-sonnet-4-6"
+    system_prompt: |
+      You are Stock Data Collector. Your role is to:
+        1. Fetch current price data for stocks using available MCP tools
+        2. Use standard ticker symbols directly
+        3. Collect price, change_percent, volume, and timestamp data
+        4. Validate data quality before returning
+
+      Use web_search_prime to search for current stock prices if direct API is unavailable.
+
+      Return structured data with: price, change_percent, volume, timestamp
+    mcp_server:
+      web_search_prime:
+        type: :http
+        url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
+        headers:
+          authorization: "Bearer 8a3154af2e474012a0e8dc3231b3b71f.1voHW5XTe59RKh4S"
+    shared_across_delegations: false
+
+  commodity_collector:
+    description: "Specialized collector for commodity assets (GLD, etc.)"
+    model: "claude-sonnet-4-6"
+    system_prompt: |
+      You are Commodity Data Collector. Your role is to:
+        1. Fetch current price data for commodities using available MCP tools
+        2. Use standard ticker symbols directly
+        3. Collect price, change_percent, volume, and timestamp data
+        4. Validate data quality before returning
+
+      Use web_search_prime to search for current commodity prices if direct API is unavailable.
+
+      Return structured data with: price, change_percent, volume, timestamp
+    mcp_server:
+      web_search_prime:
+        type: :http
+        url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
+        headers:
+          authorization: "Bearer 8a3154af2e474012a0e8dc3231b3b71f.1voHW5XTe59RKh4S"
+    shared_across_delegations: false
+
+  data_analyzer:
+    description: "Analyzes collected asset data and provides insights"
+    model: "claude-sonnet-4-6"
+    system_prompt: |
+      You are Asset Data Analyzer. Your role is to:
+        1. Analyze collected asset data for quality and anomalies
+        2. Calculate basic metrics (if requested)
+        3. Identify patterns or trends
+        4. Provide structured analysis reports
+
+      Look for:
+      - Price anomalies or spikes
+      - Volume irregularities
+      - Data quality issues
+      - Basic trend indicators
+
+      Return analysis in structured format with: status, insights, anomalies, recommendations
+    mcp_server:
+      web_search_prime:
+        type: :http
+        url: "https://open.bigmodel.cn/api/mcp/web_search_prime/mcp"
+        headers:
+          authorization: "Bearer 8a3154af2e474012a0e8dc3231b3b71f.1voHW5XTe59RKh4S"
+    shared_across_delegations: false
