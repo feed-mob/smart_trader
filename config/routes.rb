@@ -43,8 +43,6 @@ Rails.application.routes.draw do
       post :collect, to: "assets#collect"
     end
   end
-  # Sidekiq Web UI
-  mount Sidekiq::Web => "/sidekiq"
 
   # Trader management
   resources :traders do
