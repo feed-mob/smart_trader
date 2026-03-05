@@ -33,24 +33,20 @@ class AssetDataCollector
       return collect_with_swarm(asset)
     end
 
-    # Option 2: Direct API calls (default)
-    # Fetch primary data from Yahoo Finance
-    price_data = YahooFinanceService.get_price_data(asset.symbol)
-
-    return nil unless price_data
+    # Option 2: Direct API calls with TradingView MCP for crypto
+    # Crypto assets use TradingView MCP, stocks/commodities use Yahoo Finance
+    if asset.asset_type == "crypto"
+      # Use TradingView MCP for crypto assets
+      price_data = fetch_via_tradingview_mcp(asset)
+    else
+      # Use Yahoo Finance for stocks and commodities
+      price_data = YahooFinanceService.get_price_data(asset.symbol)
+      return nil unless price_data
+    end
 
     # Fetch optional technical indicators from TradingView
-    # Note: TradingViewClient is not required - we skip it if not available
+    # Note: For crypto, TradingView MCP already provides technical indicators
     technical_data = nil
-    begin
-      tv_client = Object.const_get("::TradingViewClient") rescue nil
-      if tv_client&.enabled?
-        technical_data = tv_client.get_technical_indicators(asset.symbol)
-      end
-    rescue NameError
-      # TradingViewClient not available, continue without it
-      Rails.logger.debug "[AssetDataCollector] TradingViewClient not available"
-    end
 
     # Update asset with current price
     asset.update!(
@@ -124,6 +120,27 @@ class AssetDataCollector
   end
 
   private
+
+  # Fetch crypto asset data via TradingView MCP
+  # @param asset [Asset] The crypto asset to fetch
+  # @return [Hash] Price data from TradingView MCP
+  def self.fetch_via_tradingview_mcp(asset)
+    # Use TradingViewMcpService to get real market data
+    mcp_data = TradingViewMcpService.coin_analysis(asset.symbol, exchange: "KUCOIN", timeframe: "1h")
+
+    return nil unless mcp_data
+
+    # Convert TradingView MCP format to our internal format
+    {
+      price: mcp_data["price"],
+      change_percent: mcp_data["change_percent"],
+      volume: mcp_data["volume"],
+      timestamp: Time.current
+    }
+  rescue StandardError => e
+    Rails.logger.error "[AssetDataCollector] TradingView MCP error for #{asset.symbol}: #{e.message}"
+    nil
+  end
 
   # Create a snapshot with the collected data
   def self.create_snapshot(asset, price_data, technical_data)

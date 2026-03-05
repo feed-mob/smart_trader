@@ -35,17 +35,12 @@ class AssetDataCollectionJob < ApplicationJob
 
     # Log summary
     Rails.logger.info "[AssetDataCollectionJob] Completed: #{results[:success]} success, #{results[:failed]} failed"
-
-    # Optionally use Swarm for analysis
-    if ENV["USE_SWARM_FOR_ANALYSIS"] == "true"
-      analyze_collected_data(top_assets)
-    end
   end
 
   private
 
   # Get top assets by trading volume
-  # Uses the most recent snapshot for each asset
+  # Uses most recent snapshot for each asset
   def get_top_volume_assets
     # Get latest snapshot for each asset
     latest_snapshots = AssetSnapshot
@@ -70,51 +65,11 @@ class AssetDataCollectionJob < ApplicationJob
 
   # Collect and store data for a single asset
   def collect_and_store_asset_data(asset)
-    # Fetch data from Yahoo Finance
-    price_data = YahooFinanceService.get_price_data(asset.symbol)
+    # Use AssetDataCollector which now supports TradingView MCP for crypto
+    result = AssetDataCollector.collect_for_asset(asset)
 
-    return unless price_data
+    return unless result
 
-    # Fetch optional technical indicators from TradingView
-    # Note: TradingViewClient is not required - we skip it if not available
-    technical_data = nil
-    begin
-      tv_client = Object.const_get("::TradingViewClient") rescue nil
-      if tv_client&.enabled?
-        technical_data = tv_client.get_technical_indicators(asset.symbol)
-      end
-    rescue NameError
-      # TradingViewClient not available, continue without it
-      Rails.logger.debug "[AssetDataCollectionJob] TradingViewClient not available"
-    end
-
-    # Update asset current price
-    asset.update!(
-      current_price: price_data[:price],
-      last_updated: price_data[:timestamp]
-    )
-
-    # Create snapshot
-    asset.asset_snapshots.create!(
-      price: price_data[:price],
-      change_percent: price_data[:change_percent],
-      volume: price_data[:volume],
-      captured_at: price_data[:timestamp]
-    )
-
-    Rails.logger.debug "[AssetDataCollectionJob] Collected #{asset.symbol}: $#{price_data[:price]} (Vol: #{price_data[:volume]})"
-  end
-
-  # Analyze collected data using Swarm
-  def analyze_collected_data(assets)
-    Rails.logger.info "[AssetDataCollectionJob] Running Swarm analysis..."
-
-    assets.each do |asset|
-      begin
-        SwarmDataCollectorService.analyze_asset_data(asset.symbol, asset.asset_snapshots.recent(24))
-      rescue StandardError => e
-        Rails.logger.warn "[AssetDataCollectionJob] Swarm analysis failed for #{asset.symbol}: #{e.message}"
-      end
-    end
+    Rails.logger.debug "[AssetDataCollectionJob] Collected #{asset.symbol}: $#{result[:price]} (Vol: #{result[:volume]})"
   end
 end

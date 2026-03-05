@@ -11,7 +11,7 @@ module Api
 
       # GET /api/v1/assets - List all assets
       def index
-        assets = Asset.all.includes(:snapshots)
+        assets = Asset.all.includes(:asset_snapshots)
 
         render json: {
           success: true,
@@ -102,7 +102,7 @@ module Api
           .limit(limit)
           .pluck(:asset_id)
 
-        assets = Asset.where(id: top_snapshot_ids).order("FIELD(id, #{top_snapshot_ids.join(','))")
+        assets = Asset.where(id: top_snapshot_ids).order("id ASC")
 
         render json: {
           success: true,
