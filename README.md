@@ -43,7 +43,14 @@ rails db:create
 rails db:migrate
 ```
 
-5. 启动服务
+5. 初始化操盘手数据
+```bash
+rails init:traders
+```
+
+这将创建 6 个默认操盘手（巴菲特、芒格、林奇、索罗斯、达里奥、格雷厄姆），每个操盘手包含 4 种市场环境的交易策略。
+
+6. 启动服务
 ```bash
 bin/dev
 ```
