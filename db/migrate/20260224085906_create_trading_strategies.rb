@@ -1,7 +1,7 @@
 class CreateTradingStrategies < ActiveRecord::Migration[8.1]
   def change
     create_table :trading_strategies do |t|
-      t.references :trader, null: false, foreign_key: true
+      t.integer :trader_id, null: false
       t.string :name, null: false
       t.integer :market_condition, default: 0, null: false  # 0: normal, 1: volatile, 2: crash, 3: bubble
       t.integer :risk_level, default: 1  # 0: conservative, 1: balanced, 2: aggressive

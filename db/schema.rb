@@ -20,22 +20,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
     t.decimal "change_percent", precision: 8, scale: 4
     t.datetime "created_at", null: false
     t.decimal "price", precision: 15, scale: 2, null: false
+    t.date "snapshot_date", null: false
     t.datetime "updated_at", null: false
-    t.decimal "volume", precision: 20
-    t.index ["asset_id", "captured_at"], name: "index_asset_snapshots_on_asset_id_and_captured_at"
-    t.index ["asset_id"], name: "index_asset_snapshots_on_asset_id"
+    t.decimal "volume", precision: 20, scale: 2
+    t.index ["asset_id", "snapshot_date"], name: "index_asset_snapshots_on_asset_id_and_snapshot_date", unique: true
     t.index ["captured_at"], name: "index_asset_snapshots_on_captured_at"
+    t.index ["snapshot_date"], name: "index_asset_snapshots_on_snapshot_date"
   end
 
   create_table "assets", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
     t.string "asset_type", null: false
+    t.string "coingecko_id"
     t.datetime "created_at", null: false
     t.decimal "current_price", precision: 15, scale: 2
+    t.string "exchange", default: "UNKNOWN", null: false
     t.datetime "last_updated"
     t.string "name", null: false
+    t.string "quote_currency", default: "USD", null: false
     t.string "symbol", null: false
     t.datetime "updated_at", null: false
-    t.index ["symbol"], name: "index_assets_on_symbol", unique: true
+    t.string "yahoo_symbol"
+    t.index ["active"], name: "index_assets_on_active"
+    t.index ["asset_type"], name: "index_assets_on_asset_type"
+    t.index ["coingecko_id"], name: "index_assets_on_coingecko_id", unique: true
+    t.index ["symbol", "exchange", "quote_currency"], name: "index_assets_on_symbol_and_exchange_and_quote_currency", unique: true
+    t.index ["yahoo_symbol"], name: "index_assets_on_yahoo_symbol", unique: true
   end
 
   create_table "candles", force: :cascade do |t|
@@ -98,6 +108,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
     t.integer "risk_level", default: 0
     t.integer "status", default: 0
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
     t.index ["status"], name: "index_traders_on_status"
   end
 
@@ -128,7 +139,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
     t.decimal "min_cash_reserve", precision: 3, scale: 2, default: "0.2"
     t.string "name", null: false
     t.integer "risk_level", default: 1
-    t.bigint "trader_id", null: false
+    t.integer "trader_id", null: false
     t.datetime "updated_at", null: false
     t.index ["trader_id", "market_condition"], name: "index_trading_strategies_on_trader_id_and_market_condition", unique: true
   end
@@ -151,5 +162,4 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
   add_foreign_key "factor_values", "assets"
   add_foreign_key "factor_values", "factor_definitions"
   add_foreign_key "trading_signals", "assets"
-  add_foreign_key "trading_strategies", "traders"
 end
