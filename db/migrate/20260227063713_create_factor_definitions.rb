@@ -4,6 +4,7 @@ class CreateFactorDefinitions < ActiveRecord::Migration[8.1]
       t.string :code, null: false
       t.string :name, null: false
       t.text :description
+      t.text :formula  # 计算公式（可选）
       t.string :category, null: false
       t.string :calculation_method, null: false
       t.jsonb :parameters, default: {}

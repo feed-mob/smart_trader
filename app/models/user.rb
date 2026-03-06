@@ -2,6 +2,9 @@
 
 # User - Represents a SmartTrader user
 class User < ApplicationRecord
+  # Associations
+  has_many :traders, dependent: :destroy
+
   # Validations
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true, allow_nil: true
