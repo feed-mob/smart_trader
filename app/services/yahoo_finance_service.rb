@@ -78,6 +78,42 @@ class YahooFinanceService
       []
     end
 
+    # Batch fetch stock data using Yahoo Screener API
+    # @param scr_id [String] Screener ID (e.g., "largest_market_cap", "most_actives")
+    # @param count [Integer] Number of stocks to fetch (max 100)
+    # @param start [Integer] Offset for pagination
+    # @return [Array<Hash>] Array of stock data with keys: symbol, name, exchange, price, change_percent, volume, market_cap, timestamp
+    def get_screener_data(scr_id: "largest_market_cap", count: 100, start: 0)
+      url = "https://query1.finance.yahoo.com/v1/finance/screener/predefined/saved?scrIds=#{scr_id}&count=#{count}&start=#{start}"
+
+      # Use curl to fetch data (more reliable in WSL environments)
+      response = `curl -s "#{url}" -H "User-Agent: Mozilla/5.0"`
+
+      return [] if response.empty?
+
+      data = JSON.parse(response)
+      quotes = data.dig("finance", "result", 0, "quotes")
+      return [] unless quotes
+
+      quotes.map do |quote|
+        timestamp = quote.dig("regularMarketTime")
+
+        {
+          symbol: quote["symbol"],
+          name: quote["shortName"] || quote["longName"] || quote["symbol"],
+          exchange: quote["exchange"] || "UNKNOWN",
+          price: quote.dig("regularMarketPrice")&.to_f,
+          change_percent: quote.dig("regularMarketChangePercent")&.to_f,
+          volume: quote.dig("regularMarketVolume")&.to_i,
+          market_cap: quote.dig("marketCap")&.to_i,
+          timestamp: timestamp ? Time.at(timestamp) : Time.current
+        }
+      end
+    rescue StandardError => e
+      Rails.logger.error "[YahooFinanceService] Screener API error: #{e.message}"
+      []
+    end
+
     # Check if a symbol exists/is valid on Yahoo Finance
     # @param symbol [String] The asset symbol to check
     # @return [Boolean] True if symbol is valid
