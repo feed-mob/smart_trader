@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Trader < ApplicationRecord
+  belongs_to :user
   has_many :trading_strategies, dependent: :destroy
 
   # Enums

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_05_043807) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -36,6 +36,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_043807) do
     t.string "symbol", null: false
     t.datetime "updated_at", null: false
     t.index ["symbol"], name: "index_assets_on_symbol", unique: true
+  end
+
+  create_table "candles", force: :cascade do |t|
+    t.bigint "asset_id", null: false
+    t.datetime "candle_time", null: false
+    t.decimal "close_price", precision: 15, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.decimal "high_price", precision: 15, scale: 2, null: false
+    t.string "interval", default: "4h", null: false
+    t.decimal "low_price", precision: 15, scale: 2, null: false
+    t.decimal "open_price", precision: 15, scale: 2, null: false
+    t.decimal "quote_volume", precision: 20, scale: 2
+    t.datetime "updated_at", null: false
+    t.decimal "volume", precision: 20, scale: 2
+    t.index ["asset_id", "interval", "candle_time"], name: "index_candles_on_asset_id_and_interval_and_candle_time", unique: true
+    t.index ["asset_id", "interval"], name: "index_candles_on_asset_id_and_interval"
+    t.index ["candle_time"], name: "index_candles_on_candle_time"
   end
 
   create_table "factor_definitions", force: :cascade do |t|
@@ -130,6 +147,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_043807) do
   end
 
   add_foreign_key "asset_snapshots", "assets"
+  add_foreign_key "candles", "assets"
   add_foreign_key "factor_values", "assets"
   add_foreign_key "factor_values", "factor_definitions"
   add_foreign_key "trading_signals", "assets"
