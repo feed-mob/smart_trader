@@ -6,6 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 SmartTrader (智能交易者) 是一个 AI 驱动的交易平台，使用 LLM 生成交易策略。核心理念是 "Everything is Agent" - AI 操盘手分析市场并做出投资决策。
 
+
+表设计文档： docs/database_schema.md
+
 ## 开发命令
 
 ```bash
@@ -19,7 +22,6 @@ bin/dev
 
 # 或分开运行:
 rails server
-bin/rails tailwindcss:watch
 
 # 代码质量检查
 rubocop

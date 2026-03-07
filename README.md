@@ -70,6 +70,33 @@ rails server
 
 ## 开发工具
 
+### 数据初始化任务
+
+```bash
+# 初始化操盘手数据（创建 6 个默认操盘手）
+rails init:traders
+
+# 初始化因子定义
+bundle exec rails runner db/seeds/factor_definitions.rb
+
+# 初始化 Mock 数据 (开发/测试环境)
+bundle exec rails runner db/seeds/mock_factor_data.rb
+bundle exec rails runner db/seeds/mock_trading_signals.rb
+```
+
+### 资产数据拉取
+
+```bash
+# 拉取 CoinGecko Layer-1 币种市场数据（每日）
+rails c
+> FetchCoinMarketsJob.perform_now
+
+# 拉取历史市场数据（最近 60 天，前 10 个资产）
+rails assets:fetch_historical
+```
+
+详细文档: [docs/coin_markets_job.md](docs/coin_markets_job.md)
+
 
 ## 因子系统初始化
 
