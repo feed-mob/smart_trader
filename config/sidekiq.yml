@@ -10,6 +10,7 @@
   - default
   - asset_collection
   - mailers
+  - yahoo_finance
 
 # Logging
 :logfile: ./log/sidekiq.log
@@ -47,3 +48,10 @@
     class: "FetchCoinMarketsJob"
     queue: default
     description: "每天拉取 CoinGecko Layer-1 币种市场数据（市值前 100）"
+
+  # Yahoo Finance 股票数据拉取 - 每天 UTC 02:00 执行
+  fetch_yahoo_stock_data:
+    cron: "0 2 * * *"
+    class: "FetchYahooStockDataJob"
+    queue: yahoo_finance
+    description: "每天拉取 Yahoo Finance Market Cap 前 100 股票数据"
