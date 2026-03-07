@@ -30,17 +30,11 @@
 # Schedule definitions (loaded by sidekiq-scheduler)
 :schedule:
   # 因子计算 - 每小时执行（资产拉取后15分钟）
-  factor_calculation:
-    cron: "15 * * * *"
-    class: "CalculateFactorsJob"
-    queue: default
-    description: "每小时计算交易因子"
-
-  fetch_asset:
-    cron: "15 * * * *"
-    class: "AssetDataCollectionJob"
-    queue: default
-    description: "get assets"
+  # factor_calculation:
+  #   cron: "15 * * * *"
+  #   class: "CalculateFactorsJob"
+  #   queue: default
+  #   description: "每小时计算交易因子"
 
   # CoinGecko 市场数据拉取 - 每天 UTC 02:00 和 23:00 执行
   fetch_coin_markets:

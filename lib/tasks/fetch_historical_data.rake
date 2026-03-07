@@ -9,8 +9,11 @@ namespace :assets do
     puts "开始拉取历史市场数据"
     puts "=" * 80
 
+    # 确保基准资产存在
+    ensure_benchmark_assets
+
     # 获取前 10 个活跃的加密货币资产
-    assets = Asset.active.crypto.where.not(coingecko_id: nil).limit(50)
+    assets = Asset.active.crypto.where(coingecko_id: 'tether-gold').where.not(coingecko_id: nil).limit(50)
 
     if assets.empty?
       puts "❌ 没有找到任何活跃的加密货币资产"
@@ -69,6 +72,30 @@ namespace :assets do
 end
 
 module FetchHistoricalDataHelper
+  # 确保基准资产存在
+  def ensure_benchmark_assets
+    benchmark_assets = [
+      {
+        symbol: 'XAUT',
+        name: 'Tether Gold',
+        asset_type: 'crypto',
+        exchange: 'COINGECKO',
+        quote_currency: 'USD',
+        coingecko_id: 'tether-gold',
+        active: true
+      }
+    ]
+
+    benchmark_assets.each do |attrs|
+      asset = Asset.find_or_initialize_by(symbol: attrs[:symbol], exchange: attrs[:exchange])
+      if asset.new_record?
+        asset.assign_attributes(attrs)
+        asset.save!
+        puts "✓ 创建基准资产: #{asset.name} (#{asset.symbol})"
+      end
+    end
+  end
+
   # 聚合并保存价格和成交量快照
   #
   # @param asset [Asset] 资产对象

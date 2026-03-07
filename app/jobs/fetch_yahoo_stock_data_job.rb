@@ -3,7 +3,7 @@
 # Job to fetch and save top 100 stocks by market cap from Yahoo Finance
 # Can be scheduled as a recurring task to keep assets table updated
 class FetchYahooStockDataJob < ApplicationJob
-  queue_as :yahoo_finance
+  queue_as :default
 
   retry_on Net::OpenTimeout, wait: :exponentially_longer, attempts: 3
   retry_on HTTParty::Error, wait: :exponentially_longer, attempts: 3

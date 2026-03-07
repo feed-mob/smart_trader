@@ -11,7 +11,7 @@ factors_data = [
     category: 'momentum',
     calculation_method: 'calculate_momentum',
     parameters: { days: 20 },
-    weight: 0.20,
+    weight: 0.15,
     update_frequency: 60,
     sort_order: 1,
     formula: <<~FORMULA
@@ -43,37 +43,13 @@ factors_data = [
     FORMULA
   },
   {
-    code: 'beta',
-    name: '贝塔因子',
-    description: '相对于市场基准的波动敏感度。Beta接近1为正分（与市场同步），偏离1为负分（波动异常）。',
-    category: 'risk',
-    calculation_method: 'calculate_beta',
-    parameters: { days: 20 },
-    weight: 0.15,
-    update_frequency: 60,
-    sort_order: 3,
-    formula: <<~FORMULA
-      计算公式:
-      Beta = Cov(资产收益率, 基准收益率) / Var(基准收益率)
-
-      基准选择:
-      - 加密货币：BTC
-      - 股票：S&P 500 (SPY)
-      - 商品：GLD
-
-      评分规则:
-      - Beta ≈ 1 → 正分（与市场同步）
-      - Beta 偏离1 → 负分（波动异常）
-    FORMULA
-  },
-  {
     code: 'volume_ratio',
     name: '成交量比率因子',
     description: '上涨日平均成交量/下跌日平均成交量，反映大资金流向。VR>1.5为大资金流入，VR<0.8为资金流出。',
     category: 'volume',
     calculation_method: 'calculate_volume_ratio',
     parameters: { days: 20, threshold: 1.5 },
-    weight: 0.20,
+    weight: 0.15,
     update_frequency: 60,
     sort_order: 4,
     formula: <<~FORMULA
@@ -108,7 +84,7 @@ factors_data = [
     category: 'technical',
     calculation_method: 'calculate_trend',
     parameters: { days: 20 },
-    weight: 0.15,
+    weight: 0.10,
     update_frequency: 60,
     sort_order: 6,
     formula: <<~FORMULA
@@ -122,15 +98,37 @@ factors_data = [
   },
   # Beta 因子系列 - 相对于不同基准的波动敏感度
   {
+    code: 'beta_ixic',
+    name: '纳斯达克Beta因子',
+    description: '相对于纳斯达克指数的Beta值，衡量资产相对于纳斯达克市场的波动敏感度。Beta>1表示波动大于大盘，Beta<1表示波动小于大盘。',
+    category: 'risk',
+    calculation_method: 'calculate_beta_ixic',
+    parameters: { days: 20, benchmark: '^IXIC' },
+    weight: 0.15,
+    update_frequency: 60,
+    sort_order: 7,
+    formula: <<~FORMULA
+      计算公式:
+      Beta = Cov(资产收益率, 纳斯达克收益率) / Var(纳斯达克收益率)
+
+      基准: 纳斯达克指数 (^IXIC)
+
+      评分规则:
+      - Beta > 1 → 波动大于大盘
+      - Beta ≈ 1 → 与大盘同步
+      - Beta < 1 → 波动小于大盘
+    FORMULA
+  },
+  {
     code: 'beta_btc',
     name: 'BTC Beta因子',
     description: '相对于比特币的Beta值，衡量资产相对于BTC的波动敏感度。Beta>1表示波动大于BTC，Beta<1表示波动小于BTC。',
     category: 'risk',
     calculation_method: 'calculate_beta_btc',
     parameters: { days: 20, benchmark: 'BTC-USD' },
-    weight: 0.10,
+    weight: 0.05,
     update_frequency: 60,
-    sort_order: 7,
+    sort_order: 8,
     formula: <<~FORMULA
       计算公式:
       Beta = Cov(资产收益率, BTC收益率) / Var(BTC收益率)
@@ -150,9 +148,9 @@ factors_data = [
     category: 'risk',
     calculation_method: 'calculate_beta_gold',
     parameters: { days: 20, benchmark: 'GC=F' },
-    weight: 0.10,
+    weight: 0.05,
     update_frequency: 60,
-    sort_order: 8,
+    sort_order: 9,
     formula: <<~FORMULA
       计算公式:
       Beta = Cov(资产收益率, 黄金收益率) / Var(黄金收益率)
@@ -172,9 +170,9 @@ factors_data = [
     category: 'risk',
     calculation_method: 'calculate_beta_nvda',
     parameters: { days: 20, benchmark: 'NVDA' },
-    weight: 0.10,
+    weight: 0.05,
     update_frequency: 60,
-    sort_order: 9,
+    sort_order: 10,
     formula: <<~FORMULA
       计算公式:
       Beta = Cov(资产收益率, NVDA收益率) / Var(NVDA收益率)
@@ -185,28 +183,6 @@ factors_data = [
       - Beta > 1 → 波动大于NVDA
       - Beta ≈ 1 → 与NVDA同步
       - Beta < 1 → 波动小于NVDA
-    FORMULA
-  },
-  {
-    code: 'beta_ixic',
-    name: '纳斯达克Beta因子',
-    description: '相对于纳斯达克指数的Beta值，衡量资产相对于纳斯达克市场的波动敏感度。Beta>1表示波动大于大盘，Beta<1表示波动小于大盘。',
-    category: 'risk',
-    calculation_method: 'calculate_beta_ixic',
-    parameters: { days: 20, benchmark: '^IXIC' },
-    weight: 0.10,
-    update_frequency: 60,
-    sort_order: 10,
-    formula: <<~FORMULA
-      计算公式:
-      Beta = Cov(资产收益率, 纳斯达克收益率) / Var(纳斯达克收益率)
-
-      基准: 纳斯达克指数 (^IXIC)
-
-      评分规则:
-      - Beta > 1 → 波动大于大盘
-      - Beta ≈ 1 → 与大盘同步
-      - Beta < 1 → 波动小于大盘
     FORMULA
   }
 ]
