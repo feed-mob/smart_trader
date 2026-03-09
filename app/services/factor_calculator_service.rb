@@ -117,6 +117,48 @@ class FactorCalculatorService
     [[momentum * 2, 1].min, -1].max
   end
 
+  # ========== Beta 因子系列 ==========
+
+  # 纳斯达克 Beta 因子
+  def calculate_beta_ixic
+    calculate_beta_against_benchmark('^IXIC')
+  end
+
+  # BTC Beta 因子
+  def calculate_beta_btc
+    calculate_beta_against_benchmark('BTC')
+  end
+
+  # 黄金 Beta 因子
+  def calculate_beta_gold
+    calculate_beta_against_benchmark('GC=F')
+  end
+
+  # NVDA Beta 因子
+  def calculate_beta_nvda
+    calculate_beta_against_benchmark('NVDA')
+  end
+
+  # 通用 Beta 计算方法
+  def calculate_beta_against_benchmark(benchmark_symbol)
+    days = params[:days] || 20
+
+    benchmark_asset = find_benchmark_by_symbol(benchmark_symbol)
+    return 1.0 unless benchmark_asset
+
+    asset_returns = daily_returns_for(asset, days)
+    benchmark_returns = daily_returns_for(benchmark_asset, days)
+
+    return 1.0 if asset_returns.empty? || benchmark_returns.empty?
+
+    covariance = calculate_covariance(asset_returns, benchmark_returns)
+    variance = calculate_variance(benchmark_returns)
+
+    return 1.0 if variance.zero?
+
+    covariance / variance
+  end
+
   # ========== 标准化方法 ==========
 
   def normalize(raw_value)
@@ -128,6 +170,8 @@ class FactorCalculatorService
     when 'volatility'
       normalize_volatility(raw_value)
     when 'beta'
+      normalize_beta(raw_value)
+    when 'beta_ixic', 'beta_btc', 'beta_gold', 'beta_nvda'
       normalize_beta(raw_value)
     when 'volume_ratio'
       normalize_volume_ratio(raw_value)
@@ -205,16 +249,21 @@ class FactorCalculatorService
     return nil unless asset.respond_to?(:asset_type)
 
     benchmark_symbol = case asset.asset_type
-    when 'crypto' then 'BTC'
-    when 'stock' then 'SPY'
-    when 'commodity' then 'GLD'
+    when 'crypto' then 'BTC-USD'
+    when 'stock' then '^IXIC'
+    when 'commodity' then 'GC=F'
     else nil
     end
 
     return nil unless benchmark_symbol
 
-    # 假设 Asset 有 find_by_symbol 方法
-    Asset.find_by(symbol: benchmark_symbol) if defined?(Asset)
+    find_benchmark_by_symbol(benchmark_symbol)
+  end
+
+  def find_benchmark_by_symbol(symbol)
+    return nil unless defined?(Asset)
+
+    Asset.find_by(symbol: symbol)
   end
 
   def calculate_covariance(x, y)

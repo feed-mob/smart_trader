@@ -19,7 +19,7 @@ class FetchCoinMarketsJob < ApplicationJob
   retry_on CoingeckoService::RateLimitError, wait: 5.minutes, attempts: 3
   retry_on CoingeckoService::ApiError, wait: 1.minute, attempts: 3
 
-  def perform(category: "layer-1", per_page: 50)
+  def perform(category: "layer-1", per_page: 100)
     @category = category
     @per_page = per_page
     @logs = []

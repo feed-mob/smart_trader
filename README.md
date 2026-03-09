@@ -91,7 +91,7 @@ bundle exec rails runner db/seeds/mock_trading_signals.rb
 rails c
 > FetchCoinMarketsJob.perform_now
 
-# 拉取历史市场数据（最近 60 天，前 10 个资产）
+# 拉取历史市场数据（最近 60 天，前 50 个资产）
 rails assets:fetch_historical
 ```
 
