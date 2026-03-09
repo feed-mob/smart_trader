@@ -847,20 +847,43 @@
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid rgba(148, 163, 184, 0.1);
   border-radius: 16px;
-  overflow: hidden;
+  overflow: auto;
+  max-height: calc(100vh - 200px);
   backdrop-filter: blur(10px);
+}
+
+/* Compact row style to show more data */
+.factor-matrix-table__cell {
+  padding: 0.2rem 0.35rem;
+  text-align: center;
+  border-right: 1px solid rgba(148, 163, 184, 0.05);
+}
+
+.factor-matrix-table__cell--asset {
+  text-align: left;
+  padding-left: 0.6rem;
+  padding-right: 0.35rem;
+  border-right: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .factor-matrix-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.factor-matrix-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .factor-matrix-table__header {
   padding: 1rem 0.75rem;
   text-align: center;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.95);
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  backdrop-filter: blur(10px);
 }
 
 .factor-matrix-table__header--asset {
@@ -899,18 +922,6 @@
 
 .factor-matrix-table__row:last-child {
   border-bottom: none;
-}
-
-.factor-matrix-table__cell {
-  padding: 0.75rem;
-  text-align: center;
-  border-right: 1px solid rgba(148, 163, 184, 0.05);
-}
-
-.factor-matrix-table__cell--asset {
-  text-align: left;
-  padding-left: 1.5rem;
-  border-right: 1px solid rgba(148, 163, 184, 0.1);
 }
 
 .factor-matrix-table__cell--score {
@@ -1018,6 +1029,30 @@
 
 .factor-matrix-legend__color--negative {
   background: #ef4444;
+}
+
+/* Sort Links */
+.factor-sort-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.factor-sort-link:hover {
+  color: #06b6d4;
+  background: rgba(6, 182, 212, 0.1);
+}
+
+.factor-sort-link--active {
+  color: #06b6d4;
+  background: rgba(6, 182, 212, 0.15);
 }
 
 /* Matrix Responsive */

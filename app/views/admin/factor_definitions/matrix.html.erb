@@ -1,5 +1,20 @@
 <% content_for :title, "因子矩阵 - SmartTrader" %>
 
+<%
+  def sort_link(column, label, current_sort_by, current_sort_order)
+    new_order = (current_sort_by == column && current_sort_order == "desc") ? "asc" : "desc"
+    is_active = current_sort_by == column
+    icon = if is_active
+      current_sort_order == "desc" ? "↓" : "↑"
+    else
+      ""
+    end
+    link_to "#{label} #{icon}".strip,
+            matrix_admin_factor_definitions_path(sort_by: column, sort_order: new_order),
+            class: "factor-sort-link #{'factor-sort-link--active' if is_active}"
+  end
+%>
+
 <div class="factor-matrix-container">
   <!-- Header -->
   <header class="factor-matrix-header">
@@ -53,11 +68,13 @@
               <th class="factor-matrix-table__header factor-matrix-table__header--asset">资产</th>
               <% @factors.each do |factor| %>
                 <th class="factor-matrix-table__header">
-                  <span class="factor-matrix-table__factor-name"><%= factor.name %></span>
+                  <%= sort_link(factor.id.to_s, factor.name, @sort_by, @sort_order) %>
                   <span class="factor-matrix-table__factor-weight">(<%= factor.display_weight %>)</span>
                 </th>
               <% end %>
-              <th class="factor-matrix-table__header factor-matrix-table__header--score">综合评分</th>
+              <th class="factor-matrix-table__header factor-matrix-table__header--score">
+                <%= sort_link("composite", "综合评分", @sort_by, @sort_order) %>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -85,8 +102,8 @@
                   <td class="factor-matrix-table__cell">
                     <% if factor_value %>
                       <div class="factor-matrix-value <%= factor_value_class(normalized_value) %>">
-                        <span class="factor-matrix-value__score"><%= normalized_value.round(2) %></span>
-                        <span class="factor-matrix-value__percentile"><%= factor_value.percentile&.round(0) || '-' %>%</span>
+                        <span class="factor-matrix-value__score"><%= normalized_value.round(3) %></span>
+                        <span class="factor-matrix-value__percentile"><%= factor_value.percentile&.round(1) || '-' %>%</span>
                       </div>
                     <% else %>
                       <div class="factor-matrix-value factor-matrix-value--empty">

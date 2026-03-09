@@ -1,26 +1,43 @@
 # frozen_string_literal: true
 
-namespace :assets do
-  desc "Fetch historical market data for top 10 assets (last 60 days)"
+namespace :coins do
+  desc "Fetch historical market data for top 50 coins that don't have yesterday's data"
   task fetch_historical: :environment do
-    include FetchHistoricalDataHelper
+    include CoinsHistoricalDataHelper
 
     puts "=" * 80
-    puts "开始拉取历史市场数据"
+    puts "开始拉取 Coin 历史市场数据 (市值前 50)"
     puts "=" * 80
 
     # 确保基准资产存在
     ensure_benchmark_assets
 
-    # 获取前 10 个活跃的加密货币资产
-    assets = Asset.active.crypto.where(coingecko_id: 'tether-gold').where.not(coingecko_id: nil).limit(50)
+    # 获取昨天没有数据的资产
+    yesterday = Date.yesterday
+
+    # 所有活跃的加密货币资产（只取市值前 50）
+    all_crypto_assets = Asset.active.crypto
+      .where.not(coingecko_id: nil)
+      .where.not(market_cap_rank: nil)
+      .where("market_cap_rank <= 50")
+
+    # 筛选出昨天没有快照的资产
+    assets_with_yesterday_data = AssetSnapshot
+      .where(snapshot_date: yesterday)
+      .joins(:asset)
+      .where(assets: { asset_type: 'crypto', active: true })
+      .where.not(assets: { coingecko_id: nil })
+      .distinct
+      .pluck('assets.id')
+
+    assets = all_crypto_assets.where.not(id: assets_with_yesterday_data)
 
     if assets.empty?
-      puts "❌ 没有找到任何活跃的加密货币资产"
-      exit 1
+      puts "✅ 所有资产都已有昨天的数据，无需拉取"
+      exit 0
     end
 
-    puts "\n找到 #{assets.count} 个资产待处理:"
+    puts "\n找到 #{assets.count} 个资产缺少昨天的数据:"
     assets.each_with_index do |asset, index|
       puts "  #{index + 1}. #{asset.symbol} - #{asset.name} (#{asset.coingecko_id})"
     end
@@ -33,8 +50,8 @@ namespace :assets do
       puts "\n[#{index + 1}/#{assets.count}] 处理 #{asset.symbol}..."
 
       begin
-        # 拉取最近 60 天的数据
-        data = service.fetch_market_chart(asset.coingecko_id, days: 60)
+        # 拉取最近 5 天的数据
+        data = service.fetch_market_chart(asset.coingecko_id, days: 5)
 
         if data["prices"].blank?
           puts "  ⚠️  没有获取到价格数据"
@@ -63,7 +80,7 @@ namespace :assets do
     end
 
     puts "\n" + "=" * 80
-    puts "拉取完成"
+    puts "Coin 历史数据拉取完成"
     puts "  ✅ 成功: #{stats[:success]}"
     puts "  ❌ 失败: #{stats[:failed]}"
     puts "  📊 总快照数: #{stats[:total_snapshots]}"
@@ -71,7 +88,7 @@ namespace :assets do
   end
 end
 
-module FetchHistoricalDataHelper
+module CoinsHistoricalDataHelper
   # 确保基准资产存在
   def ensure_benchmark_assets
     benchmark_assets = [
@@ -82,6 +99,7 @@ module FetchHistoricalDataHelper
         exchange: 'COINGECKO',
         quote_currency: 'USD',
         coingecko_id: 'tether-gold',
+        market_cap_rank: 0,
         active: true
       }
     ]

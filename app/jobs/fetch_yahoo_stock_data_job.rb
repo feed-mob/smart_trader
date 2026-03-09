@@ -16,8 +16,8 @@ class FetchYahooStockDataJob < ApplicationJob
 
     results = { created: 0, updated: 0, failed: 0, errors: [] }
 
-    stocks_data.each do |stock_data|
-      process_stock(stock_data, results)
+    stocks_data.each_with_index do |stock_data, index|
+      process_stock(stock_data, index + 1, results)
     end
 
     Rails.logger.info "[FetchYahooStockDataJob] Complete: #{results[:created]} created, #{results[:updated]} updated, #{results[:failed]} failed"
@@ -26,7 +26,7 @@ class FetchYahooStockDataJob < ApplicationJob
 
   private
 
-  def process_stock(stock_data, results)
+  def process_stock(stock_data, rank, results)
     # Find existing asset or create new one
     asset = Asset.find_or_initialize_by(
       symbol: stock_data[:symbol],
@@ -40,8 +40,10 @@ class FetchYahooStockDataJob < ApplicationJob
     asset.asset_type = "stock"
     asset.active = true
 
-    # Update price data
+    # Update price and market cap data
     asset.current_price = stock_data[:price]
+    asset.market_cap = stock_data[:market_cap]
+    asset.market_cap_rank = rank
     asset.last_updated = stock_data[:timestamp]
 
     if asset.save

@@ -76,7 +76,8 @@ class FetchSpecialCoinsHistoryJob < ApplicationJob
         exchange: 'COINGECKO',
         quote_currency: 'USD',
         coingecko_id: 'tether-gold',
-        active: true
+        active: true,
+        market_cap_rank: 0
       }
     ]
 

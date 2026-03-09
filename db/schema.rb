@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_09_100040) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -36,6 +36,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_06_080000) do
     t.decimal "current_price", precision: 15, scale: 2
     t.string "exchange", default: "UNKNOWN", null: false
     t.datetime "last_updated"
+    t.decimal "market_cap"
+    t.integer "market_cap_rank"
     t.string "name", null: false
     t.string "quote_currency", default: "USD", null: false
     t.string "symbol", null: false

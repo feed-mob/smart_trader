@@ -123,9 +123,11 @@ class FetchCoinMarketsJob < ApplicationJob
       @stats[:updated] += 1
     end
 
-    # 更新当前价格和最后更新时间
+    # 更新当前价格、市值和最后更新时间
     asset.update!(
       current_price: coin_data["current_price"],
+      market_cap: coin_data["market_cap"],
+      market_cap_rank: coin_data["market_cap_rank"],
       last_updated: Time.current
     )
 
