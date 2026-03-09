@@ -53,10 +53,19 @@ class FactorCalculatorService
     days = params[:days] || 20
     returns = daily_returns(days)
 
-    return 0 if returns.empty?
+    # 需要至少 2 个有效回报率才能计算波动率（避免除以 0）
+    return 0 if returns.size < 2
 
-    mean = returns.sum / returns.size
-    variance = returns.sum { |r| (r - mean) ** 2 } / (returns.size - 1)
+    # 过滤掉 NaN、Infinity 等无效值
+    valid_returns = returns.select { |r| r.is_a?(Numeric) && r.finite? }
+    return 0 if valid_returns.size < 2
+
+    mean = valid_returns.sum / valid_returns.size
+    variance = valid_returns.sum { |r| (r - mean) ** 2 } / (valid_returns.size - 1)
+
+    # 方差可能为负数（由于浮点精度），需要保护
+    variance = 0 if variance < 0
+
     Math.sqrt(variance)
   end
 
@@ -110,18 +119,35 @@ class FactorCalculatorService
     calculate_slope(prices)
   end
 
-  # 情绪因子 (简化版)
+  # 情绪因子 (市场广度)
   def calculate_sentiment
-    # 基于动量的简化情绪指标
-    momentum = calculate_momentum
-    [[momentum * 2, 1].min, -1].max
+    days = params[:days] || 5
+
+    # 取同类资产（crypto/stock）过去 N 天的涨跌数据
+    peer_asset_ids = Asset.active.where(asset_type: asset.asset_type).pluck(:id)
+
+    recent_snapshots = AssetSnapshot
+      .where(asset_id: peer_asset_ids)
+      .where("snapshot_date >= ?", days.days.ago.to_date)
+      .where.not(change_percent: nil)
+
+    return 0 if recent_snapshots.empty?
+
+    up_count = recent_snapshots.where("change_percent > 0").count
+    total_count = recent_snapshots.count
+
+    # 上涨比例: 0.0 ~ 1.0
+    up_ratio = up_count.to_f / total_count
+
+    # 映射到 [-1, 1]: 50% 上涨 = 中性(0)，100% 上涨 = 1.0，0% 上涨 = -1.0
+    (up_ratio - 0.5) * 2
   end
 
   # ========== Beta 因子系列 ==========
 
   # 纳斯达克 Beta 因子
   def calculate_beta_ixic
-    calculate_beta_against_benchmark('^IXIC')
+    calculate_beta_against_benchmark('IXIC')
   end
 
   # BTC Beta 因子
@@ -131,7 +157,7 @@ class FactorCalculatorService
 
   # 黄金 Beta 因子
   def calculate_beta_gold
-    calculate_beta_against_benchmark('GC=F')
+    calculate_beta_against_benchmark('XAUT')
   end
 
   # NVDA Beta 因子
@@ -185,11 +211,14 @@ class FactorCalculatorService
   end
 
   def normalize_momentum(value)
-    # 涨幅 0-50% 映射到 0-1，跌幅 0-50% 映射到 0 到 -1
-    [[value * 2, 1].min, -1].max
+    # 涨幅 0-20% 映射到 0-1，跌幅 0-20% 映射到 0 到 -1
+    [[value * 5, 1].min, -1].max
   end
 
   def normalize_volatility(value)
+    # 处理 NaN 或无效值
+    return 0 unless value.is_a?(Numeric) && value.finite?
+
     # 低波动为正，高波动为负
     # 假设 5% 日波动率为中性点
     volatility_score = 1 - (value * 20)
@@ -210,8 +239,21 @@ class FactorCalculatorService
   end
 
   def normalize_trend(value)
-    # 斜率标准化
-    score = value * 1000
+    # 趋势因子：标准化
+    # value 是斜率（绝对价格变化），需要转换为百分比
+    current_price = asset.current_price || asset_snapshots.first&.price
+    return 0 if current_price.nil? || current_price.zero?
+
+    # 计算 20 天百分比变化
+    # percent_change = (斜率 * 20 / 当前价格) * 100
+    percent_change = (value * 20 / current_price) * 100
+
+    # 标准化：20 天涨幅 10% → score = 1.0（满分)
+    # 标准化：20 天涨幅 5% → score = 0.5(中等)
+    # 标准化：20 天涨幅 0% → score = 0(中性)
+    # 标准化：20 天跌 5% → score = -0.5
+    # 标准化：20 天跌 10% → score = -1.0(最低)
+    score = percent_change / 10
     [[score, 1].min, -1].max
   end
 
@@ -261,8 +303,6 @@ class FactorCalculatorService
   end
 
   def find_benchmark_by_symbol(symbol)
-    return nil unless defined?(Asset)
-
     Asset.find_by(symbol: symbol)
   end
 

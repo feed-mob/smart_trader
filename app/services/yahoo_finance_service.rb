@@ -133,13 +133,15 @@ class YahooFinanceService
     # Normalize symbol for Yahoo Finance API
     # Crypto symbols need -USD suffix (e.g., BTC -> BTC-USD)
     # Stock symbols remain as-is
+    # URI encode special characters like ^ (e.g., ^IXIC -> %5EIXIC)
     def normalize_symbol_for_yahoo(symbol)
-      case symbol.upcase
+      normalized_symbol = case symbol.upcase
       when "BTC", "ETH", "SOL", "DOGE", "ADA"
         "#{symbol}-USD"
       else
         symbol
       end
+      URI.encode_www_form_component(normalized_symbol)
     end
   end
 end

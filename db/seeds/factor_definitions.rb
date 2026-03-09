@@ -19,8 +19,8 @@ factors_data = [
       Momentum = (当前价格 - N日前价格) / N日前价格
 
       评分规则:
-      - 涨幅 0-50% → 评分 0 到 +1
-      - 跌幅 0-50% → 评分 0 到 -1
+      - 涨幅 0-20% → 评分 0 到 +1
+      - 跌幅 0-20% → 评分 0 到 -1
     FORMULA
   },
   {
@@ -65,16 +65,22 @@ factors_data = [
   {
     code: 'sentiment',
     name: '情绪因子',
-    description: '市场恐惧贪婪指数的简化版本，基于市场涨跌幅分布计算。',
+    description: '基于市场广度的情绪指标，计算同类资产（crypto/stock）过去N天中上涨资产的比例。上涨比例高表示市场乐观，低表示恐慌。',
     category: 'sentiment',
     calculation_method: 'calculate_sentiment',
-    parameters: {},
+    parameters: { days: 5 },
     weight: 0.15,
     update_frequency: 60,
     sort_order: 5,
     formula: <<~FORMULA
-      计算方式:
-      基于市场涨跌幅分布计算，反映市场整体情绪
+      计算公式:
+      up_ratio = 过去N天同类资产上涨次数 / 总记录数
+      Sentiment = (up_ratio - 0.5) * 2
+
+      评分规则:
+      - 上涨比例 > 50% → 正分（市场乐观）
+      - 上涨比例 = 50% → 0（中性）
+      - 上涨比例 < 50% → 负分（市场恐慌）
     FORMULA
   },
   {

@@ -10,7 +10,6 @@ module Admin
     end
 
     def matrix
-      @assets = Asset.all.order(:symbol)
       @factors = FactorDefinition.active.ordered
 
       # 获取最新的因子值，按 asset_id 和 factor_definition_id 分组
@@ -18,6 +17,17 @@ module Admin
       @values_by_asset = @factor_values.group_by(&:asset_id).transform_values do |values|
         values.index_by { |v| v.factor_definition_id }
       end
+
+      # 获取市值前 50 的资产并计算排序
+      @assets = sort_assets(
+        Asset.where.not(market_cap_rank: nil).where("market_cap_rank <= 50").to_a,
+        @factors,
+        @values_by_asset
+      )
+
+      # 当前排序参数
+      @sort_by = params[:sort_by] || "composite"
+      @sort_order = params[:sort_order] || "desc"
     end
 
     def correlations
@@ -132,6 +142,49 @@ module Admin
       end
 
       high_corr.sort_by { |c| -c[:correlation].abs }
+    end
+
+    def sort_assets(assets, factors, values_by_asset)
+      sort_by = params[:sort_by] || "composite"
+      sort_order = params[:sort_order] || "desc"
+
+      # 计算每个资产的排序值
+      assets_with_scores = assets.map do |asset|
+        asset_values = values_by_asset[asset.id] || {}
+
+        # 计算综合评分
+        total_score = 0
+        total_weight = 0
+        factors.each do |factor|
+          factor_value = asset_values[factor.id]
+          if factor_value
+            total_score += factor_value.normalized_value * factor.weight
+            total_weight += factor.weight
+          end
+        end
+        composite_score = total_weight > 0 ? (total_score / total_weight) : 0
+
+        # 获取指定因子的值
+        factor_score = if sort_by != "composite"
+          factor = factors.find { |f| f.id.to_s == sort_by }
+          factor_value = asset_values[factor&.id]
+          factor_value&.normalized_value || 0
+        else
+          composite_score
+        end
+
+        {
+          asset: asset,
+          score: factor_score,
+          composite_score: composite_score
+        }
+      end
+
+      # 排序
+      sorted = assets_with_scores.sort_by { |item| item[:score] }
+      sorted = sorted.reverse if sort_order == "desc"
+
+      sorted.map { |item| item[:asset] }
     end
   end
 end
