@@ -146,7 +146,7 @@ class AiAllocationServiceV2
       lead :fetcher
 
       agent :fetcher do
-        model "claude-sonnet-4-6"
+        model "gpt-5.2"
         description "使用 MCP 获取加密货币市场数据"
 
         mcp_server :tradingview_mcp,

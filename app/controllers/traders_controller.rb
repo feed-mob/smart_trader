@@ -20,6 +20,7 @@ class TradersController < ApplicationController
 
   def create
     @trader = Trader.new(trader_params)
+    @trader.user = current_user
 
     if @trader.save
       generate_strategies_for(@trader)
