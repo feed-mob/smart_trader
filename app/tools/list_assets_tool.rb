@@ -9,7 +9,7 @@ class ListAssetsTool < RubyLLM::Tool
   param :limit, type: :integer, required: false,
         desc: "返回数量限制，默认20，最大100"
 
-  def execute(asset_type: nil, limit: 20)
+  def execute(asset_type: nil, limit: 60)
     limit = [limit.to_i, 100].min
     limit = 20 if limit <= 0
 

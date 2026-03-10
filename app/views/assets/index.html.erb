@@ -87,7 +87,7 @@
         <% if @top_assets.any? %>
           <% @top_assets.each do |asset| %>
             <div class="asset-card asset-card--featured">
-              <%= link_to asset, class: "asset-card__link" do %>
+              <%= link_to market_asset_path(asset), class: "asset-card__link" do %>
                 <div class="asset-card__header">
                   <div class="asset-card__icon">
                     <% case asset.asset_type.to_s.downcase %>
@@ -169,7 +169,7 @@
         <div class="assets-grid">
           <% @assets.each do |asset| %>
             <div class="asset-card">
-              <%= link_to asset, class: "asset-card__link" do %>
+              <%= link_to market_asset_path(asset), class: "asset-card__link" do %>
                 <div class="asset-card__header">
                   <div class="asset-card__icon">
                     <% case asset.asset_type.to_s.downcase %>
@@ -256,6 +256,15 @@
           <button onclick="triggerCollection()" class="btn btn-primary">
             立即触发采集
           </button>
+        </div>
+      <% end %>
+
+      <% if @assets.total_pages > 1 %>
+        <div class="pagination-container">
+          <%= paginate @assets, window: 2, class: "pagination" %>
+          <div class="pagination-info">
+            共 <%= @assets.total_count %> 个资产，当前第 <%= @assets.current_page %> / <%= @assets.total_pages %> 页
+          </div>
         </div>
       <% end %>
     </section>

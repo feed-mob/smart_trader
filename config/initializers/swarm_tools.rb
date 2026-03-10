@@ -17,7 +17,9 @@ Rails.application.config.after_initialize do
     GetAssetPriceTool,
     GetFactorDataTool,
     GetSignalDataTool,
-    TraderInfoTool
+    TraderInfoTool,
+    CalculateFactorsTool,
+    GenerateSignalsTool
   ].each do |tool_class|
     SwarmSDK.register_tool(tool_class)
     inferred_name = tool_class.name.sub(/Tool\z/, "").to_sym
@@ -26,7 +28,7 @@ Rails.application.config.after_initialize do
     Rails.logger.warn "[SwarmTools] Failed to register #{tool_class.name}: #{e.message}"
   end
 
-  Rails.logger.info "[SwarmTools] Initialized 5 tools"
+  Rails.logger.info "[SwarmTools] Initialized 7 tools"
 rescue StandardError => e
   Rails.logger.error "[SwarmTools] Initialization error: #{e.message}"
   Rails.logger.error e.backtrace.first(10).join("\n")

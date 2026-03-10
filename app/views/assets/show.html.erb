@@ -3,7 +3,7 @@
 <div class="container mx-auto px-4 py-8">
   <!-- Header -->
   <div class="mb-6">
-    <%= link_to '← 返回列表', assets_path,
+    <%= link_to '← 返回列表', market_assets_path,
           class: "text-blue-600 hover:text-blue-700 font-medium" %>
 
     <div class="flex items-center justify-between mt-4">
@@ -49,7 +49,7 @@
   <div class="mb-8 flex items-center gap-4">
     <span class="text-gray-600">时间范围：</span>
     <% ['1h', '6h', '24h', '7d', '30d'].each do |tf| %>
-      <%= link_to timeframe_label(tf), asset_path(@asset, timeframe: tf),
+      <%= link_to timeframe_label(tf), market_asset_path(@asset, timeframe: tf),
             class: "px-4 py-2 rounded-lg #{tf == @timeframe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
     <% end %>
   </div>

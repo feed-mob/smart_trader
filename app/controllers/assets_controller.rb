@@ -2,9 +2,12 @@
 
 # Frontend Assets Controller - Renders web pages for asset data
 class AssetsController < ApplicationController
-  # GET /assets - List all assets
+  # GET /market_assets - List all assets with pagination
   def index
-    @assets = Asset.all.includes(:asset_snapshots)
+    @assets = Asset.active.includes(:latest_snapshot)
+                    .order(last_updated: :desc)
+                    .page(params[:page])
+                    .per(20)
     @top_assets = get_top_assets(6)
   end
 
@@ -17,7 +20,7 @@ class AssetsController < ApplicationController
                       .order(captured_at: :desc)
                       .limit(200)
   rescue ActiveRecord::RecordNotFound
-    redirect_to assets_path, alert: "Asset not found"
+    redirect_to market_assets_path, alert: "Asset not found"
   end
 
   # GET /assets/:id/analysis - Show AI analysis page
@@ -25,26 +28,37 @@ class AssetsController < ApplicationController
     @asset = Asset.find(params[:id])
     @analysis_hours = (params[:hours] || 48).to_i
   rescue ActiveRecord::RecordNotFound
-    redirect_to assets_path, alert: "Asset not found"
+    redirect_to market_assets_path, alert: "Asset not found"
   end
 
   private
 
   def get_top_assets(limit)
-    # Yahoo Finance热门股票 - 随机3条
-    yahoo_assets = Asset.active
-                        .where(asset_type: 'stock')
-                        .order('RANDOM()')
-                        .limit(3)
+    yesterday = Date.yesterday
 
-    # CoinGecko热门加密货币 - 随机3条
-    coingecko_assets = Asset.active
-                            .where(asset_type: 'crypto')
-                            .order('RANDOM()')
-                            .limit(3)
+    # 股票中昨天涨幅最大的 - 使用子查询避免 DISTINCT + ORDER BY 冲突
+    top_stock_ids = AssetSnapshot
+                          .joins(:asset)
+                          .where(assets: { asset_type: 'stock', active: true })
+                          .where(snapshot_date: yesterday)
+                          .where('change_percent > 0')
+                          .order(change_percent: :desc)
+                          .limit(limit / 2)
+                          .pluck(:asset_id)
 
-    # 合并并去重
-    (yahoo_assets + coingecko_assets).uniq.first(limit)
+    # 加密货币中昨天涨幅最大的
+    top_crypto_ids = AssetSnapshot
+                          .joins(:asset)
+                          .where(assets: { asset_type: 'crypto', active: true })
+                          .where(snapshot_date: yesterday)
+                          .where('change_percent > 0')
+                          .order(change_percent: :desc)
+                          .limit(limit - top_stock_ids.size)
+                          .pluck(:asset_id)
+
+    # 合并 ID 并查询 Asset
+    all_ids = (top_stock_ids + top_crypto_ids).uniq.first(limit)
+    Asset.where(id: all_ids).includes(:latest_snapshot)
   end
 
   # Parse timeframe string to range
