@@ -5,13 +5,13 @@ class AllocationPreviewsController < ApplicationController
   before_action :set_trader
 
   def show
-    # 预加载非 AI 数据
+    # 预加载基础数据（不含 AI 建议）
     @preview = build_base_preview
   end
 
-  # 异步加载 AI 配置建议 (缓存1分钟)
+  # 异步加载 AI 配置建议 (缓存2分钟)
   def recommendation
-    @recommendation = Rails.cache.fetch(cache_key_for_recommendation, expires_in: 2.minute) do
+    @recommendation = Rails.cache.fetch(cache_key_for_recommendation, expires_in: 2.minutes) do
       AiAllocationService.new(@trader).generate_recommendation
     end
     @strategies = @trader.trading_strategies.order(:market_condition)
@@ -29,11 +29,8 @@ class AllocationPreviewsController < ApplicationController
     "trader/#{@trader.id}/allocation_recommendation"
   end
 
-  def cache_key_for_recommendation
-    "trader/#{@trader.id}/allocation_recommendation"
-  end
-
   # 构建基础预览数据（不含 AI 建议）
+  # 这些数据用于前端展示，AI 建议通过 Tools 动态获取
   def build_base_preview
     assets_data = collect_asset_data
 
@@ -47,10 +44,54 @@ class AllocationPreviewsController < ApplicationController
   end
 
   def collect_asset_data
-    Asset.all.map do |asset|
-      snapshot = asset.latest_snapshot
-      factor_values = collect_factor_values(asset)
-      signal = collect_latest_signal(asset)
+    assets = Asset.all.index_by(&:id)
+    asset_ids = assets.keys
+
+    # 批量加载最新 snapshots
+    snapshots = AssetSnapshot
+      .where(asset_id: asset_ids)
+      .select("DISTINCT ON (asset_id) *")
+      .order("asset_id, captured_at DESC")
+      .index_by(&:asset_id)
+
+    # 批量加载 factor_values
+    factor_values = FactorValue
+      .where(asset_id: asset_ids)
+      .latest
+      .joins(:factor_definition)
+      .pluck(
+        "factor_values.asset_id",
+        "factor_definitions.code",
+        "factor_definitions.name",
+        "factor_definitions.category",
+        "factor_values.normalized_value",
+        "factor_values.percentile"
+      )
+      .group_by(&:first)
+      .transform_values do |rows|
+        rows.map do |_, code, name, category, value, percentile|
+          {
+            code: code,
+            name: name,
+            category: category,
+            value: value&.round(2),
+            percentile: percentile&.round(1)
+          }
+        end
+      end
+
+    # 批量加载最新 signals
+    signals = TradingSignal
+      .where(asset_id: asset_ids)
+      .select("DISTINCT ON (asset_id) *")
+      .order("asset_id, generated_at DESC")
+      .index_by(&:asset_id)
+
+    # 组装数据
+    assets.map do |asset_id, asset|
+      snapshot = snapshots[asset_id]
+      asset_factors = factor_values[asset_id] || []
+      signal = signals[asset_id]
 
       {
         symbol: asset.symbol,
@@ -60,33 +101,9 @@ class AllocationPreviewsController < ApplicationController
         signal: signal&.signal_type,
         confidence: signal&.confidence,
         reasoning: signal&.reasoning,
-        factors: factor_values
+        factors: asset_factors
       }
     end
-  end
-
-  def collect_factor_values(asset)
-    FactorValue.where(asset: asset).latest
-      .joins(:factor_definition)
-      .pluck(
-        "factor_definitions.code",
-        "factor_definitions.name",
-        "factor_definitions.category",
-        "factor_values.normalized_value",
-        "factor_values.percentile"
-      ).map do |code, name, category, normalized_value, percentile|
-        {
-          code: code,
-          name: name,
-          category: category,
-          value: normalized_value&.round(2),
-          percentile: percentile&.round(1)
-        }
-      end
-  end
-
-  def collect_latest_signal(asset)
-    TradingSignal.where(asset: asset).order(generated_at: :desc).first
   end
 
   def trader_info

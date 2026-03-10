@@ -1,219 +1,102 @@
 # frozen_string_literal: true
 
-# AI配置建议服务 - 使用 SwarmSDK 多 Agent 系统生成资产配置建议
+# AI配置建议服务 - 使用 SwarmSDK Tool 调用方式生成资产配置建议
+#
+# 设计理念：
+# - AI Agent 通过调用 Tools 动态获取需要的数据
+# - 不再一次性传递所有数据，而是让 AI 自己决定需要哪些数据
+# - 支持 Context-Aware Tools (如 TraderInfoTool 需要 trader_id)
+#
 class AiAllocationService
   def initialize(trader)
     @trader = trader
-    @strategies = trader.trading_strategies.order(:market_condition)
     @capital = trader.current_capital_value
   end
 
-  # 生成完整的配置预览
-  def generate_preview
-    assets_data = collect_asset_data
-    recommendation = call_swarm_for_recommendation(assets_data)
-
-    {
-      trader: trader_info,
-      strategies: strategies_info,
-      signals: extract_signals(assets_data),
-      factors: extract_factors(assets_data),
-      assets: assets_data,
-      recommendation: recommendation
-    }
-  end
-
-  # 只生成 AI 配置建议（用于异步加载）
+  # 生成 AI 配置建议（Tool 调用方式）
   def generate_recommendation
-    assets_data = collect_asset_data
-    call_swarm_for_recommendation(assets_data)
-  end
-
-  # 提取信号摘要
-  def extract_signals(assets_data)
-    assets_data.filter_map do |data|
-      next if data[:signal].blank?
-
-      {
-        symbol: data[:symbol],
-        name: data[:name],
-        signal_type: data[:signal],
-        confidence: data[:confidence],
-        reasoning: data[:reasoning]
-      }
-    end
-  end
-
-  # 提取因子摘要
-  def extract_factors(assets_data)
-    assets_data.map do |data|
-      {
-        symbol: data[:symbol],
-        name: data[:name],
-        factors: data[:factors]
-      }
-    end
+    call_swarm_for_recommendation
   end
 
   private
 
-  # 操盘手基本信息
-  def trader_info
-    {
-      id: @trader.id,
-      name: @trader.name,
-      risk_level: @trader.risk_level,
-      display_risk_level: @trader.display_risk_level,
-      initial_capital: @trader.initial_capital,
-      current_capital: @capital
-    }
-  end
-
-  # 收集所有资产的数据（价格、信号、因子）
-  def collect_asset_data
-    Asset.all.map do |asset|
-      snapshot = asset.latest_snapshot
-      factor_values = collect_factor_values(asset)
-      signal = collect_latest_signal(asset)
-
-      {
-        symbol: asset.symbol,
-        name: asset.name,
-        asset_type: asset.asset_type,
-        price: snapshot&.price,
-        signal: signal&.signal_type,
-        confidence: signal&.confidence,
-        reasoning: signal&.reasoning,
-        factors: factor_values
-      }
-    end
-  end
-
-  # 收集资产的因子值
-  def collect_factor_values(asset)
-    factor_values = FactorValue.where(asset: asset).latest
-      .joins(:factor_definition)
-      .pluck(
-        "factor_definitions.code",
-        "factor_definitions.name",
-        "factor_definitions.category",
-        "factor_values.normalized_value",
-        "factor_values.percentile"
-      )
-
-    factor_values.map do |code, name, category, normalized_value, percentile|
-      {
-        code: code,
-        name: name,
-        category: category,
-        value: normalized_value&.round(2),
-        percentile: percentile&.round(1)
-      }
-    end
-  end
-
-  # 收集资产的最新信号
-  def collect_latest_signal(asset)
-    TradingSignal.where(asset: asset).order(generated_at: :desc).first
-  end
-
-  # 策略信息
-  def strategies_info
-    @strategies.map do |strategy|
-      {
-        market_condition: strategy.market_condition,
-        display_market_condition: strategy.display_market_condition,
-        risk_level: strategy.risk_level,
-        max_positions: strategy.max_positions,
-        buy_signal_threshold: strategy.buy_signal_threshold,
-        max_position_size: strategy.max_position_size,
-        min_cash_reserve: strategy.min_cash_reserve,
-        name: strategy.name,
-        description: strategy.description
-      }
-    end
-  end
-
   # 使用 SwarmSDK 多 Agent 系统生成配置建议
-  def call_swarm_for_recommendation(assets_data)
-    context = build_swarm_context(assets_data)
+  def call_swarm_for_recommendation
     swarm = build_allocation_swarm
-    result = swarm.execute(context)
+    result = swarm.execute(build_prompt)
     Rails.logger.info "[AiAllocationService] Swarm result: #{result.inspect}"
     parse_swarm_result(result)
   end
 
-  # 构建 Swarm 上下文
-  def build_swarm_context(assets_data)
-    <<~CONTEXT
-      ## 操盘手信息
-      - 名称: #{@trader.name}
-      - 风险偏好: #{@trader.display_risk_level}
-      - 可用资金: $#{number_with_delimiter(@capital.round(0))}
+  # 构建 prompt
+  def build_prompt
+    <<~PROMPT
+      请为操盘手生成资产配置建议。
 
-      ## 策略配置
-      #{format_strategies_for_context}
+      操盘手 ID: #{@trader.id}
+      操盘手名称: #{@trader.name}
+      可用资金: $#{number_with_delimiter(@capital.round(0))}
 
-      ## 资产数据
-      #{format_assets_for_context(assets_data)}
+      请按以下步骤操作：
+      1. 首先调用 TraderInfo(trader_id: #{@trader.id}) 获取操盘手的策略配置
+      2. 使用 ListAssets 查看可用资产
+      3. 使用 GetSignalData(min_confidence: 0.5) 获取高置信度的买入信号
+      4. 使用 GetFactorData 获取相关资产的因子数据，判断市场环境
+      5. 根据策略约束和市场环境，生成配置建议
 
-      请分析以上数据，生成资产配置建议。
-    CONTEXT
+      市场环境判断标准：
+      - normal: 因子值正常，波动适中
+      - volatile: 波动率因子偏高
+      - crash: 多数因子为负，市场恐慌
+      - bubble: 动量过热，情绪因子极端
+
+      配置约束：
+      - 遵循 max_positions 限制
+      - 单资产不超过 max_position_size
+      - 保留至少 min_cash_reserve 的现金
+      - 只对置信度超过 buy_signal_threshold 的资产买入
+    PROMPT
   end
 
-  # 构建 Allocation Swarm - 简化为 2 个 Agent
+  # 构建 Allocation Swarm - 单 Agent + Tools
   def build_allocation_swarm
     SwarmSDK.build do
       name "Asset Allocation Advisor"
       lead :coordinator
 
-      # 协调器 Agent - 负责分析市场、因子、信号并决策
+      # 协调器 Agent - 通过 Tools 获取数据并决策
       agent :coordinator do
-        model "claude-sonnet-4-6"
-        description "投资组合协调器，分析市场、因子、信号并选择策略"
+        model "gpt-5.2"
+        description "投资组合协调器，通过调用 Tools 获取数据并生成配置建议"
 
         system_prompt <<~PROMPT
           你是 SmartTrader 的投资组合协调器。你的职责是：
-          1. 分析因子数据判断市场环境（normal/volatile/crash/bubble）
-          2. 分析每个资产的交易信号和置信度
-          3. 选择最合适的交易策略
-          4. 委派配置计算任务给 allocation_planner
 
-          市场环境判断标准：
+          1. 使用 TraderInfo 工具获取操盘手的策略配置
+          2. 使用 ListAssets 工具查看可用资产列表
+          3. 使用 GetSignalData 工具获取交易信号（建议筛选高置信度信号）
+          4. 使用 GetFactorData 工具获取因子数据，判断市场环境
+          5. 根据策略和市场生成配置建议
+
+          ## 市场环境判断标准
+
+          根据 factor 数据判断：
           - normal: 因子值正常，波动适中
-          - volatile: 波动率因子偏高（>70%百分位）
+          - volatile: 波动率因子偏高（percentile > 70）
           - crash: 多数因子为负，市场恐慌
           - bubble: 动量过热，情绪因子极端
 
-          信号评估：
-          - 高置信度信号（>0.7）值得跟随
-          - 低置信度信号应谨慎对待
-        PROMPT
+          ## 配置约束
 
-        delegates_to :allocation_planner
-      end
-
-      # 配置规划 Agent - 负责计算具体配置方案
-      agent :allocation_planner do
-        model "claude-sonnet-4-6"
-        description "根据策略和信号计算资产配置方案"
-
-        system_prompt <<~PROMPT
-          你是资产配置规划专家。你的职责是：
-          1. 根据策略参数约束计算配置方案
-          2. 计算每个资产的配置比例和金额
-          3. 确保满足现金保留要求
-          4. 返回 JSON 格式的配置建议
-
-          配置约束：
-          - 遵循 max_positions 限制
-          - 单资产不超过 max_position_size
-          - 保留至少 min_cash_reserve 的现金
-          - 只对信号置信度超过 buy_signal_threshold 的资产买入
+          根据策略参数：
+          - max_positions: 最大持仓数量
+          - max_position_size: 单资产最大仓位比例
+          - min_cash_reserve: 最小现金保留比例
+          - buy_signal_threshold: 买入信号最低置信度
 
           ## 输出格式要求
 
-          你的回复必须只包含一个 JSON 对象：
+          你的最终回复必须只包含一个 JSON 对象：
 
           {
             "market_analysis": "市场环境分析（1-2句话）",
@@ -241,6 +124,8 @@ class AiAllocationService
           - 如果没有合适的买入机会，allocations 为空数组 []
           - allocation_percent + cash_reserve.percent = 100
         PROMPT
+
+        tools :TraderInfo, :ListAssets, :GetFactorData, :GetSignalData, :GetAssetPrice
       end
     end
   end
@@ -250,48 +135,7 @@ class AiAllocationService
     parse_json_response(result.content)
   end
 
-  # 格式化策略信息用于上下文
-  def format_strategies_for_context
-    @strategies.map do |strategy|
-      <<~STRATEGY
-        ### #{strategy.display_market_condition} (#{strategy.market_condition})
-        - 策略名称: #{strategy.name}
-        - 最大持仓数: #{strategy.max_positions}
-        - 买入信号阈值: #{(strategy.buy_signal_threshold * 100).to_i}%
-        - 单资产最大仓位: #{(strategy.max_position_size * 100).to_i}%
-        - 最小现金保留: #{(strategy.min_cash_reserve * 100).to_i}%
-        - 描述: #{strategy.description}
-      STRATEGY
-    end.join("\n")
-  end
-
-  # 格式化资产信息用于上下文
-  def format_assets_for_context(assets_data)
-    assets_data.map do |data|
-      signal_info = if data[:signal]
-        "信号: #{data[:signal].upcase} (置信度: #{(data[:confidence] * 100).round(1) if data[:confidence]}%)\n理由: #{data[:reasoning]}"
-      else
-        "信号: 无"
-      end
-
-      factors_info = if data[:factors].any?
-        data[:factors].map { |f| "  - #{f[:name]}: #{f[:value]} (百分位: #{f[:percentile]}%)" }.join("\n")
-      else
-        "  暂无因子数据"
-      end
-
-      <<~ASSET
-        ### #{data[:name]} (#{data[:symbol]})
-        - 类型: #{data[:asset_type]}
-        - 当前价格: $#{data[:price]&.round(2) || 'N/A'}
-        - #{signal_info}
-        - 因子数据:
-        #{factors_info}
-      ASSET
-    end.join("\n")
-  end
-
-  # 解析响应 - 使用 RubyLLM 解析 Markdown
+  # 解析响应 - 使用 AiChatService 提取 JSON
   def parse_json_response(response)
     return nil if response.blank?
 
@@ -356,6 +200,9 @@ class AiAllocationService
     Rails.logger.info "[AiAllocationService] Successfully parsed LLM JSON with keys: #{result.keys.join(', ')}"
 
     symbolize_keys(result)
+  rescue JSON::ParserError => e
+    Rails.logger.error "[AiAllocationService] JSON parse error: #{e.message}"
+    { error: "Failed to parse response", raw_response: markdown_content }
   end
 
   # 从 LLM 响应中提取 JSON 字符串
@@ -374,7 +221,6 @@ class AiAllocationService
 
     content.strip
   end
-
 
   # 将哈希的键名符号化（递归）
   def symbolize_keys(obj)

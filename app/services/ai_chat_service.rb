@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class AiChatService
-  MODEL = "claude-sonnet-4-6"
+  MODEL = "gpt-5.2"
   PROVIDER = :openai
 
   def initialize(instructions: nil, temperature: 0.3, max_tokens: 1000)
