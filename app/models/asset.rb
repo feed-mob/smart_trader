@@ -25,6 +25,14 @@ class Asset < ApplicationRecord
     asset_snapshots.order(captured_at: :desc).first
   end
 
+  def current_price
+    latest_snapshot&.price
+  end
+
+  def last_updated
+    latest_snapshot&.captured_at
+  end
+
   def snapshots_in_period(hours: 24)
     asset_snapshots.where('captured_at > ?', hours.hours.ago).order(captured_at: :asc)
   end

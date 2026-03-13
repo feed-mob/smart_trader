@@ -88,31 +88,7 @@ module Api
         }, status: :not_found
       end
 
-      # GET /api/v1/assets/top_by_volume - Get top assets by volume
-      def top_by_volume
-        limit = (params[:limit] || 10).to_i.clamp(1, 100)
-
-        latest_snapshots = AssetSnapshot
-          .select("DISTINCT ON (asset_id) *")
-          .order("asset_id, captured_at DESC")
-
-        top_snapshot_ids = latest_snapshots
-          .where.not(volume: nil)
-          .order(volume: :desc)
-          .limit(limit)
-          .pluck(:asset_id)
-
-        assets = Asset.where(id: top_snapshot_ids).order("id ASC")
-
-        render json: {
-          success: true,
-          data: AssetSerializer.serialize_collection(assets),
-          count: assets.count,
-          limit: limit,
-          timestamp: Time.current.iso8601
-        }
-      end
-
+      
       # GET /api/v1/assets/health - API health check
       def health
         health = AssetDataCollector.health_status

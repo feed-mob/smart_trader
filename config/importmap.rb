@@ -9,5 +9,4 @@ pin_all_from "app/javascript/controllers", under: "controllers"
 # Page-specific JavaScript
 pin "sessions", to: "sessions.js"
 pin "home", to: "home.js"
-pin "assets", to: "assets_controller.js"
 
