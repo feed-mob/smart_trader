@@ -10,9 +10,52 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_09_100040) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_17_113000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "allocation_decisions", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "decision_date", null: false
+    t.text "error_message"
+    t.datetime "generated_at"
+    t.string "llm_model_name"
+    t.text "market_analysis"
+    t.jsonb "recommendation_payload", default: {}, null: false
+    t.string "selected_strategy"
+    t.string "source", default: "llm", null: false
+    t.integer "status", default: 0, null: false
+    t.text "summary"
+    t.bigint "trader_id", null: false
+    t.bigint "trading_strategy_id"
+    t.datetime "updated_at", null: false
+    t.integer "validation_status", default: 0, null: false
+    t.index ["status"], name: "index_allocation_decisions_on_status"
+    t.index ["trader_id", "decision_date"], name: "index_allocation_decisions_on_trader_id_and_decision_date"
+    t.index ["trader_id"], name: "index_allocation_decisions_on_trader_id"
+    t.index ["trading_strategy_id"], name: "index_allocation_decisions_on_trading_strategy_id"
+  end
+
+  create_table "allocation_tasks", force: :cascade do |t|
+    t.bigint "allocation_decision_id"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.decimal "ending_cash", precision: 15, scale: 2, default: "0.0", null: false
+    t.text "error_message"
+    t.jsonb "execution_payload", default: {}, null: false
+    t.decimal "portfolio_value", precision: 15, scale: 2, default: "0.0", null: false
+    t.date "run_on", null: false
+    t.datetime "started_at"
+    t.decimal "starting_cash", precision: 15, scale: 2, default: "0.0", null: false
+    t.integer "status", default: 0, null: false
+    t.text "summary"
+    t.bigint "trader_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["allocation_decision_id"], name: "index_allocation_tasks_on_allocation_decision_id"
+    t.index ["status"], name: "index_allocation_tasks_on_status"
+    t.index ["trader_id", "run_on"], name: "index_allocation_tasks_on_trader_id_and_run_on"
+    t.index ["trader_id"], name: "index_allocation_tasks_on_trader_id"
+  end
 
   create_table "asset_snapshots", force: :cascade do |t|
     t.bigint "asset_id", null: false
@@ -101,6 +144,87 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_100040) do
     t.index ["factor_definition_id"], name: "index_factor_values_on_factor_definition_id"
   end
 
+  create_table "job_executions", force: :cascade do |t|
+    t.text "arguments"
+    t.datetime "created_at", null: false
+    t.integer "duration_ms"
+    t.text "error_message"
+    t.datetime "finished_at"
+    t.string "job_id", null: false
+    t.string "job_name", null: false
+    t.string "queue_name"
+    t.datetime "started_at", null: false
+    t.string "status", default: "running", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_id"], name: "index_job_executions_on_job_id", unique: true
+    t.index ["job_name"], name: "index_job_executions_on_job_name"
+    t.index ["started_at"], name: "index_job_executions_on_started_at"
+    t.index ["status"], name: "index_job_executions_on_status"
+  end
+
+  create_table "portfolio_snapshots", force: :cascade do |t|
+    t.bigint "allocation_task_id"
+    t.datetime "captured_at", null: false
+    t.decimal "cash_value", precision: 15, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.decimal "invested_value", precision: 15, scale: 2, default: "0.0", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.decimal "portfolio_value", precision: 15, scale: 2, default: "0.0", null: false
+    t.decimal "profit_loss", precision: 15, scale: 2, default: "0.0", null: false
+    t.decimal "profit_loss_percent", precision: 8, scale: 2, default: "0.0", null: false
+    t.date "snapshot_date", null: false
+    t.string "source", default: "execution", null: false
+    t.bigint "trader_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["allocation_task_id"], name: "index_portfolio_snapshots_on_allocation_task_id"
+    t.index ["source"], name: "index_portfolio_snapshots_on_source"
+    t.index ["trader_id", "captured_at"], name: "index_portfolio_snapshots_on_trader_id_and_captured_at"
+    t.index ["trader_id", "snapshot_date"], name: "index_portfolio_snapshots_on_trader_id_and_snapshot_date"
+    t.index ["trader_id"], name: "index_portfolio_snapshots_on_trader_id"
+  end
+
+  create_table "trader_positions", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "asset_id", null: false
+    t.decimal "average_cost", precision: 15, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.decimal "current_price", precision: 15, scale: 2, default: "0.0", null: false
+    t.datetime "last_rebalanced_at"
+    t.decimal "market_value", precision: 15, scale: 2, default: "0.0", null: false
+    t.datetime "opened_at"
+    t.decimal "quantity", precision: 20, scale: 8, default: "0.0", null: false
+    t.bigint "trader_id", null: false
+    t.decimal "unrealized_pnl", precision: 15, scale: 2, default: "0.0", null: false
+    t.decimal "unrealized_pnl_percent", precision: 8, scale: 2, default: "0.0", null: false
+    t.datetime "updated_at", null: false
+    t.index ["asset_id"], name: "index_trader_positions_on_asset_id"
+    t.index ["trader_id", "active"], name: "index_trader_positions_on_trader_id_and_active"
+    t.index ["trader_id", "asset_id"], name: "index_trader_positions_on_trader_id_and_asset_id", unique: true
+    t.index ["trader_id"], name: "index_trader_positions_on_trader_id"
+  end
+
+  create_table "trader_trades", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "allocation_decision_id", null: false
+    t.bigint "allocation_task_id", null: false
+    t.decimal "amount", precision: 15, scale: 2, null: false
+    t.bigint "asset_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "executed_at", null: false
+    t.decimal "price", precision: 15, scale: 2, null: false
+    t.decimal "quantity", precision: 20, scale: 8, null: false
+    t.text "reason"
+    t.bigint "trader_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_trader_trades_on_action"
+    t.index ["allocation_decision_id"], name: "index_trader_trades_on_allocation_decision_id"
+    t.index ["allocation_task_id", "asset_id"], name: "index_trader_trades_on_allocation_task_id_and_asset_id"
+    t.index ["allocation_task_id"], name: "index_trader_trades_on_allocation_task_id"
+    t.index ["asset_id"], name: "index_trader_trades_on_asset_id"
+    t.index ["trader_id", "executed_at"], name: "index_trader_trades_on_trader_id_and_executed_at"
+    t.index ["trader_id"], name: "index_trader_trades_on_trader_id"
+  end
+
   create_table "traders", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.decimal "current_capital", precision: 15, scale: 2
@@ -159,9 +283,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_100040) do
     t.index ["google_id"], name: "index_users_on_google_id", unique: true
   end
 
+  add_foreign_key "allocation_decisions", "traders"
+  add_foreign_key "allocation_decisions", "trading_strategies"
+  add_foreign_key "allocation_tasks", "allocation_decisions"
+  add_foreign_key "allocation_tasks", "traders"
   add_foreign_key "asset_snapshots", "assets"
   add_foreign_key "candles", "assets"
   add_foreign_key "factor_values", "assets"
   add_foreign_key "factor_values", "factor_definitions"
+  add_foreign_key "portfolio_snapshots", "allocation_tasks"
+  add_foreign_key "portfolio_snapshots", "traders"
+  add_foreign_key "trader_positions", "assets"
+  add_foreign_key "trader_positions", "traders"
+  add_foreign_key "trader_trades", "allocation_decisions"
+  add_foreign_key "trader_trades", "allocation_tasks"
+  add_foreign_key "trader_trades", "assets"
+  add_foreign_key "trader_trades", "traders"
   add_foreign_key "trading_signals", "assets"
 end

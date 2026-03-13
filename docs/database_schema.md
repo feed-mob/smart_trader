@@ -309,15 +309,21 @@ SmartTrader 数据库采用 PostgreSQL 14+，包含 10 个核心表，遵循以�
 erDiagram
     users ||--o{ traders : "拥有"
     traders ||--|{ trading_strategies : "配置"
+    traders ||--o{ allocation_decisions : "生成建议"
+    traders ||--o{ allocation_tasks : "执行任务"
+    traders ||--o{ trader_positions : "持仓"
     trading_strategies ||--|{ strategy_factor_weights : "包含"
+    trading_strategies ||--o{ allocation_decisions : "被采用"
 
     assets ||--|{ asset_snapshots : "有历史快照"
     assets ||--|{ factor_values : "有因子值"
     assets ||--|{ trading_signals : "产生信号"
+    assets ||--o{ trader_positions : "构成持仓"
 
     factor_definitions ||--|{ factor_values : "定义"
     factor_definitions ||--|{ strategy_factor_weights : "被引用"
 
+    allocation_decisions ||--o{ allocation_tasks : "被执行"
     trading_strategies }|..|{ assets : "适用"
     trading_signals }|..|{ traders : "被使用"
 ```
@@ -334,56 +340,172 @@ erDiagram
 4. **完整的历史记录**: 保存资产价格快照和因子值序列
 5. **性能优化**: 为高频查询建立了适当索引
 
-### 4.2 改进建议
+### 4.2 模拟盘 Phase 1 新增表
 
-#### 4.2.1 缺失的核心表
+#### 4.2.1 allocation_decisions (资产配置建议表)
 
-**1. positions (持仓表)**
+用于保存 LLM 生成的正式配置建议，是“决策层”数据，不是执行结果。
+
+| 字段名                 | 类型          | 约束           | 说明 |
+|----------------------|---------------|----------------|------|
+| id                   | bigint        | PRIMARY KEY    | 主键 |
+| trader_id            | bigint        | NOT NULL, FOREIGN KEY | 操盘手 ID |
+| trading_strategy_id  | bigint        | FOREIGN KEY    | 被采用的策略 ID，可为空 |
+| decision_date        | date          | NOT NULL, INDEX | 建议日期 |
+| status               | integer       | NOT NULL, DEFAULT 0 | 建议生成状态 |
+| source               | string        | NOT NULL, DEFAULT 'llm' | 建议来源 |
+| llm_model_name       | string        |                | 生成建议的模型名 |
+| validation_status    | integer       | NOT NULL, DEFAULT 0 | 执行前校验状态 |
+| selected_strategy    | string        |                | LLM 选择的策略标识 |
+| market_analysis      | text          |                | 市场分析 |
+| summary              | text          |                | 配置摘要 |
+| error_message        | text          |                | 生成或校验失败原因 |
+| recommendation_payload | jsonb       | NOT NULL, DEFAULT {} | recommendation 原始 JSON |
+| generated_at         | datetime      |                | 建议生成时间 |
+| created_at           | datetime      | NOT NULL       | 创建时间 |
+| updated_at           | datetime      | NOT NULL       | 更新时间 |
+
+**索引**:
+- `index_allocation_decisions_on_trader_id_and_decision_date`
+- `index_allocation_decisions_on_status`
+
+**关联关系**:
+- `belongs_to :trader`
+- `belongs_to :trading_strategy, optional: true`
+- `has_many :allocation_tasks`
+
+**枚举值**:
+- status: { pending: 0, generated: 1, invalid_payload: 2, failed: 3 }
+- validation_status: { pending_validation: 0, valid_payload: 1, invalid_payload: 2 }
+
+#### 4.2.2 allocation_tasks (资产配置执行任务表)
+
+用于保存某一天某次是否执行了某份配置建议，是“执行层”数据。
+
+| 字段名               | 类型          | 约束           | 说明 |
+|---------------------|---------------|----------------|------|
+| id                  | bigint        | PRIMARY KEY    | 主键 |
+| trader_id           | bigint        | NOT NULL, FOREIGN KEY | 操盘手 ID |
+| allocation_decision_id | bigint     | FOREIGN KEY    | 对应的配置建议，可为空 |
+| run_on              | date          | NOT NULL, INDEX | 执行日期 |
+| status              | integer       | NOT NULL, DEFAULT 0 | 执行状态 |
+| starting_cash       | decimal(15,2) | NOT NULL, DEFAULT 0 | 执行前现金 |
+| ending_cash         | decimal(15,2) | NOT NULL, DEFAULT 0 | 执行后现金 |
+| portfolio_value     | decimal(15,2) | NOT NULL, DEFAULT 0 | 执行后组合净值 |
+| summary             | text          |                | 执行摘要 |
+| error_message       | text          |                | 执行失败原因 |
+| execution_payload   | jsonb         | NOT NULL, DEFAULT {} | 执行附加信息 |
+| started_at          | datetime      |                | 开始执行时间 |
+| completed_at        | datetime      |                | 完成执行时间 |
+| created_at          | datetime      | NOT NULL       | 创建时间 |
+| updated_at          | datetime      | NOT NULL       | 更新时间 |
+
+**索引**:
+- `index_allocation_tasks_on_trader_id_and_run_on`
+- `index_allocation_tasks_on_status`
+
+**关联关系**:
+- `belongs_to :trader`
+- `belongs_to :allocation_decision, optional: true`
+
+**业务说明**:
+- 不对 `(trader_id, run_on)` 做唯一约束
+- 同一个操盘手同一天允许执行多次
+- 防止重复执行应在 service 层控制，不在本阶段用数据库唯一索引限制
+
+**枚举值**:
+- status: { pending: 0, running: 1, completed: 2, failed: 3, skipped: 4 }
+
+#### 4.2.3 trader_positions (操盘手持仓表)
+
+用于保存操盘手当前持仓，是“结果层”数据。
+
+| 字段名                 | 类型          | 约束           | 说明 |
+|----------------------|---------------|----------------|------|
+| id                   | bigint        | PRIMARY KEY    | 主键 |
+| trader_id            | bigint        | NOT NULL, FOREIGN KEY | 操盘手 ID |
+| asset_id             | bigint        | NOT NULL, FOREIGN KEY | 资产 ID |
+| quantity             | decimal(20,8) | NOT NULL, DEFAULT 0 | 持仓数量 |
+| average_cost         | decimal(15,2) | NOT NULL, DEFAULT 0 | 持仓均价 |
+| current_price        | decimal(15,2) | NOT NULL, DEFAULT 0 | 当前价格 |
+| market_value         | decimal(15,2) | NOT NULL, DEFAULT 0 | 当前市值 |
+| unrealized_pnl       | decimal(15,2) | NOT NULL, DEFAULT 0 | 浮盈亏 |
+| unrealized_pnl_percent | decimal(8,2)| NOT NULL, DEFAULT 0 | 浮盈亏比例 |
+| active               | boolean       | NOT NULL, DEFAULT true | 是否活跃 |
+| opened_at            | datetime      |                | 开仓时间 |
+| last_rebalanced_at   | datetime      |                | 最近调仓时间 |
+| created_at           | datetime      | NOT NULL       | 创建时间 |
+| updated_at           | datetime      | NOT NULL       | 更新时间 |
+
+**索引**:
+- `index_trader_positions_on_trader_id_and_asset_id` (复合唯一索引)
+- `index_trader_positions_on_trader_id_and_active`
+
+**关联关系**:
+- `belongs_to :trader`
+- `belongs_to :asset`
+
+**业务说明**:
+- 采用 `trader_positions` 而不是 `portfolio_positions`
+- 当前业务主体是 `trader`，系统中没有独立的 `portfolios` 主表
+- 当前阶段只保存当前持仓，不包含交易流水
+
+### 4.3 后续扩展建议
+
+1. **trader_positions 表**: 后续可添加 `cost_basis` 字段支持更精确的分批建仓与减仓成本计算
+2. **allocation_decisions 表**: 后续可添加 `expires_at` 字段管理建议有效期
+3. **allocation_tasks 表**: 后续可添加 `attempt_no` 或 `run_at` 字段支持更细粒度的多次执行追踪
+4. **执行层表**: Phase 3 已新增 `trader_trades` 表保存模拟交易流水，结构如下：
+
 ```sql
-CREATE TABLE positions (
+CREATE TABLE trader_trades (
     id bigint PRIMARY KEY,
     trader_id bigint NOT NULL REFERENCES traders,
+    allocation_task_id bigint REFERENCES allocation_tasks,
+    allocation_decision_id bigint REFERENCES allocation_decisions,
     asset_id bigint NOT NULL REFERENCES assets,
-    quantity decimal(15,6) NOT NULL,
-    average_cost decimal(15,2) NOT NULL,
-    current_value decimal(15,2) NOT NULL,
-    pnl decimal(15,2) NOT NULL,
-    pnl_percent decimal(5,2) NOT NULL,
-    created_at timestamptz NOT NULL,
-    updated_at timestamptz NOT NULL,
-    UNIQUE(trader_id, asset_id)
-);
-```
-
-**2. transactions (交易记录表)**
-```sql
-CREATE TABLE transactions (
-    id bigint PRIMARY KEY,
-    trader_id bigint NOT NULL REFERENCES traders,
-    asset_id bigint NOT NULL REFERENCES assets,
-    transaction_type smallint NOT NULL, -- 0:买入, 1:卖出
-    quantity decimal(15,6) NOT NULL,
+    action varchar NOT NULL, -- buy / sell
+    quantity decimal(20,8) NOT NULL,
     price decimal(15,2) NOT NULL,
-    total_amount decimal(15,2) NOT NULL,
-    fee decimal(15,2) DEFAULT 0,
-    signal_id bigint REFERENCES trading_signals,
+    amount decimal(15,2) NOT NULL,
+    reason text,
     executed_at timestamptz NOT NULL,
-    created_at timestamptz NOT NULL
+    created_at timestamptz NOT NULL,
+    updated_at timestamptz NOT NULL
 );
 ```
 
-#### 4.2.2 现有表优化建议
+用途说明：
+- 保存每一笔模拟成交流水
+- 连接 recommendation、execution task 和当前持仓结果
+- 用于后续交易历史、调仓审计、盈亏回放
 
-1. **users 表**: 添加 `timezone` 和 `locale` 字段支持多语言和时区
-2. **traders 表**: 添加 `performance_metrics` JSONB 字段存储历史绩效统计
-3. **trading_strategies 表**: 添加 `backtest_result` JSONB 字段存储回测结果
-4. **trading_signals 表**: 添加 `expiration_time` 字段支持信号有效期管理
-5. **asset_snapshots 表**: 添加 `market_cap` 和 `volume` 字段完善市场数据
+补充说明：
+- Phase 2.5 已增加 `allocation_decisions` 的只读展示页
+- 当前可以直接查看 recommendation 列表、详情和原始 JSON
+- Phase 3A 已支持从 recommendation 详情页手动执行，并写入 `allocation_tasks` / `trader_positions`
+- Phase 4.5 已增加独立 `Portfolio Dashboard` 页面 `/portfolio_dashboard`，聚合展示 trader 净值、盈亏、最近执行和持仓摘要
+- `Portfolio Dashboard` 的盈亏口径采用最新价格盯市计算：`最近一次执行后的现金 + 当前持仓按最新快照估值`
+- `Portfolio Dashboard` 的趋势图当前基于 `allocation_tasks.portfolio_value` 构建，每个 trader 每天取最后一次执行结果参与总组合聚合
+- `Portfolio Dashboard` 同时支持展示每个 trader 自己的收益曲线，数据来源为该 trader 的 `allocation_tasks.portfolio_value`
+- Phase 5A 已新增自动 recommendation 生成能力：`GenerateDailyAllocationDecisionsJob` 会为活跃 trader 批量生成 `allocation_decisions`
+- Phase 5B 已新增自动 recommendation 执行能力：`ExecuteDailyAllocationDecisionsJob` 会消费当天最新有效 decision，并写入 `allocation_tasks` / `trader_positions` / `trader_trades`
+- 自动执行 recommendation 时，若同一 trader 同一天存在多条有效 `allocation_decisions`，默认取 `created_at` 最新的一条
+- Phase 5C 已将 recommendation generation / execution 接入 `sidekiq.yml`，当前 cron 顺序为 `signals -> decisions -> execution`
+- recommendation 生成层已增加当前持仓上下文输入，LLM 会优先基于现有组合给出调仓建议，而不是默认从空仓重新配置
+- recommendation 生成层已新增 `GetCurrentPortfolio` tool，可返回当前现金、持仓、仓位占比、浮盈亏和最近执行摘要
+- 已新增 `portfolio_snapshots` 表保存净值历史快照，`Portfolio Dashboard` 曲线将基于快照表而不是 `allocation_tasks` 绘制
+- 已新增 `MarkToMarketPortfolioSnapshotsJob`，每天两次按最新价格为活跃 trader 记录 `portfolio_snapshots`
+- 已新增 `script/backfill_mark_to_market_snapshots.rb`，可手动回填昨天或指定日期的 `mark_to_market` 快照
+- `Portfolio Dashboard` 卡片主数值已优先读取最新 `portfolio_snapshots`，与曲线口径保持一致
+- 已新增 `PortfolioSnapshotBackfillService`，可在需要时手动将历史 `allocation_tasks` 回填为快照数据
 
-#### 4.2.3 索引优化
+5. **trading_signals 表**: 可添加 `expiration_time` 字段支持信号有效期管理
 
-1. 为 `positions(trader_id, current_value)` 建立复合索引支持持仓价值排序
-2. 为 `transactions(trader_id, executed_at)` 建立复合索引支持交易历史查询
+### 4.4 索引优化建议
+
+1. 为 `trader_positions(trader_id, market_value)` 建立复合索引支持持仓价值排序
+2. 为未来的 `trader_trades(trader_id, executed_at)` 建立复合索引支持交易历史查询
 3. 为 `trading_signals(generated_at)` 建立降序索引优化最新信号查询
 
 ---
@@ -396,7 +518,26 @@ CREATE TABLE transactions (
   - 添加 `coingecko_id`, `yahoo_symbol` 字段对接外部数据源 API
   - 添加 `active` 字段管理资产状态
   - 调整唯一索引为复合索引 `(symbol, exchange, quote_currency)`
-- **v1.1.0**: 计划添加 positions 和 transactions 表
+- **v1.1.0** (2026-03-13): 新增模拟盘 Phase 1 数据结构
+  - 添加 `allocation_decisions` 表保存 LLM 配置建议
+  - 添加 `allocation_tasks` 表保存执行任务记录
+  - 添加 `trader_positions` 表保存当前持仓
+- **v1.1.1** (2026-03-16): 完成模拟盘展示层增强
+  - 新增独立 `Portfolio Dashboard` 页面
+  - 增加总组合净值/盈亏曲线
+  - 增加单个 trader 收益曲线展示
+- **v1.1.2** (2026-03-17): 完成 Phase 5A / 5B 自动任务基础能力
+  - 新增 recommendation 批量生成 job
+  - 新增 recommendation 批量执行 job
+- **v1.1.3** (2026-03-17): 完成 Phase 5C 自动调度接入
+  - 在 `sidekiq.yml` 中接入 recommendation 生成与执行 cron
+- **v1.1.4** (2026-03-17): 新增净值快照层
+  - 添加 `portfolio_snapshots` 表
+  - 执行 recommendation 后自动写入净值快照
+  - `Portfolio Dashboard` 曲线切换到快照表
+- **v1.1.5** (2026-03-17): 新增日常盯市快照任务
+  - 添加 `MarkToMarketPortfolioSnapshotsJob`
+  - 在 `sidekiq.yml` 中接入盯市快照 cron
 
 ---
 

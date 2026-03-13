@@ -30,6 +30,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "home#index"
+  resource :portfolio_dashboard, only: :show
 
   # API routes (Phase 4 & 5)
   namespace :api do
@@ -55,6 +56,11 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :allocation_decisions, only: [:index, :show] do
+    post :execute, on: :member
+  end
+  resources :allocation_tasks, only: [:index, :show]
+
   # AI Analysis
   get 'ai_analysis', to: 'ai_analysis#new', as: :new_ai_analysis
   post 'ai_analysis', to: 'ai_analysis#create', as: :ai_analysis
@@ -63,6 +69,8 @@ Rails.application.routes.draw do
 
   # Admin namespace
   namespace :admin do
+    root "dashboard#index", as: :admin_root
+
     resources :factor_definitions do
       member do
         post :toggle
@@ -79,5 +87,7 @@ Rails.application.routes.draw do
         post :generate_all
       end
     end
+
+    resources :job_executions, only: %i[index show]
   end
 end

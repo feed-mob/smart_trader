@@ -2,6 +2,7 @@
 
 class TradingStrategy < ApplicationRecord
   belongs_to :trader
+  has_many :allocation_decisions, dependent: :nullify
 
   # Enums
   enum :risk_level, { conservative: 0, balanced: 1, aggressive: 2 }
