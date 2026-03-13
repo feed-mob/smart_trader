@@ -13,7 +13,7 @@ class GetSignalDataTool < RubyLLM::Tool
   param :limit, type: :integer, required: false,
         desc: "返回数量限制，默认20，最大100"
 
-  def execute(symbols: nil, signal_type: nil, min_confidence: nil, limit: 20)
+  def execute(symbols: nil, signal_type: nil, min_confidence: nil, limit: 60)
     limit = [limit.to_i, 100].min
     limit = 20 if limit <= 0
 

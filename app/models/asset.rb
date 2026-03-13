@@ -5,6 +5,9 @@ class Asset < ApplicationRecord
   has_many :factor_values, dependent: :destroy
   has_many :candles, dependent: :destroy
 
+  # Latest snapshot association for eager loading (prevents N+1 queries)
+  has_one :latest_snapshot, -> { order(captured_at: :desc) }, class_name: 'AssetSnapshot'
+
   # Validations
   validates :symbol, presence: true
   validates :name, presence: true
@@ -19,11 +22,6 @@ class Asset < ApplicationRecord
   scope :by_exchange, ->(exchange) { where(exchange: exchange) }
   scope :crypto, -> { where(asset_type: 'crypto') }
   scope :stock, -> { where(asset_type: 'stock') }
-
-  # Instance methods
-  def latest_snapshot
-    asset_snapshots.order(captured_at: :desc).first
-  end
 
   def current_price
     latest_snapshot&.price

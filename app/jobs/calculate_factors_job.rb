@@ -9,9 +9,9 @@ class CalculateFactorsJob < ApplicationJob
     factors = FactorDefinition.active.ordered
 
     assets = if asset_symbol.present?
-      Asset.where(active: true).where("symbol ILIKE ?", asset_symbol.upcase)
+      Asset.where(active: true).where("market_cap_rank < ?", 60).where("symbol ILIKE ?", asset_symbol.upcase)
     else
-      Asset.where(active: true)
+      Asset.where(active: true).where("market_cap_rank < ?", 60)
     end
 
     if factors.empty? || assets.empty?
@@ -27,6 +27,7 @@ class CalculateFactorsJob < ApplicationJob
     Rails.logger.info(log_message)
 
     assets.find_each do |asset|
+      Rails.logger.info("CalculateFactorsJob: Processing asset #{asset.symbol} (rank: #{asset.market_cap_rank})")
       factors.each do |factor|
         calculate_and_save_factor(asset, factor)
       end
@@ -60,6 +61,7 @@ class CalculateFactorsJob < ApplicationJob
       normalized_value: result[:normalized_value]
     )
     factor_value.save!
+    Rails.logger.info("CalculateFactorsJob: Saved #{factor.code} for #{asset.symbol} = #{result[:raw_value]&.round(4)} (normalized: #{result[:normalized_value]&.round(4)})")
   rescue => e
     Rails.logger.error("CalculateFactorsJob error for #{factor.code}/#{asset.symbol}: #{e.message}")
   end
@@ -67,6 +69,7 @@ class CalculateFactorsJob < ApplicationJob
   def calculate_percentiles(factors)
     # 百分位需要基于所有资产、同一天的数据计算
     today = Date.current.beginning_of_day
+    Rails.logger.info("CalculateFactorsJob: Calculating percentiles for #{factors.count} factors")
 
     factors.each do |factor|
       # 获取今天所有资产的因子值
@@ -75,13 +78,17 @@ class CalculateFactorsJob < ApplicationJob
                           .where.not(normalized_value: nil)
                           .order(normalized_value: :asc)
 
-      next if values.count < 2
+      if values.count < 2
+        Rails.logger.info("CalculateFactorsJob: Skipped percentile for #{factor.code} - only #{values.count} value(s)")
+        next
+      end
 
       total = values.count
       values.each_with_index do |factor_value, index|
         percentile = ((index + 1).to_f / total * 100).round(2)
         factor_value.update_column(:percentile, percentile)
       end
+      Rails.logger.info("CalculateFactorsJob: Calculated percentiles for #{factor.code} - #{total} assets (range: #{values.first.percentile}&tilde;#{values.last.percentile})")
     end
   end
 end

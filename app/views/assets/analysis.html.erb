@@ -2,7 +2,7 @@
 <div class="container mx-auto px-4 py-8">
   <!-- Header -->
   <div class="mb-6">
-    <%= link_to '← 返回', asset_path(@asset),
+    <%= link_to '← 返回', market_asset_path(@asset),
           class: "text-blue-600 hover:text-blue-700 font-medium" %>
 
     <div class="flex items-center justify-between mt-4">
@@ -29,7 +29,7 @@
         </label>
         <div class="flex gap-4">
           <% [24, 48, 72, 168].each do |hours| %>
-            <%= link_to "#{hours}小时", analysis_asset_path(@asset, hours:),
+            <%= link_to "#{hours}小时", analysis_market_asset_path(@asset, hours:),
                   class: "px-4 py-2 rounded-lg #{hours == @analysis_hours ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}" %>
           <% end %>
         </div>

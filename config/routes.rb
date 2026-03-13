@@ -20,8 +20,8 @@ Rails.application.routes.draw do
   post "auth/google/callback", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
-  # Asset management (Phase 6) - Move before root to ensure priority
-  resources :assets, only: [:index, :show] do
+  # Market Assets (Phase 6) - Use market_assets path to avoid conflict with Rails assets pipeline
+  resources :market_assets, controller: 'assets', only: [:index, :show] do
     get :analysis, on: :member
   end
 
