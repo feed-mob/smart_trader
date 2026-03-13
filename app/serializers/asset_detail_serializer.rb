@@ -37,7 +37,7 @@ class AssetDetailSerializer
   end
 
   def calculate_statistics
-    snapshots = @resource.snapshots
+    snapshots = @resource.asset_snapshots
     return basic_stats if snapshots.empty?
 
     {

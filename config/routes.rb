@@ -20,13 +20,16 @@ Rails.application.routes.draw do
   post "auth/google/callback", to: "sessions#create"
   delete "logout", to: "sessions#destroy"
 
-  # Defines the root path route ("/")
-  root "home#index"
-
-  # Asset management (Phase 6)
+  # Asset management (Phase 6) - Move before root to ensure priority
   resources :assets, only: [:index, :show] do
     get :analysis, on: :member
   end
+
+  # Favicon - suppress routing error
+  get "favicon.ico", to: proc { [204, {}, [""]] }
+
+  # Defines the root path route ("/")
+  root "home#index"
 
   # API routes (Phase 4 & 5)
   namespace :api do
@@ -36,11 +39,12 @@ Rails.application.routes.draw do
         get :latest, on: :member
         get :analyze, on: :member
         get :signal, on: :member
+        # Custom collection and analysis routes
+        collection do
+          get :health, to: "assets#health"
+          post :collect, to: "assets#collect"
+        end
       end
-      # Custom collection and analysis routes
-      get :top_by_volume, to: "assets#top_by_volume"
-      get :health, to: "assets#health"
-      post :collect, to: "assets#collect"
     end
   end
 

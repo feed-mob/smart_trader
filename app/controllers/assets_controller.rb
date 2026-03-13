@@ -4,25 +4,18 @@
 class AssetsController < ApplicationController
   # GET /assets - List all assets
   def index
-    # GET /assets - List all assets
-  def index
     @assets = Asset.all.includes(:asset_snapshots)
-  end
+    @top_assets = get_top_assets(6)
   end
 
   # GET /assets/:id - Show asset detail page
   def show
     @asset = Asset.find(params[:id])
-
-    # Get snapshots based on timeframe parameter
-    timeframe = params[:timeframe] || "24h"
-
+    @timeframe = params[:timeframe] || "24h"
     @snapshots = @asset.asset_snapshots
-                        .where(captured_at: parse_timeframe(timeframe))
-                        .order(captured_at: :desc)
-                        .limit(200)
-
-    @timeframe = timeframe
+                      .where(captured_at: parse_timeframe(@timeframe))
+                      .order(captured_at: :desc)
+                      .limit(200)
   rescue ActiveRecord::RecordNotFound
     redirect_to assets_path, alert: "Asset not found"
   end
@@ -36,6 +29,23 @@ class AssetsController < ApplicationController
   end
 
   private
+
+  def get_top_assets(limit)
+    # Yahoo Finance热门股票 - 随机3条
+    yahoo_assets = Asset.active
+                        .where(asset_type: 'stock')
+                        .order('RANDOM()')
+                        .limit(3)
+
+    # CoinGecko热门加密货币 - 随机3条
+    coingecko_assets = Asset.active
+                            .where(asset_type: 'crypto')
+                            .order('RANDOM()')
+                            .limit(3)
+
+    # 合并并去重
+    (yahoo_assets + coingecko_assets).uniq.first(limit)
+  end
 
   # Parse timeframe string to range
   def parse_timeframe(timeframe)
