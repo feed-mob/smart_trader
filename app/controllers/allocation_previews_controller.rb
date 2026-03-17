@@ -11,9 +11,11 @@ class AllocationPreviewsController < ApplicationController
 
   # 异步加载 AI 配置建议 (缓存2分钟)
   def recommendation
-    @recommendation = Rails.cache.fetch(cache_key_for_recommendation, expires_in: 2.minutes) do
-      AiAllocationService.new(@trader).generate_recommendation
+    decision_id = Rails.cache.fetch(cache_key_for_recommendation, expires_in: 2.minutes) do
+      AiAllocationService.new(@trader).generate_and_persist_recommendation!.id
     end
+    @decision = AllocationDecision.find_by(id: decision_id)
+    @recommendation = @decision&.recommendation_payload_symbolized || { error: "AI recommendation not found" }
     @strategies = @trader.trading_strategies.order(:market_condition)
 
     render partial: "recommendation", locals: { recommendation: @recommendation, strategies: @strategies }

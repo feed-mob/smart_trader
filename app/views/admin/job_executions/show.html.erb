@@ -1,0 +1,131 @@
+<% content_for :title, "Job 执行详情" %>
+
+<div class="signals-container">
+  <!-- Background -->
+  <div class="signals-background">
+    <div class="signals-background__gradient"></div>
+    <div class="signals-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="signals-header">
+    <div class="signals-header__left">
+      <%= link_to admin_job_executions_path, class: "signals-home-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      <% end %>
+      <div>
+        <h1 class="signals-header__title">Job 执行详情</h1>
+        <p class="signals-header__subtitle"><%= @execution.job_name %></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Execution Details Card -->
+  <div class="signals-section">
+    <div class="execution-detail-card">
+      <!-- Status Banner -->
+      <div class="execution-status-banner execution-status-banner--<%= @execution.status %>">
+        <div class="execution-status-banner__icon">
+          <% case @execution.status %>
+          <% when "success" %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          <% when "failed" %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+          <% when "running" %>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          <% end %>
+        </div>
+        <div class="execution-status-banner__content">
+          <span class="execution-status-banner__title"><%= status_label(@execution.status) %></span>
+          <span class="execution-status-banner__duration"><%= @execution.formatted_duration %></span>
+        </div>
+      </div>
+
+      <!-- Details Grid -->
+      <div class="execution-detail-grid">
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">Job ID</span>
+          <span class="execution-detail-item__value"><%= @execution.job_id %></span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">Job 名称</span>
+          <span class="execution-detail-item__value"><%= @execution.job_name %></span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">队列</span>
+          <span class="execution-detail-item__value"><%= @execution.queue_name || "default" %></span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">状态</span>
+          <span class="execution-detail-item__value">
+            <span class="signal-badge signal-badge--<%= status_badge_class(@execution.status) %>">
+              <%= status_label(@execution.status) %>
+            </span>
+          </span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">开始时间</span>
+          <span class="execution-detail-item__value"><%= @execution.started_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">结束时间</span>
+          <span class="execution-detail-item__value">
+            <%= @execution.finished_at&.strftime("%Y-%m-%d %H:%M:%S") || "-" %>
+          </span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">执行时长</span>
+          <span class="execution-detail-item__value"><%= @execution.formatted_duration %></span>
+        </div>
+        <div class="execution-detail-item">
+          <span class="execution-detail-item__label">创建时间</span>
+          <span class="execution-detail-item__value"><%= @execution.created_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+        </div>
+      </div>
+
+      <!-- Arguments Section -->
+      <% if @execution.arguments.present? %>
+      <div class="execution-detail-section">
+        <h3 class="execution-detail-section__title">执行参数</h3>
+        <div class="execution-detail-section__content">
+          <pre class="execution-code-block"><code><%= JSON.pretty_generate(JSON.parse(@execution.arguments)) rescue @execution.arguments %></code></pre>
+        </div>
+      </div>
+      <% end %>
+
+      <!-- Error Section -->
+      <% if @execution.error_message.present? %>
+      <div class="execution-detail-section execution-detail-section--error">
+        <h3 class="execution-detail-section__title">错误信息</h3>
+        <div class="execution-detail-section__content">
+          <pre class="execution-code-block execution-code-block--error"><code><%= @execution.error_message %></code></pre>
+        </div>
+      </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Back Button -->
+  <div class="signals-section">
+    <%= link_to admin_job_executions_path, class: "signals-btn signals-btn--secondary" do %>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      返回列表
+    <% end %>
+  </div>
+</div>

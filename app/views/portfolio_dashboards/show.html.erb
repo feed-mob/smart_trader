@@ -1,0 +1,269 @@
+<% content_for :title, "Portfolio Dashboard - SmartTrader" %>
+
+<div class="traders-container portfolio-dashboard">
+  <div class="traders-background">
+    <div class="traders-background__gradient"></div>
+    <div class="traders-background__grid"></div>
+  </div>
+
+  <header class="traders-header">
+    <div class="traders-header__left">
+      <%= link_to root_path, class: "traders-logo" do %>
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 22L16 17C17 16 19 15 22 15C25 15 27 17 28 19L30 22" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      <% end %>
+      <div>
+        <h1 class="traders-header__title">Portfolio Dashboard</h1>
+        <p class="portfolio-dashboard__subtitle">操盘手组合总览、执行结果与持仓摘要</p>
+      </div>
+    </div>
+    <div class="traders-header__right">
+      <%= link_to "操盘手管理", traders_path, class: "btn btn-secondary" %>
+    </div>
+  </header>
+
+  <main class="traders-main">
+    <% if notice.present? %>
+      <div class="alert alert-success"><%= notice %></div>
+    <% end %>
+
+    <% if alert.present? %>
+      <div class="alert alert-error"><%= alert %></div>
+    <% end %>
+
+    <section class="portfolio-dashboard__hero">
+      <div class="portfolio-dashboard__hero-copy">
+        <span class="portfolio-dashboard__eyebrow">Simulated Trading</span>
+        <h2 class="portfolio-dashboard__headline">统一查看 AI 建议执行后的组合表现</h2>
+        <p class="portfolio-dashboard__description">
+          聚合展示净值、盈亏、趋势、最近执行和持仓摘要，专注查看结果，不承载手动操作。
+        </p>
+      </div>
+      <div class="portfolio-dashboard__metrics">
+        <div class="portfolio-metric-card">
+          <span class="portfolio-metric-card__label">总资产净值</span>
+          <strong class="portfolio-metric-card__value"><%= number_to_currency(@dashboard_stats[:total_equity], unit: "¥", precision: 0) %></strong>
+        </div>
+        <div class="portfolio-metric-card">
+          <span class="portfolio-metric-card__label">总盈亏</span>
+          <strong class="portfolio-metric-card__value <%= @dashboard_stats[:total_profit_loss] >= 0 ? "positive" : "negative" %>">
+            <%= @dashboard_stats[:total_profit_loss] >= 0 ? "+" : "" %><%= number_to_currency(@dashboard_stats[:total_profit_loss], unit: "¥", precision: 0) %>
+          </strong>
+        </div>
+        <div class="portfolio-metric-card">
+          <span class="portfolio-metric-card__label">平均收益率</span>
+          <strong class="portfolio-metric-card__value <%= @dashboard_stats[:average_return] >= 0 ? "positive" : "negative" %>">
+            <%= @dashboard_stats[:average_return] >= 0 ? "+" : "" %><%= @dashboard_stats[:average_return] %>%
+          </strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="portfolio-dashboard__summary-grid">
+      <article class="portfolio-summary-card">
+        <span class="portfolio-summary-card__label">活跃操盘手</span>
+        <strong class="portfolio-summary-card__value"><%= @dashboard_stats[:active_traders] %></strong>
+      </article>
+      <article class="portfolio-summary-card">
+        <span class="portfolio-summary-card__label">当前持仓数</span>
+        <strong class="portfolio-summary-card__value"><%= @dashboard_stats[:total_positions] %></strong>
+      </article>
+      <article class="portfolio-summary-card">
+        <span class="portfolio-summary-card__label">已完成执行次数</span>
+        <strong class="portfolio-summary-card__value"><%= @dashboard_stats[:completed_tasks] %></strong>
+      </article>
+    </section>
+
+    <section class="portfolio-dashboard__chart-card">
+      <div class="portfolio-dashboard__chart-header">
+        <div>
+          <span class="portfolio-dashboard__chart-kicker">P/L View</span>
+          <h3 class="portfolio-dashboard__chart-title">组合净值与累计盈亏</h3>
+          <p class="portfolio-dashboard__chart-subtitle">
+            基于 `portfolio_snapshots` 聚合生成总组合趋势，作为模拟盘总览的主图表。
+          </p>
+        </div>
+        <div class="portfolio-dashboard__chart-stat">
+          <span class="portfolio-dashboard__chart-stat-label">最新总盈亏</span>
+          <strong class="portfolio-dashboard__chart-stat-value <%= @portfolio_chart[:latest_pnl] >= 0 ? "positive" : "negative" %>">
+            <%= @portfolio_chart[:latest_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@portfolio_chart[:latest_pnl], unit: "¥", precision: 0) %>
+          </strong>
+        </div>
+      </div>
+
+      <% if @portfolio_chart[:equity_path].present? %>
+        <div class="portfolio-dashboard__chart-grid">
+          <div class="portfolio-dashboard__chart-panel">
+            <div class="portfolio-dashboard__chart-panel-head">
+              <span class="portfolio-dashboard__chart-panel-title">总组合净值</span>
+              <strong><%= number_to_currency(@portfolio_chart[:latest_value], unit: "¥", precision: 0) %></strong>
+            </div>
+            <svg viewBox="0 0 100 100" class="portfolio-dashboard__chart-svg" preserveAspectRatio="none" role="img" aria-label="总组合净值走势图">
+              <line x1="0" y1="100" x2="100" y2="100" class="portfolio-dashboard__chart-axis"></line>
+              <path d="<%= @portfolio_chart[:equity_path] %>" class="portfolio-dashboard__chart-line portfolio-dashboard__chart-line--equity"></path>
+            </svg>
+          </div>
+
+          <div class="portfolio-dashboard__chart-panel">
+            <div class="portfolio-dashboard__chart-panel-head">
+              <span class="portfolio-dashboard__chart-panel-title">累计盈亏</span>
+              <strong class="<%= @portfolio_chart[:latest_pnl] >= 0 ? "positive" : "negative" %>">
+                <%= @portfolio_chart[:latest_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@portfolio_chart[:latest_pnl], unit: "¥", precision: 0) %>
+              </strong>
+            </div>
+            <svg viewBox="0 0 100 100" class="portfolio-dashboard__chart-svg" preserveAspectRatio="none" role="img" aria-label="累计盈亏走势图">
+              <line x1="0" y1="100" x2="100" y2="100" class="portfolio-dashboard__chart-axis"></line>
+              <path d="<%= @portfolio_chart[:pnl_path] %>" class="portfolio-dashboard__chart-line <%= @portfolio_chart[:latest_pnl] >= 0 ? "portfolio-dashboard__chart-line--profit" : "portfolio-dashboard__chart-line--loss" %>"></path>
+            </svg>
+          </div>
+        </div>
+
+        <div class="portfolio-dashboard__chart-footer">
+          <% @portfolio_chart[:labels].each do |label| %>
+            <span class="portfolio-dashboard__chart-label portfolio-dashboard__chart-label--<%= label[:position] %>"><%= label[:text] %></span>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="portfolio-dashboard__chart-empty">
+          还没有足够的执行历史，暂时无法生成组合盈亏图表。
+        </div>
+      <% end %>
+    </section>
+
+    <% if @traders.any? %>
+      <section class="traders-grid">
+        <% @trader_dashboard_rows.each do |row| %>
+          <% trader = row[:trader] %>
+          <% latest_task = row[:latest_task] %>
+          <% active_positions = row[:active_positions] %>
+          <% recent_trade = row[:recent_trade] %>
+          <% trader_chart = row[:chart] %>
+          <article class="trader-card trader-card--dashboard" data-risk="<%= trader.risk_level %>">
+            <div class="trader-card__header">
+              <div class="trader-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v18h18"></path>
+                  <path d="m19 9-5 5-4-4-3 3"></path>
+                </svg>
+              </div>
+              <span class="trader-card__risk-badge trader-card__risk-badge--<%= trader.risk_level %>">
+                <%= trader.display_risk_level %>
+              </span>
+            </div>
+
+            <div class="trader-card__headline">
+              <h3 class="trader-card__name"><%= trader.name %></h3>
+              <span class="trader-card__status-chip trader-card__status-chip--<%= trader.status %>">
+                <%= trader.display_status %>
+              </span>
+            </div>
+
+            <div class="trader-card__stats">
+              <div class="trader-card__stat">
+                <span class="trader-card__stat-label">净值</span>
+                <span class="trader-card__stat-value"><%= number_to_currency(row[:equity_value], unit: "¥", precision: 0) %></span>
+              </div>
+              <div class="trader-card__stat">
+                <span class="trader-card__stat-label">累计盈亏</span>
+                <span class="trader-card__stat-value <%= row[:profit_loss] >= 0 ? 'positive' : 'negative' %>">
+                  <%= row[:profit_loss] >= 0 ? '+' : '' %><%= number_to_currency(row[:profit_loss], unit: "¥", precision: 0) %>
+                </span>
+              </div>
+              <div class="trader-card__stat">
+                <span class="trader-card__stat-label">收益率</span>
+                <span class="trader-card__stat-value <%= row[:profit_loss_percent] >= 0 ? 'positive' : 'negative' %>">
+                  <%= row[:profit_loss_percent] >= 0 ? '+' : '' %><%= row[:profit_loss_percent] %>%
+                </span>
+              </div>
+            </div>
+
+            <div class="portfolio-dashboard__mini-chart-card">
+              <div class="portfolio-dashboard__mini-chart-header">
+                <span class="portfolio-dashboard__mini-chart-title">收益曲线</span>
+                <strong class="<%= trader_chart[:latest_pnl] >= 0 ? 'positive' : 'negative' %>">
+                  <%= trader_chart[:latest_pnl] >= 0 ? '+' : '' %><%= number_to_currency(trader_chart[:latest_pnl], unit: "¥", precision: 0) %>
+                </strong>
+              </div>
+              <% if trader_chart[:has_points] %>
+                <svg viewBox="0 0 100 64" class="portfolio-dashboard__mini-chart-svg" preserveAspectRatio="none" role="img" aria-label="<%= "#{trader.name} 收益曲线" %>">
+                  <line x1="0" y1="64" x2="100" y2="64" class="portfolio-dashboard__chart-axis"></line>
+                  <path d="<%= trader_chart[:path] %>" class="portfolio-dashboard__chart-line <%= trader_chart[:latest_pnl] >= 0 ? "portfolio-dashboard__chart-line--profit" : "portfolio-dashboard__chart-line--loss" %>"></path>
+                </svg>
+                <div class="portfolio-dashboard__mini-chart-labels">
+                  <span><%= trader_chart[:start_label] %></span>
+                  <span><%= trader_chart[:end_label] %></span>
+                </div>
+              <% else %>
+                <div class="portfolio-dashboard__mini-chart-empty">执行历史不足，暂时没有可绘制的收益曲线。</div>
+              <% end %>
+            </div>
+
+            <div class="portfolio-dashboard__trader-grid">
+              <div class="portfolio-dashboard__trader-block">
+                <span class="portfolio-dashboard__block-label">资产拆分</span>
+                <div class="portfolio-dashboard__block-value">
+                  <strong>现金 <%= number_to_currency(row[:cash_value], unit: "¥", precision: 0) %></strong>
+                  <small>持仓 <%= number_to_currency(row[:invested_value], unit: "¥", precision: 0) %></small>
+                </div>
+              </div>
+
+              <div class="portfolio-dashboard__trader-block">
+                <span class="portfolio-dashboard__block-label">最近执行</span>
+                <% if latest_task.present? %>
+                  <div class="portfolio-dashboard__block-value">
+                    <span class="portfolio-task-badge portfolio-task-badge--<%= latest_task.status %>"><%= latest_task.status.humanize %></span>
+                    <small><%= l(latest_task.created_at, format: :short) %></small>
+                  </div>
+                <% else %>
+                  <span class="portfolio-dashboard__block-empty">暂无执行记录</span>
+                <% end %>
+              </div>
+
+              <div class="portfolio-dashboard__trader-block">
+                <span class="portfolio-dashboard__block-label">当前持仓</span>
+                <div class="portfolio-dashboard__block-value">
+                  <strong><%= active_positions.size %></strong>
+                  <% if active_positions.any? %>
+                    <small><%= active_positions.first(3).map { |position| position.asset.symbol }.join(", ") %></small>
+                  <% else %>
+                    <small>空仓</small>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="portfolio-dashboard__trader-block">
+                <span class="portfolio-dashboard__block-label">最近交易</span>
+                <% if recent_trade.present? %>
+                  <div class="portfolio-dashboard__block-value">
+                    <strong><%= recent_trade.action.upcase %> <%= recent_trade.asset.symbol %></strong>
+                    <small><%= l(recent_trade.executed_at, format: :short) %></small>
+                  </div>
+                <% else %>
+                  <span class="portfolio-dashboard__block-empty">暂无交易流水</span>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="trader-card__actions">
+              <%= link_to "查看操盘手", trader_path(trader), class: "btn btn-secondary" %>
+            </div>
+          </article>
+        <% end %>
+      </section>
+    <% else %>
+      <div class="traders-empty">
+        <div class="traders-empty__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20"></path>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        </div>
+        <h3 class="traders-empty__title">还没有可展示的模拟盘</h3>
+        <p class="traders-empty__text">先创建操盘手并生成 recommendation，Portfolio Dashboard 才会开始显示组合结果。</p>
+        <%= link_to "创建操盘手", new_trader_path, class: "btn btn-primary" %>
+      </div>
+    <% end %>
+  </main>
+</div>

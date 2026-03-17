@@ -1,0 +1,59 @@
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--color-text-secondary);
+}
+
+.status-pill--generated,
+.status-pill--valid_payload {
+  background: rgba(16, 185, 129, 0.14);
+  color: #10b981;
+}
+
+.status-pill--pending,
+.status-pill--pending_validation,
+.status-pill--running {
+  background: rgba(245, 158, 11, 0.14);
+  color: #f59e0b;
+}
+
+.status-pill--failed,
+.status-pill--invalid_payload,
+.status-pill--invalid_payload {
+  background: rgba(239, 68, 68, 0.14);
+  color: #ef4444;
+}
+
+.json-viewer {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--color-border);
+  color: #cbd5e1;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.text-link {
+  color: var(--color-accent-primary);
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
+.btn-sm {
+  padding: 0.45rem 0.8rem;
+  font-size: 0.75rem;
+}

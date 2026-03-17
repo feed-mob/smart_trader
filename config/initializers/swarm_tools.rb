@@ -14,6 +14,7 @@ Rails.application.config.after_initialize do
 
   [
     ListAssetsTool,
+    GetCurrentPortfolioTool,
     GetAssetPriceTool,
     GetFactorDataTool,
     GetSignalDataTool,
@@ -28,7 +29,7 @@ Rails.application.config.after_initialize do
     Rails.logger.warn "[SwarmTools] Failed to register #{tool_class.name}: #{e.message}"
   end
 
-  Rails.logger.info "[SwarmTools] Initialized 7 tools"
+  Rails.logger.info "[SwarmTools] Initialized 8 tools"
 rescue StandardError => e
   Rails.logger.error "[SwarmTools] Initialization error: #{e.message}"
   Rails.logger.error e.backtrace.first(10).join("\n")

@@ -4,6 +4,8 @@ class Asset < ApplicationRecord
   has_many :asset_snapshots, dependent: :destroy
   has_many :factor_values, dependent: :destroy
   has_many :candles, dependent: :destroy
+  has_many :trader_positions, dependent: :restrict_with_exception
+  has_many :trader_trades, dependent: :restrict_with_exception
 
   # Latest snapshot association for eager loading (prevents N+1 queries)
   has_one :latest_snapshot, -> { order(captured_at: :desc) }, class_name: 'AssetSnapshot'

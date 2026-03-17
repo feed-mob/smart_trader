@@ -10,6 +10,10 @@ class TradersController < ApplicationController
 
   def show
     @strategies = @trader.trading_strategies.order(:market_condition)
+    @latest_allocation_task = @trader.allocation_tasks.recent.first
+    @latest_portfolio_snapshot = @trader.portfolio_snapshots.recent.first
+    @trader_positions = @trader.trader_positions.active.includes(:asset).ordered_by_value
+    @recent_trader_trades = @trader.trader_trades.recent.includes(:asset).limit(10)
   end
 
   def new

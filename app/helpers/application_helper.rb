@@ -26,4 +26,32 @@ module ApplicationHelper
     sign = value.to_f >= 0 ? '+' : ''
     "#{sign}#{value.to_f.round(2)}%"
   end
+
+  # Job 执行状态样式类
+  def status_badge_class(status)
+    case status.to_s.downcase
+    when 'success'
+      'buy'
+    when 'failed'
+      'sell'
+    when 'running'
+      'hold'
+    else
+      ''
+    end
+  end
+
+  # Job 执行状态标签
+  def status_label(status)
+    case status.to_s.downcase
+    when 'success'
+      '成功'
+    when 'failed'
+      '失败'
+    when 'running'
+      '运行中'
+    else
+      status
+    end
+  end
 end

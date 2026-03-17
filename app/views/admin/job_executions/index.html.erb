@@ -1,0 +1,184 @@
+<% content_for :title, "Job 执行记录" %>
+
+<div class="signals-container">
+  <!-- Background -->
+  <div class="signals-background">
+    <div class="signals-background__gradient"></div>
+    <div class="signals-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <div class="signals-header">
+    <div class="signals-header__left">
+      <%= link_to root_path, class: "signals-home-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9v11a2H5a2 2H5a2z"></path>
+          <polyline points="9 22 9 12 15 22"></polyline>
+        </svg>
+      <% end %>
+      <div>
+        <h1 class="signals-header__title">Job 执行记录</h1>
+        <p class="signals-header__subtitle">后台任务执行监控</p>
+      </div>
+    </div>
+    <div class="signals-header__right">
+      <%= link_to sidekiq_web_path, class: "signals-btn signals-btn--secondary", target: "_blank" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg>
+        Sidekiq 监控
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="signals-stats">
+    <div class="stat-card stat-card--total">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:total] %></span>
+        <span class="stat-card__label">总执行数</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card--buy">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12 10.5 8.5 10.5 2 17"></path>
+          <polyline points="16 7 22 7 22 13"></polyline>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:success] %></span>
+        <span class="stat-card__label">成功</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card--sell">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:failed] %></span>
+        <span class="stat-card__label">失败</span>
+      </div>
+    </div>
+    <div class="stat-card stat-card--high">
+      <div class="stat-card__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+      <div class="stat-card__content">
+        <span class="stat-card__value"><%= @stats[:running] %></span>
+        <span class="stat-card__label">运行中</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="signals-filters">
+    <%= form_with url: admin_job_executions_path, method: :get, local: true, class: "signals-filters__form" do |f| %>
+      <div class="filter-group">
+        <label class="filter-label">Job 名称</label>
+        <%= f.select :job_name, options_for_select([["全部", ""]] + @job_names.map { |n| [n, n] }, params[:job_name]), {}, class: "filter-select" %>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">状态</label>
+        <%= f.select :status, options_for_select([["全部", ""], ["运行中", "running"], ["成功", "success"], ["失败", "failed"]], params[:status]), {}, class: "filter-select" %>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">开始日期</label>
+        <%= f.date_field :start_date, value: params[:start_date], class: "filter-input" %>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">结束日期</label>
+        <%= f.date_field :end_date, value: params[:end_date], class: "filter-input" %>
+      </div>
+      <div class="filter-group">
+        <%= f.submit "筛选", class: "signals-btn signals-btn--small" %>
+        <%= link_to "重置", admin_job_executions_path, class: "signals-btn signals-btn--small signals-btn--outline" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Executions Table -->
+  <div class="signals-section">
+    <h2 class="signals-section__title">执行记录</h2>
+    <div class="signals-table-wrapper">
+      <table class="signals-table">
+        <thead>
+          <tr>
+            <th>Job 名称</th>
+            <th>状态</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>耗时</th>
+            <th>队列</th>
+            <th>错误信息</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @executions.each do |execution| %>
+            <tr class="signals-table__row signals-table__row--<%= execution.status %>">
+              <td>
+                <div class="asset-cell">
+                  <span class="asset-symbol"><%= execution.job_name.demodulize %></span>
+                  <span class="asset-name"><%= execution.job_name %></span>
+                </div>
+              </td>
+              <td>
+                <span class="signal-badge signal-badge--<%= status_badge_class(execution.status) %>">
+                  <%= status_label(execution.status) %>
+                </span>
+              </td>
+              <td>
+                <span class="time-cell"><%= execution.started_at.strftime("%Y-%m-%d %H:%M:%S") %></span>
+              </td>
+              <td>
+                <span class="time-cell">
+                  <%= execution.finished_at&.strftime("%Y-%m-%d %H:%M:%S") || "-" %>
+                </span>
+              </td>
+              <td>
+                <span class="duration-cell"><%= execution.formatted_duration %></span>
+              </td>
+              <td>
+                <span class="queue-cell"><%= execution.queue_name || "default" %></span>
+              </td>
+              <td>
+                <% if execution.error_message.present? %>
+                  <span class="error-text" title="<%= execution.error_message %>">
+                    <%= truncate(execution.error_message, length: 40) %>
+                  </span>
+                <% else %>
+                  <span class="text-gray-400">-</span>
+                <% end %>
+              </td>
+              <td>
+                <%= link_to "详情", admin_job_execution_path(execution), class: "action-link" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if @executions.respond_to?(:total_pages) %>
+      <div class="pagination">
+        <%= paginate @executions %>
+      </div>
+    <% end %>
+  </div>
+</div>

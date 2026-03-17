@@ -1,0 +1,123 @@
+<% content_for :title, "Admin 管理面板" %>
+
+<div class="signals-container">
+  <!-- Background -->
+  <div class="signals-background">
+    <div class="signals-background__gradient"></div>
+    <div class="signals-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+          <div class="signals-header">
+            <div class="signals-header__left">
+              <%= link_to root_path, class: "signals-home-link" do %>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9v11a2H5a2z"></path>
+                  <polyline points="9 22 9 12 15 22"></polyline>
+                </svg>
+              <% end %>
+              <div>
+                <h1 class="signals-header__title">Admin管理面板</h1>
+                <p class="signals-header__subtitle">系统管理入口</p>
+            </div>
+
+            <div class="signals-header__right">
+              <div class="admin-nav">
+                <%= link_to "进入管理面板", class: "signals-btn signals-btn--primary" do %>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                </svg>
+                </span>
+
+                <!-- Stats Cards -->
+                <div class="stat-card stat-card--total">
+                    <div class="stat-card__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                    </div>
+                    <div class="stat-card__content">
+                        <span class="stat-card__value"><%= @factor_count %></span>
+                        <span class="stat-card__label">活跃因子</span>
+                    </div>
+
+                    <div class="stat-card stat-card--buy">
+                        <div class="stat-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12 10.5 8.5 10.5 2 17"></path>
+                                <polyline points="16 7 22 7 22 13"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                  </div>
+
+                    <div class="stat-card stat-card--sell">
+                        <div class="stat-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y2="9"></line>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card--high">
+                        <div class="stat-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 14 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-card--high">
+                        <div class="stat-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Job Stats -->
+                    <div class="stat-card stat-card--high">
+                        <div class="stat-card__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Recent Jobs -->
+                    <div class="admin-section">
+                        <h2 class="admin-section__title">最近任务执行</h2>
+                        <table class="signals-table">
+                            <thead>
+                                <tr>
+                                    <th>Job 名称</th>
+                                    <th>状态</th>
+                                            <th>开始时间</th>
+                                            <th>结束时间</th>
+                                            <th>耗时</th>
+                                            <th>错误信息</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-nav">
+            <%= link_to "返回管理面板", class: "signals-btn signals-btn--small" %>
+            <%= link_to "查看全部", admin_job_executions_path, class: "signals-btn signals-btn--small signals-btn--outline" %>
+        </div>
+    </div>
+</div>
