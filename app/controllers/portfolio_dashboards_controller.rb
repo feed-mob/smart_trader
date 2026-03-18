@@ -18,43 +18,32 @@ class PortfolioDashboardsController < ApplicationController
   def build_trader_dashboard_rows(traders)
     traders.map do |trader|
       latest_task = trader.allocation_tasks.max_by { |task| [task.run_on, task.created_at] }
-      latest_snapshot = trader.portfolio_snapshots.max_by { |snapshot| [snapshot.snapshot_date, snapshot.captured_at] }
       active_positions = trader.trader_positions.select(&:active?)
       recent_trade = trader.trader_trades.max_by(&:executed_at)
-      invested_value = active_positions.sum do |position|
-        latest_price = position.asset.latest_snapshot&.price&.to_d || position.current_price.to_d
-        position.quantity.to_d * latest_price
-      end.round(2)
+      position_metrics = summarize_positions(active_positions)
       cash_value, equity_value, profit_loss, profit_loss_percent =
-        metrics_from_snapshot_or_market_value(trader, latest_snapshot, invested_value, latest_task)
+        current_portfolio_metrics(trader, position_metrics[:invested_value], latest_task)
+      realized_pnl = (profit_loss - position_metrics[:unrealized_pnl]).round(2)
       trader_chart = build_trader_chart(trader)
 
       {
         trader: trader,
         latest_task: latest_task,
-        latest_snapshot: latest_snapshot,
         active_positions: active_positions,
         recent_trade: recent_trade,
+        position_metrics: position_metrics,
         cash_value: cash_value.round(2),
-        invested_value: invested_value,
+        invested_value: position_metrics[:invested_value],
         equity_value: equity_value,
         profit_loss: profit_loss,
         profit_loss_percent: profit_loss_percent,
+        realized_pnl: realized_pnl,
         chart: trader_chart
       }
     end
   end
 
-  def metrics_from_snapshot_or_market_value(trader, latest_snapshot, invested_value, latest_task)
-    if latest_snapshot.present?
-      return [
-        latest_snapshot.cash_value.to_d,
-        latest_snapshot.portfolio_value.to_d,
-        latest_snapshot.profit_loss.to_d,
-        latest_snapshot.profit_loss_percent.to_d
-      ]
-    end
-
+  def current_portfolio_metrics(trader, invested_value, latest_task)
     ending_cash = latest_task&.ending_cash.to_d
     cash_value = if latest_task.present?
                    ending_cash
@@ -72,10 +61,40 @@ class PortfolioDashboardsController < ApplicationController
     [cash_value, equity_value, profit_loss, profit_loss_percent]
   end
 
+  def summarize_positions(active_positions)
+    invested_value = 0.to_d
+    unrealized_pnl = 0.to_d
+
+    active_positions.each do |position|
+      quantity = position.quantity.to_d
+      latest_price = position.asset.latest_snapshot&.price&.to_d || position.current_price.to_d
+      market_value = (quantity * latest_price).round(2)
+      cost_basis = (quantity * position.average_cost.to_d).round(2)
+
+      invested_value += market_value
+      unrealized_pnl += market_value - cost_basis
+    end
+
+    unrealized_pnl = unrealized_pnl.round(2)
+    unrealized_cost_basis = (invested_value - unrealized_pnl).round(2)
+    unrealized_pnl_percent = if unrealized_cost_basis.positive?
+                               ((unrealized_pnl / unrealized_cost_basis) * 100).round(2)
+                             else
+                               0
+                             end
+
+    {
+      invested_value: invested_value.round(2),
+      unrealized_pnl: unrealized_pnl,
+      unrealized_pnl_percent: unrealized_pnl_percent
+    }
+  end
+
   def build_dashboard_stats(rows)
     active_traders = rows.count { |row| row[:trader].active? }
     total_equity = rows.sum { |row| row[:equity_value] }
     total_profit_loss = rows.sum { |row| row[:profit_loss] }
+    total_unrealized_pnl = rows.sum { |row| row.dig(:position_metrics, :unrealized_pnl).to_d }
     total_positions = rows.sum { |row| row[:active_positions].size }
     completed_tasks = rows.sum { |row| row[:trader].allocation_tasks.count(&:completed?) }
 
@@ -86,9 +105,10 @@ class PortfolioDashboardsController < ApplicationController
                      end
 
     {
-      active_traders: active_traders.size,
+      active_traders: active_traders,
       total_equity: total_equity,
       total_profit_loss: total_profit_loss,
+      total_unrealized_pnl: total_unrealized_pnl.round(2),
       total_positions: total_positions,
       completed_tasks: completed_tasks,
       average_return: average_return.round(2)
