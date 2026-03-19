@@ -12,11 +12,20 @@
     <div class="assets-header__left">
       <%= link_to market_assets_path, class: "assets-logo" do %>
         <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:1" />
+            </linearGradient>
+          </defs>
           <path d="M14 22L16 17C17 16 19 15 22 15C25 15 27 17 28 19L30 22" stroke="url(#logoGradient)" stroke-width="2" stroke-linecap="round"/>
           <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
         </svg>
       <% end %>
       <h1 class="assets-header__title"><%= @asset.symbol %></h1>
+      <span class="asset-type-badge asset-type-badge--<%= @asset.asset_type %>">
+        <%= @asset.asset_type.upcase %>
+      </span>
     </div>
     <div class="assets-header__right">
       <%= link_to "返回列表", market_assets_path, class: "btn btn-ghost" %>
@@ -31,52 +40,88 @@
       </div>
     <% end %>
 
+    <!-- Asset Hero Section -->
+    <div class="asset-hero">
+      <div class="asset-hero__content">
+        <div class="asset-hero__eyebrow">资产详情</div>
+        <h2 class="asset-hero__title"><%= @asset.name %></h2>
+        <p class="asset-hero__subtitle">
+          在 <%= @asset.exchange %> 交易 · 以 <%= @asset.quote_currency %> 计价
+        </p>
+      </div>
+      <div class="asset-hero__metrics">
+        <% if @asset.current_price %>
+          <div class="asset-hero__metric">
+            <span class="asset-hero__metric-label">当前价格</span>
+            <span class="asset-hero__metric-value">
+              <%= number_to_currency(@asset.current_price, precision: 4) %>
+              <small><%= @asset.quote_currency %></small>
+            </span>
+          </div>
+        <% end %>
+        <% if @asset.latest_snapshot && @asset.latest_snapshot.change_percent %>
+          <div class="asset-hero__metric <%= @asset.latest_snapshot.change_percent >= 0 ? 'asset-hero__metric--positive' : 'asset-hero__metric--negative' %>">
+            <span class="asset-hero__metric-label">24小时</span>
+            <span class="asset-hero__metric-value">
+              <%= @asset.latest_snapshot.change_percent >= 0 ? '+' : '' %><%= @asset.latest_snapshot.change_percent.round(2) %>%
+            </span>
+          </div>
+        <% end %>
+        <% if @asset.latest_snapshot && @asset.latest_snapshot.volume %>
+          <div class="asset-hero__metric">
+            <span class="asset-hero__metric-label">成交量</span>
+            <span class="asset-hero__metric-value">
+              <%= number_with_delimiter(@asset.latest_snapshot.volume.to_i) %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
     <!-- Asset Detail -->
     <div class="asset-detail">
       <!-- Basic Info Section -->
       <div class="trader-detail__section">
-        <h2 class="trader-detail__section-title">基本信息</h2>
+        <h2 class="trader-detail__section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          基本信息
+        </h2>
         <div class="trader-detail__grid">
           <div class="trader-detail__item">
             <span class="trader-detail__label">资产类型</span>
             <span class="trader-detail__value">
               <span class="asset-type-badge asset-type-badge--<%= @asset.asset_type %>">
-                <span class="asset-type-badge__icon">
-                  <% case @asset.asset_type.to_s.downcase %>
-                  <% when 'crypto' %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="8"></circle>
-                      <path d="M12 2v2"></path>
-                      <path d="M12 20v2"></path>
-                      <path d="M4.93 4.93l1.41 1.41"></path>
-                      <path d="M17.66 17.66l1.41 1.41"></path>
-                      <path d="M2 12h2"></path>
-                      <path d="M20 12h2"></path>
-                      <path d="M4.93 19.07l1.41-1.41"></path>
-                      <path d="M17.66 6.34l1.41-1.41"></path>
-                    </svg>
-                  <% when 'stock' %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 21h18"></path>
-                      <path d="M5 21V7l8-4 8 4v14"></path>
-                      <path d="M8 21V12"></path>
-                      <path d="M12 21V12"></path>
-                      <path d="M16 21V12"></path>
-                    </svg>
-                  <% when 'forex' %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="6" x2="12" y2="18"></line>
-                      <line x1="6" y1="12" x2="18" y2="12"></line>
-                    </svg>
-                  <% else %>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                  <% end %>
-                </span>
+                <% case @asset.asset_type.to_s.downcase %>
+                <% when 'crypto' %>
+                  <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="9" r="6"></circle>
+                    <path d="M9 3v1"></path>
+                    <path d="M9 14v1"></path>
+                    <path d="M4 9h1"></path>
+                    <path d="M13 9h1"></path>
+                  </svg>
+                <% when 'stock' %>
+                  <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2 16h14"></path>
+                    <path d="M4 16V5l6-3 6 3v11"></path>
+                  </svg>
+                <% when 'forex' %>
+                  <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="9" r="7"></circle>
+                    <line x1="9" y1="4.5" x2="9" y2="13.5"></line>
+                    <line x1="4.5" y1="9" x2="13.5" y2="9"></line>
+                  </svg>
+                <% else %>
+                  <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="9" r="7"></circle>
+                    <line x1="9" y1="6" x2="9" y2="9"></line>
+                    <line x1="9" y1="12" x2="9.01" y2="12"></line>
+                  </svg>
+                <% end %>
                 <%= @asset.asset_type.upcase %>
               </span>
             </span>
@@ -108,15 +153,34 @@
           </div>
         </div>
 
-        <div class="trader-detail__description">
-          <h3 class="trader-detail__description-title">资产名称</h3>
-          <p class="trader-detail__description-text"><%= @asset.name %></p>
-        </div>
+        <% if @asset.coingecko_id.present? || @asset.yahoo_symbol.present? %>
+          <div class="trader-detail__description">
+            <h3 class="trader-detail__description-title">外部标识符</h3>
+            <div class="trader-detail__external-ids">
+              <% if @asset.coingecko_id.present? %>
+                <div class="trader-detail__external-id">
+                  <span class="trader-detail__external-id-label">CoinGecko ID</span>
+                  <span class="trader-detail__external-id-value"><%= @asset.coingecko_id %></span>
+                </div>
+              <% end %>
+              <% if @asset.yahoo_symbol.present? %>
+                <div class="trader-detail__external-id">
+                  <span class="trader-detail__external-id-label">Yahoo Symbol</span>
+                  <span class="trader-detail__external-id-value"><%= @asset.yahoo_symbol %></span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
       </div>
 
       <!-- Market Data Section -->
       <div class="trader-detail__section">
         <h2 class="trader-detail__section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"></path>
+            <path d="M18 9l-5 10-5-5-5 5"></path>
+          </svg>
           市场数据
           <span class="strategy-matrix-hint">（基于最新快照）</span>
         </h2>
@@ -130,7 +194,6 @@
               </span>
             </div>
           <% end %>
-
           <% if @asset.latest_snapshot && @asset.latest_snapshot.change_percent %>
             <div class="trader-detail__item">
               <span class="trader-detail__label">24小时变化</span>
@@ -139,7 +202,6 @@
               </span>
             </div>
           <% end %>
-
           <% if @asset.latest_snapshot && @asset.latest_snapshot.volume %>
             <div class="trader-detail__item">
               <span class="trader-detail__label">成交量</span>
@@ -148,7 +210,6 @@
               </span>
             </div>
           <% end %>
-
           <% if @asset.market_cap %>
             <div class="trader-detail__item">
               <span class="trader-detail__label">市值</span>
@@ -157,14 +218,12 @@
               </span>
             </div>
           <% end %>
-
           <% if @asset.market_cap_rank %>
             <div class="trader-detail__item">
               <span class="trader-detail__label">市值排名</span>
               <span class="trader-detail__value">#<%= @asset.market_cap_rank %></span>
             </div>
           <% end %>
-
           <% if @asset.latest_snapshot&.captured_at %>
             <div class="trader-detail__item">
               <span class="trader-detail__label">快照时间</span>
@@ -174,32 +233,19 @@
             </div>
           <% end %>
         </div>
-
-        <% if @asset.coingecko_id.present? || @asset.yahoo_symbol.present? %>
-          <div class="trader-detail__description">
-            <h3 class="trader-detail__description-title">外部标识符</h3>
-            <div class="trader-detail__external-ids">
-              <% if @asset.coingecko_id.present? %>
-                <div class="trader-detail__external-id">
-                  <span class="trader-detail__external-id-label">CoinGecko ID:</span>
-                  <span class="trader-detail__external-id-value"><%= @asset.coingecko_id %></span>
-                </div>
-              <% end %>
-              <% if @asset.yahoo_symbol.present? %>
-                <div class="trader-detail__external-id">
-                  <span class="trader-detail__external-id-label">Yahoo Symbol:</span>
-                  <span class="trader-detail__external-id-value"><%= @asset.yahoo_symbol %></span>
-                </div>
-              <% end %>
-            </div>
-          </div>
-        <% end %>
       </div>
 
       <!-- Timeframe Section -->
       <div class="trader-detail__section">
-        <h2 class="trader-detail__section-title">时间范围</h2>
+        <h2 class="trader-detail__section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          历史快照时间范围
+        </h2>
         <div class="timeframe-selector">
+          <span class="timeframe-selector__label">选择时间范围：</span>
           <% ['all', '1h', '6h', '24h', '7d', '30d'].each do |tf| %>
             <%= link_to timeframe_label(tf), market_asset_path(@asset, timeframe: tf),
                   class: "timeframe-btn #{tf == @timeframe ? 'timeframe-btn--active' : ''}" %>
@@ -209,8 +255,18 @@
 
       <!-- Snapshots History Section -->
       <div class="trader-detail__section">
-        <h2 class="trader-detail__section-title">历史快照</h2>
-        <p class="assets-section__subtitle"><%= @snapshots.count %> 条记录</p>
+        <h2 class="trader-detail__section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          历史快照记录
+          <span class="strategy-matrix-hint"><%= @snapshots.count %> 条记录</span>
+        </h2>
 
         <% if @snapshots.any? %>
           <div class="snapshots-table-container">
