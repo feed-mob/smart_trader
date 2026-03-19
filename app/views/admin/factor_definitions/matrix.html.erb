@@ -29,7 +29,7 @@
     </div>
     <div class="factor-matrix-header__right">
       <span class="factor-matrix-header__info">
-        更新时间: <%= @factor_values.first&.calculated_at&.strftime('%Y-%m-%d %H:%M') || '暂无数据' %>
+        更新时间: <%= @latest_calculated_at&.strftime('%Y-%m-%d %H:%M') || '暂无数据' %>
       </span>
     </div>
   </header>

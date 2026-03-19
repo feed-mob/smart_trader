@@ -7,8 +7,27 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Sidekiq Web UI (add authentication in production!)
-  require "sidekiq/web"
+  # Sidekiq Web UI. In production, require dedicated Basic Auth credentials.
+  if Rails.env.production?
+    sidekiq_username = ENV["SIDEKIQ_USERNAME"].to_s
+    sidekiq_password = ENV["SIDEKIQ_PASSWORD"].to_s
+
+    Sidekiq::Web.use Rack::Auth::Basic do |username, password|
+      next false if sidekiq_username.blank? || sidekiq_password.blank?
+
+      username_matches = ActiveSupport::SecurityUtils.secure_compare(
+        Digest::SHA256.hexdigest(username),
+        Digest::SHA256.hexdigest(sidekiq_username)
+      )
+      password_matches = ActiveSupport::SecurityUtils.secure_compare(
+        Digest::SHA256.hexdigest(password),
+        Digest::SHA256.hexdigest(sidekiq_password)
+      )
+
+      username_matches & password_matches
+    end
+  end
+
   mount Sidekiq::Web => "/sidekiq"
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

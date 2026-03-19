@@ -1,389 +1,390 @@
-# Coolify 部署指南
+# SmartTrader Coolify 部署说明
 
-本文档介绍如何将 SmartTrader 项目部署到 Coolify 平台。
+本文档针对当前仓库 `https://github.com/feed-mob/smart_trader`，说明如何使用 Coolify 发布系统。
 
-## 目录
+适用场景：
 
-- [前置要求](#前置要求)
-- [项目准备](#项目准备)
-- [Coolify 配置](#coolify-配置)
-- [环境变量](#环境变量)
-- [部署步骤](#部署步骤)
-- [常见问题](#常见问题)
+- Coolify 自托管或 Coolify Cloud
+- GitHub 私有仓库
+- Rails 8 + Dockerfile 部署
+- PostgreSQL + Redis + Sidekiq
 
-## 前置要求
+## 推荐部署架构
 
-1. 一台已安装 Coolify 的服务器（或使用 Coolify Cloud）
-2. GitHub/GitLab 仓库访问权限
-3. 域名（可选，但推荐）
+不要把所有东西硬塞进一个容器。这个项目当前依赖：
 
-## 项目准备
+- Rails Web
+- PostgreSQL
+- Redis
+- Sidekiq Worker
 
-### 1. 确保 Dockerfile 存在
+推荐在 Coolify 中创建 4 个资源：
 
-项目根目录需要有 `Dockerfile`。如果使用 Kamal 部署，应该已经有 `Dockerfile`。
+1. `smart-trader-web`
+2. `smart-trader-worker`
+3. `smart-trader-postgres`
+4. `smart-trader-redis`
 
-### 2. 数据库配置
+说明：
 
-确保 `config/database.yml` 支持环境变量配置：
+- `web` 负责页面、API、登录、后台页面
+- `worker` 负责 Sidekiq 后台任务
+- `postgres` 存业务数据
+- `redis` 给 Sidekiq、缓存、Action Cable 使用
 
-```yaml
-default: &default
-  adapter: postgresql
-  encoding: unicode
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: <%= ENV.fetch("DATABASE_HOST") { "localhost" } %>
-  port: <%= ENV.fetch("DATABASE_PORT") { 5432 } %>
-  username: <%= ENV.fetch("DATABASE_USERNAME") { "postgres" } %>
-  password: <%= ENV.fetch("DATABASE_PASSWORD") { "" } %>
+## 当前仓库可直接复用的内容
 
+这个仓库已经具备 Dockerfile 部署条件：
+
+- 有 [Dockerfile](/Users/jason/rails/smart_trader/Dockerfile)
+- 有 [bin/docker-entrypoint](/Users/jason/rails/smart_trader/bin/docker-entrypoint)
+- 有 [config/puma.rb](/Users/jason/rails/smart_trader/config/puma.rb)
+- 有健康检查路由 `/up`，见 [config/routes.rb](/Users/jason/rails/smart_trader/config/routes.rb)
+- 生产环境启用了 `Sidekiq`，见 [config/environments/production.rb](/Users/jason/rails/smart_trader/config/environments/production.rb)
+
+因此，Coolify 里最合适的构建方式是：
+
+- Git 源部署
+- Build Pack 选择 `Dockerfile`
+
+不建议优先走 `Nixpacks`。
+
+## 部署前需要注意的事项
+
+### 1. 当前 production 数据库配置不够理想
+
+当前 [config/database.yml](/Users/jason/rails/smart_trader/config/database.yml) 中：
+
+- `development` 使用 `PRIMARY_DATABASE_URL`
+- `production` 不是 `DATABASE_URL` 模式
+- `production` 仍然是拆开的 `database / username / password` 结构
+
+这意味着：
+
+- 在 Coolify 中虽然可以创建 PostgreSQL
+- 但 Rails production 不能很自然地直接使用 Coolify 提供的标准连接串
+
+建议上线前把 `production` 改成支持：
+
+```yml
 production:
-  <<: *default
-  database: <%= ENV.fetch("DATABASE_NAME") { "smart_trader_production" } %>
+  url: <%= ENV.fetch("DATABASE_URL") %>
 ```
 
-### 3. 添加 dockerignore（如不存在）
+这是部署前最值得先改的一处。
 
-创建 `.dockerignore` 文件：
+### 2. `/sidekiq` 现在直接挂在公网路由上
 
-```
-.git
-.gitignore
-README.md
-.env*
-!.env.example
-node_modules
-log/*
-tmp/*
-storage/*
-public/assets
-.bundle
-vendor/bundle
+当前 [config/routes.rb](/Users/jason/rails/smart_trader/config/routes.rb) 直接挂载了：
+
+```ruby
+mount Sidekiq::Web => "/sidekiq"
 ```
 
-## Coolify 配置
+上线前建议为生产环境增加鉴权保护，否则任何知道地址的人都可以访问 Sidekiq 面板。
 
-### 方式一：通过 Git 仓库部署（推荐）
+### 3. Google 登录需要补生产域名
 
-1. **登录 Coolify 控制台**
+当前项目使用 Google 登录，相关变量见：
 
-   访问你的 Coolify 实例（通常是 `https://coolify.yourdomain.com`）
+- [config/initializers/google_sign_in.rb](/Users/jason/rails/smart_trader/config/initializers/google_sign_in.rb)
+- [app/views/sessions/new.html.erb](/Users/jason/rails/smart_trader/app/views/sessions/new.html.erb)
 
-2. **创建新项目**
+上线后需要在 Google Cloud Console 中补充生产域名，否则登录可能失败。
 
-   - 点击 "New Project"
-   - 输入项目名称：`SmartTrader`
+### 4. `action_mailer.default_url_options` 仍是占位值
 
-3. **添加新服务**
+当前 [config/environments/production.rb](/Users/jason/rails/smart_trader/config/environments/production.rb) 中仍是：
 
-   - 在项目中选择 "New Resource" → "Service"
-   - 选择 "Git Repository"
-
-4. **配置 Git 仓库**
-
-   - Repository URL: `https://github.com/your-org/smart_trader`
-   - Branch: `main`
-   - Build Pack: `Nixpacks` 或 `Docker`
-
-5. **配置构建设置**
-
-   如果使用 Nixpacks：
-   - Build Command: `bundle install && rails assets:precompile`
-   - Start Command: `bin/rails server -b 0.0.0.0 -p ${PORT:-3000}`
-
-   如果使用 Docker：
-   - Dockerfile Location: `/Dockerfile`
-   - 确保 Dockerfile 暴露正确的端口
-
-### 方式二：通过 Docker Compose 部署
-
-1. 创建 `docker-compose.coolify.yml`：
-
-```yaml
-version: '3.8'
-
-services:
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    environment:
-      - RAILS_ENV=production
-      - DATABASE_HOST=db
-      - DATABASE_USERNAME=postgres
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
-      - DATABASE_NAME=smart_trader_production
-      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-    depends_on:
-      - db
-      - redis
-    restart: unless-stopped
-
-  db:
-    image: postgres:16-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=smart_trader_production
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-
-volumes:
-  postgres_data:
-  redis_data:
+```ruby
+config.action_mailer.default_url_options = { host: "example.com" }
 ```
 
-2. 在 Coolify 中选择 "Docker Compose" 部署方式
+如果未来使用邮件功能，需要换成正式域名。
 
-## 环境变量
+## 在 Coolify 中接入 GitHub 仓库
 
-在 Coolify 的 "Environment Variables" 部分添加以下变量：
+推荐方式：
+
+- `Private Repository (with GitHub App)`
+
+原因：
+
+- 仓库是私有仓库
+- GitHub App 权限范围更清晰
+- 自动部署更顺手
+
+Coolify 官方文档：
+
+- GitHub App Setup: https://coolify.io/docs/applications/ci-cd/github/setup-app
+
+### 具体步骤
+
+1. 登录你的 Coolify：`https://coolify.tonob.net/login`
+2. 进入 `Sources`
+3. 添加 GitHub App
+4. 给 GitHub App 授权访问仓库：
+   - `feed-mob/smart_trader`
+5. 创建资源时选择：
+   - `Private Repository (with GitHub App)`
+
+## Web 应用配置
+
+创建一个应用，例如：
+
+- 名称：`smart-trader-web`
+
+推荐参数：
+
+- Repository: `feed-mob/smart_trader`
+- Branch: 你的发布分支，例如 `main`
+- Build Pack: `Dockerfile`
+- Dockerfile 路径：`/Dockerfile`
+- Base Directory: `/`
+- Exposed Port: `80`
+
+原因：
+
+- 当前 [Dockerfile](/Users/jason/rails/smart_trader/Dockerfile) 已经 `EXPOSE 80`
+- 默认 `CMD` 是：
+
+```dockerfile
+CMD ["./bin/thrust", "./bin/rails", "server"]
+```
+
+因此不需要额外自定义 web 启动命令。
+
+### Health Check
+
+建议配置：
+
+- Path: `/up`
+
+对应路由定义见 [config/routes.rb](/Users/jason/rails/smart_trader/config/routes.rb)：
+
+```ruby
+get "up" => "rails/health#show", as: :rails_health_check
+```
+
+Coolify 官方文档：
+
+- Health Checks: https://coolify.io/docs/knowledge-base/health-checks
+
+## Worker 应用配置
+
+再创建一个应用，例如：
+
+- 名称：`smart-trader-worker`
+
+它与 `web` 使用同一个仓库、同一个分支、同一个 Dockerfile。
+
+不同点是启动命令要覆盖为：
+
+```bash
+bundle exec sidekiq -C config/sidekiq.yml
+```
+
+说明：
+
+- `worker` 不需要暴露域名
+- `worker` 不需要走 HTTP 健康检查
+- 它只负责消费 Sidekiq 队列
+
+仓库中相关配置：
+
+- [Procfile](/Users/jason/rails/smart_trader/Procfile)
+- [config/sidekiq.yml](/Users/jason/rails/smart_trader/config/sidekiq.yml)
+- [config/initializers/sidekiq.rb](/Users/jason/rails/smart_trader/config/initializers/sidekiq.rb)
+
+## PostgreSQL 配置
+
+在 Coolify 中创建 PostgreSQL 数据库，例如：
+
+- 名称：`smart-trader-postgres`
+
+创建后会得到连接信息。
+
+推荐 Rails 最终使用：
+
+- `DATABASE_URL`
+
+如果你完成了前面提到的 `database.yml` 调整，那么在 Coolify 中直接给：
+
+```env
+DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/DB_NAME
+```
+
+即可。
+
+## Redis 配置
+
+在 Coolify 中创建 Redis，例如：
+
+- 名称：`smart-trader-redis`
+
+创建后将连接串配置给：
+
+```env
+REDIS_URL=redis://HOST:6379/0
+```
+
+当前项目中以下地方依赖 Redis：
+
+- Sidekiq client/server
+- Rails cache
+- Action Cable
+
+见：
+
+- [config/initializers/sidekiq.rb](/Users/jason/rails/smart_trader/config/initializers/sidekiq.rb)
+- [config/environments/production.rb](/Users/jason/rails/smart_trader/config/environments/production.rb)
+- [config/cable.yml](/Users/jason/rails/smart_trader/config/cable.yml)
+
+## 生产环境变量
+
+`web` 和 `worker` 至少都需要以下变量。
 
 ### 必需变量
 
-| 变量名 | 说明 | 示例 |
-|--------|------|------|
-| `RAILS_ENV` | Rails 环境 | `production` |
-| `SECRET_KEY_BASE` | Rails 密钥 | `rails secret` 生成 |
-| `DATABASE_HOST` | 数据库主机 | `db` 或 Postgres 服务地址 |
-| `DATABASE_USERNAME` | 数据库用户名 | `postgres` |
-| `DATABASE_PASSWORD` | 数据库密码 | 强密码 |
-| `DATABASE_NAME` | 数据库名称 | `smart_trader_production` |
-| `ANTHROPIC_API_KEY` | Claude API 密钥 | `sk-ant-...` |
+```env
+RAILS_ENV=production
+RAILS_MASTER_KEY=your_master_key
+DATABASE_URL=postgres://USER:PASSWORD@HOST:5432/DB_NAME
+REDIS_URL=redis://HOST:6379/0
+OAUTH_GOOGLE_CLIENT_ID=your_google_client_id
+OAUTH_GOOGLE_CLIENT_SECRET=your_google_client_secret
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_API_BASE=your_openai_api_base
+```
 
-### 可选变量
+如果生产环境会用到 CoinGecko，也补上：
 
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `RAILS_MAX_THREADS` | 最大线程数 | `5` |
-| `WEB_CONCURRENCY` | Web 并发数 | `2` |
-| `PORT` | 应用端口 | `3000` |
+```env
+COINGECKO_API_KEY=your_coingecko_api_key
+```
 
-### 生成 SECRET_KEY_BASE
+### 常用可选变量
+
+```env
+RAILS_LOG_LEVEL=info
+RAILS_MAX_THREADS=3
+WEB_CONCURRENCY=1
+JOB_CONCURRENCY=1
+```
+
+说明：
+
+- `RAILS_MASTER_KEY` 来自本地 [config/master.key](/Users/jason/rails/smart_trader/config/master.key)
+- `OPENAI_API_BASE` 当前项目里是实际使用中的变量，不要漏掉
+
+## 域名配置
+
+在 Coolify 的 `web` 应用中绑定正式域名，例如：
+
+- `trader.example.com`
+
+然后把 DNS 指向 Coolify 所在服务器。
+
+Coolify 官方文档：
+
+- Domains: https://coolify.io/docs/knowledge-base/domains
+
+## 首次部署流程
+
+推荐顺序：
+
+1. 先创建 PostgreSQL
+2. 再创建 Redis
+3. 创建 `smart-trader-web`
+4. 创建 `smart-trader-worker`
+5. 配置环境变量
+6. 先部署 `web`
+7. 再部署 `worker`
+
+## 数据库初始化
+
+当前 [bin/docker-entrypoint](/Users/jason/rails/smart_trader/bin/docker-entrypoint) 中：
 
 ```bash
-rails secret
-# 或
-openssl rand -hex 64
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  ./bin/rails db:prepare
+fi
 ```
 
-## 部署步骤
+因此：
 
-### 1. 添加数据库服务
+- `web` 容器启动时会自动执行 `db:prepare`
+- 包含建库、迁移等初始化动作
 
-1. 在 Coolify 项目中添加 PostgreSQL 服务
-2. 记录数据库连接信息
-3. 更新 Web 服务的环境变量
+但前提是：
 
-### 2. 配置域名
+- 数据库连接可用
+- 生产数据库权限足够
 
-1. 在服务设置中添加自定义域名
-2. 配置 DNS 记录指向 Coolify 服务器
-3. 启用 HTTPS（Coolify 自动配置 Let's Encrypt）
+## 上线后建议立即检查
 
-### 3. 首次部署
+上线后建议先检查这些地址和功能：
 
-1. 点击 "Deploy" 按钮开始部署
-2. 查看构建日志确认无错误
-3. 部署成功后访问应用
+1. `/up`
+2. `/login`
+3. 首页 `/`
+4. `traders`
+5. `portfolio_dashboard`
+6. Sidekiq 任务是否真的在跑
 
-### 4. 数据库迁移
+此外要重点验证：
 
-首次部署后需要运行数据库迁移：
+- Google 登录是否正常
+- Redis 是否连接成功
+- Sidekiq 是否开始消费任务
+- 静态资源是否加载正常
 
-**方法 A：通过 Coolify Terminal**
+## 当前项目的最小可用部署方案
 
-1. 进入 Coolify 控制台
-2. 点击服务的 "Terminal"
-3. 运行：
-```bash
-rails db:migrate
-```
+如果你只想尽快上线，最小方案是：
 
-**方法 B：修改启动命令**
+1. 保留现有 Dockerfile
+2. 在 Coolify 上创建：
+   - PostgreSQL
+   - Redis
+   - Web App
+   - Worker App
+3. 配置环境变量
+4. 部署
 
-在 Dockerfile 或启动命令中添加：
+但更稳的上线前处理仍然是：
 
-```dockerfile
-# 在 CMD 之前添加
-RUN echo '#!/bin/bash\nset -e\nrails db:prepare\nexec bin/rails server -b 0.0.0.0 -p ${PORT:-3000}' > /rails/start.sh && chmod +x /rails/start.sh
-CMD ["/rails/start.sh"]
-```
+1. 把 production 数据库配置改成 `DATABASE_URL`
+2. 给 `/sidekiq` 增加生产鉴权
 
-**方法 C：添加 release 步骤（推荐）**
+## 不建议的方案
 
-在 `bin/rails` 中添加或创建 `config/initializers/db_prepare.rb`：
+当前仓库不建议优先使用：
 
-```ruby
-# config/initializers/db_prepare.rb
-if Rails.env.production?
-  begin
-    ActiveRecord::Migration.maintain_test_schema!
-  rescue ActiveRecord::PendingMigrationError => e
-    Rails.logger.info "Running pending migrations..."
-    system("rails db:migrate")
-  end
-end
-```
+- `Nixpacks`
+- 单容器同时跑 Web + Worker
+- 直接把 `.env` 原样搬到生产
 
-更好的方式是在 `config/deploy.yml`（如果使用 Kamal）或通过启动脚本处理：
+原因：
 
-```bash
-#!/bin/bash
-set -e
+- 仓库已经有生产级 Dockerfile，没有必要再让 Nixpacks 猜
+- Web 和 Worker 混跑不利于排障和扩缩容
+- 本地 `.env` 中的值是开发环境配置，不适合直接用于生产
 
-# 等待数据库就绪
-until nc -z $DATABASE_HOST 5432; do
-  echo "Waiting for database..."
-  sleep 1
-done
+## Coolify 官方参考文档
 
-# 运行迁移
-rails db:migrate
+- GitHub App: https://coolify.io/docs/applications/ci-cd/github/setup-app
+- Applications Overview: https://coolify.io/docs/applications/
+- Dockerfile Build Pack: https://coolify.io/docs/applications/build-packs/dockerfile
+- Environment Variables: https://coolify.io/docs/knowledge-base/environment-variables
+- Health Checks: https://coolify.io/docs/knowledge-base/health-checks
+- Domains: https://coolify.io/docs/knowledge-base/domains
 
-# 启动服务
-exec bin/rails server -b 0.0.0.0 -p ${PORT:-3000}
-```
+## 建议的下一步
 
-## 配置自动部署
+如果准备正式上 Coolify，建议先做这两处代码调整：
 
-### GitHub Actions 集成
+1. 把 [config/database.yml](/Users/jason/rails/smart_trader/config/database.yml) 的 production 改成支持 `DATABASE_URL`
+2. 给 [config/routes.rb](/Users/jason/rails/smart_trader/config/routes.rb) 里的 `/sidekiq` 增加生产环境访问保护
 
-1. 在 Coolify 中获取 Webhook URL：
-   - 进入服务设置
-   - 找到 "Webhooks"
-   - 复制 Deploy Hook URL
-
-2. 在 GitHub 仓库添加 Secrets：
-   - `COOLIFY_WEBHOOK`: Webhook URL
-
-3. 创建 `.github/workflows/deploy.yml`：
-
-```yaml
-name: Deploy to Coolify
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Trigger Coolify Deploy
-        run: curl -X POST ${{ secrets.COOLIFY_WEBHOOK }}
-```
-
-## 健康检查
-
-在 Coolify 中配置健康检查：
-
-- **Health Check Path**: `/health`
-- **Health Check Interval**: 30s
-- **Health Check Timeout**: 10s
-
-添加健康检查路由：
-
-```ruby
-# config/routes.rb
-get "/health", to: proc { [200, {}, ["OK"]] }
-```
-
-## 常见问题
-
-### 1. 数据库连接失败
-
-**问题**: 应用无法连接到数据库
-
-**解决方案**:
-- 确认数据库服务已启动
-- 检查 `DATABASE_HOST` 是否正确（Docker 网络中使用服务名）
-- 确认数据库用户名密码正确
-
-### 2. 资源预编译失败
-
-**问题**: CSS/JS 资产编译失败
-
-**解决方案**:
-```bash
-# 确保安装了 Node.js
-# 在 Dockerfile 中添加：
-RUN apt-get update && apt-get install -y nodejs npm
-```
-
-### 3. 首次部署后 500 错误
-
-**问题**: 部署成功但访问返回 500
-
-**解决方案**:
-- 检查日志：`docker logs <container_id>`
-- 确认 `SECRET_KEY_BASE` 已设置
-- 确认数据库迁移已运行
-
-### 4. SSL 证书问题
-
-**问题**: HTTPS 无法访问
-
-**解决方案**:
-- 确认 DNS 已正确指向 Coolify 服务器
-- 等待 Let's Encrypt 证书生成（可能需要几分钟）
-- 检查 Coolify 的 SSL 设置
-
-### 5. 环境变量未生效
-
-**问题**: 环境变量设置后应用未读取
-
-**解决方案**:
-- 重新部署应用
-- 确认变量名拼写正确
-- 检查是否有 `.env` 文件覆盖
-
-## 监控与日志
-
-### 查看日志
-
-1. 在 Coolify 控制台选择服务
-2. 点击 "Logs" 标签
-3. 实时查看应用日志
-
-### 资源监控
-
-Coolify 提供内置的资源监控：
-- CPU 使用率
-- 内存使用
-- 网络流量
-- 磁盘使用
-
-## 扩展阅读
-
-- [Coolify 官方文档](https://coolify.io/docs)
-- [Rails 部署指南](https://guides.rubyonrails.org/deployment.html)
-- [Docker 最佳实践](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
-
-## 更新部署
-
-```bash
-# 本地更新代码后推送到 Git
-git push origin main
-
-# Coolify 会自动触发部署（如果配置了 Webhook）
-# 或手动在 Coolify 控制台点击 "Redeploy"
-```
-
-## 回滚
-
-在 Coolify 控制台：
-1. 进入服务详情
-2. 点击 "Deployments" 标签
-3. 选择之前的成功部署
-4. 点击 "Rollback"
+做完这两处，再上 Coolify，会顺很多。
