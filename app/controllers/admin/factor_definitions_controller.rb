@@ -14,6 +14,7 @@ module Admin
 
       # 获取最新的因子值，按 asset_id 和 factor_definition_id 分组
       @factor_values = FactorValue.latest.includes(:asset, :factor_definition)
+      @latest_calculated_at = @factor_values.maximum(:calculated_at)
       @values_by_asset = @factor_values.group_by(&:asset_id).transform_values do |values|
         values.index_by { |v| v.factor_definition_id }
       end
