@@ -32,10 +32,10 @@
   <div class="form-group">
     <%= form.label :initial_capital, "初始资金", class: "form-label" %>
     <div class="form-input-group">
-      <span class="form-input-prefix">¥</span>
+      <span class="form-input-prefix">$</span>
       <%= form.number_field :initial_capital, class: "form-input form-input--with-prefix", min: 0, step: 0.01 %>
     </div>
-    <span class="form-hint">操盘手的起始资金（默认 ¥100,000）</span>
+    <span class="form-hint">操盘手的起始资金（默认 $100,000）</span>
   </div>
 
   <div class="form-group">

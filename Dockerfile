@@ -47,9 +47,14 @@ RUN bundle install && \
 # Copy application code
 COPY . .
 
+RUN chmod +x ./bin/docker-entrypoint ./bin/start-web-and-worker
+
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
+
+# Build Tailwind output so Propshaft can resolve tailwind.css in production.
+RUN mkdir -p app/assets/builds && SECRET_KEY_BASE_DUMMY=1 bundle exec rails tailwindcss:build
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
@@ -72,6 +77,6 @@ COPY --chown=rails:rails --from=build /rails /rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start server via Thruster by default, this can be overwritten at runtime
+# Start Rails web and Sidekiq worker in a single container for lightweight environments.
 EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
+CMD ["./bin/start-web-and-worker"]

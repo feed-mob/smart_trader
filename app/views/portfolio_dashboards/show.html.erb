@@ -36,18 +36,18 @@
     <section class="portfolio-dashboard__metrics">
       <div class="portfolio-metric-card">
         <span class="portfolio-metric-card__label" title="所有操盘手当前现金与持仓按最新价格估值后的合计">总资产</span>
-        <strong class="portfolio-metric-card__value"><%= number_to_currency(@dashboard_stats[:total_equity], unit: "¥", precision: 0) %></strong>
+        <strong class="portfolio-metric-card__value"><%= number_to_currency(@dashboard_stats[:total_equity], unit: "$", precision: 0) %></strong>
       </div>
       <div class="portfolio-metric-card">
         <span class="portfolio-metric-card__label" title="相对所有操盘手初始资金总和的累计盈亏，包含现金与持仓变化">累计盈亏</span>
         <strong class="portfolio-metric-card__value <%= @dashboard_stats[:total_profit_loss] >= 0 ? "positive" : "negative" %>">
-          <%= @dashboard_stats[:total_profit_loss] >= 0 ? "+" : "" %><%= number_to_currency(@dashboard_stats[:total_profit_loss], unit: "¥", precision: 0) %>
+          <%= @dashboard_stats[:total_profit_loss] >= 0 ? "+" : "" %><%= number_to_currency(@dashboard_stats[:total_profit_loss], unit: "$", precision: 0) %>
         </strong>
       </div>
       <div class="portfolio-metric-card">
         <span class="portfolio-metric-card__label" title="仅统计当前仍持有仓位的账面盈亏，不包含现金，也不代表最终已实现收益">持仓浮盈亏</span>
         <strong class="portfolio-metric-card__value <%= @dashboard_stats[:total_unrealized_pnl] >= 0 ? "positive" : "negative" %>">
-          <%= @dashboard_stats[:total_unrealized_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@dashboard_stats[:total_unrealized_pnl], unit: "¥", precision: 0) %>
+          <%= @dashboard_stats[:total_unrealized_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@dashboard_stats[:total_unrealized_pnl], unit: "$", precision: 0) %>
         </strong>
       </div>
       <div class="portfolio-metric-card">
@@ -85,7 +85,7 @@
         <div class="portfolio-dashboard__chart-stat">
           <span class="portfolio-dashboard__chart-stat-label">最新总盈亏</span>
           <strong class="portfolio-dashboard__chart-stat-value <%= @portfolio_chart[:latest_pnl] >= 0 ? "positive" : "negative" %>">
-            <%= @portfolio_chart[:latest_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@portfolio_chart[:latest_pnl], unit: "¥", precision: 0) %>
+            <%= @portfolio_chart[:latest_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@portfolio_chart[:latest_pnl], unit: "$", precision: 0) %>
           </strong>
         </div>
       </div>
@@ -95,7 +95,7 @@
           <div class="portfolio-dashboard__chart-panel">
             <div class="portfolio-dashboard__chart-panel-head">
               <span class="portfolio-dashboard__chart-panel-title">总组合净值</span>
-              <strong><%= number_to_currency(@portfolio_chart[:latest_value], unit: "¥", precision: 0) %></strong>
+              <strong><%= number_to_currency(@portfolio_chart[:latest_value], unit: "$", precision: 0) %></strong>
             </div>
             <svg viewBox="0 0 100 100" class="portfolio-dashboard__chart-svg" preserveAspectRatio="none" role="img" aria-label="总组合净值走势图">
               <line x1="0" y1="100" x2="100" y2="100" class="portfolio-dashboard__chart-axis"></line>
@@ -107,7 +107,7 @@
             <div class="portfolio-dashboard__chart-panel-head">
               <span class="portfolio-dashboard__chart-panel-title">累计盈亏</span>
               <strong class="<%= @portfolio_chart[:latest_pnl] >= 0 ? "positive" : "negative" %>">
-                <%= @portfolio_chart[:latest_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@portfolio_chart[:latest_pnl], unit: "¥", precision: 0) %>
+                <%= @portfolio_chart[:latest_pnl] >= 0 ? "+" : "" %><%= number_to_currency(@portfolio_chart[:latest_pnl], unit: "$", precision: 0) %>
               </strong>
             </div>
             <svg viewBox="0 0 100 100" class="portfolio-dashboard__chart-svg" preserveAspectRatio="none" role="img" aria-label="累计盈亏走势图">
@@ -161,12 +161,12 @@
             <div class="trader-card__stats">
               <div class="trader-card__stat">
                 <span class="trader-card__stat-label">净值</span>
-                <span class="trader-card__stat-value"><%= number_to_currency(row[:equity_value], unit: "¥", precision: 0) %></span>
+                <span class="trader-card__stat-value"><%= number_to_currency(row[:equity_value], unit: "$", precision: 0) %></span>
               </div>
               <div class="trader-card__stat">
                 <span class="trader-card__stat-label">累计盈亏</span>
                 <span class="trader-card__stat-value <%= row[:profit_loss] >= 0 ? 'positive' : 'negative' %>">
-                  <%= row[:profit_loss] >= 0 ? '+' : '' %><%= number_to_currency(row[:profit_loss], unit: "¥", precision: 0) %>
+                  <%= row[:profit_loss] >= 0 ? '+' : '' %><%= number_to_currency(row[:profit_loss], unit: "$", precision: 0) %>
                 </span>
               </div>
               <div class="trader-card__stat">
@@ -181,7 +181,7 @@
               <div class="portfolio-dashboard__mini-chart-header">
                 <span class="portfolio-dashboard__mini-chart-title">收益曲线</span>
                 <strong class="<%= trader_chart[:latest_pnl] >= 0 ? 'positive' : 'negative' %>">
-                  <%= trader_chart[:latest_pnl] >= 0 ? '+' : '' %><%= number_to_currency(trader_chart[:latest_pnl], unit: "¥", precision: 0) %>
+                  <%= trader_chart[:latest_pnl] >= 0 ? '+' : '' %><%= number_to_currency(trader_chart[:latest_pnl], unit: "$", precision: 0) %>
                 </strong>
               </div>
               <% if trader_chart[:has_points] %>
@@ -202,8 +202,8 @@
               <div class="portfolio-dashboard__trader-block">
                 <span class="portfolio-dashboard__block-label">资产拆分</span>
                 <div class="portfolio-dashboard__block-value">
-                  <strong>现金 <%= number_to_currency(row[:cash_value], unit: "¥", precision: 0) %></strong>
-                  <small>持仓 <%= number_to_currency(row[:invested_value], unit: "¥", precision: 0) %></small>
+                  <strong>现金 <%= number_to_currency(row[:cash_value], unit: "$", precision: 0) %></strong>
+                  <small>持仓 <%= number_to_currency(row[:invested_value], unit: "$", precision: 0) %></small>
                 </div>
               </div>
 
@@ -223,7 +223,7 @@
                 <span class="portfolio-dashboard__block-label">已实现盈亏</span>
                 <div class="portfolio-dashboard__block-value">
                   <strong class="<%= row[:realized_pnl] >= 0 ? 'positive' : 'negative' %>">
-                    <%= row[:realized_pnl] >= 0 ? '+' : '' %><%= number_to_currency(row[:realized_pnl], unit: "¥", precision: 0) %>
+                    <%= row[:realized_pnl] >= 0 ? '+' : '' %><%= number_to_currency(row[:realized_pnl], unit: "$", precision: 0) %>
                   </strong>
                   <small>历史已兑现盈亏</small>
                 </div>
@@ -233,7 +233,7 @@
                 <span class="portfolio-dashboard__block-label">持仓浮盈亏</span>
                 <div class="portfolio-dashboard__block-value">
                   <strong class="<%= position_metrics[:unrealized_pnl] >= 0 ? 'positive' : 'negative' %>">
-                    <%= position_metrics[:unrealized_pnl] >= 0 ? '+' : '' %><%= number_to_currency(position_metrics[:unrealized_pnl], unit: "¥", precision: 0) %>
+                    <%= position_metrics[:unrealized_pnl] >= 0 ? '+' : '' %><%= number_to_currency(position_metrics[:unrealized_pnl], unit: "$", precision: 0) %>
                   </strong>
                   <small class="<%= position_metrics[:unrealized_pnl] >= 0 ? 'positive' : 'negative' %>">
                     <%= position_metrics[:unrealized_pnl_percent] >= 0 ? '+' : '' %><%= position_metrics[:unrealized_pnl_percent] %>%

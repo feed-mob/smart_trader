@@ -55,17 +55,17 @@
           </div>
           <div class="trader-detail__item">
             <span class="trader-detail__label">初始资金</span>
-            <span class="trader-detail__value"><%= number_to_currency(@trader.initial_capital, unit: "¥", precision: 2) %></span>
+            <span class="trader-detail__value"><%= number_to_currency(@trader.initial_capital, unit: "$", precision: 2) %></span>
           </div>
           <div class="trader-detail__item">
             <span class="trader-detail__label">当前资金</span>
-            <span class="trader-detail__value"><%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @trader.current_capital_value, unit: "¥", precision: 2) %></span>
+            <span class="trader-detail__value"><%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @trader.current_capital_value, unit: "$", precision: 2) %></span>
           </div>
           <div class="trader-detail__item">
             <span class="trader-detail__label">盈亏</span>
             <% current_profit_loss = @latest_portfolio_snapshot&.profit_loss || @trader.profit_loss %>
             <span class="trader-detail__value <%= current_profit_loss >= 0 ? 'positive' : 'negative' %>">
-              <%= current_profit_loss >= 0 ? '+' : '' %><%= number_to_currency(current_profit_loss, unit: "¥", precision: 2) %>
+              <%= current_profit_loss >= 0 ? '+' : '' %><%= number_to_currency(current_profit_loss, unit: "$", precision: 2) %>
             </span>
           </div>
           <div class="trader-detail__item">
@@ -161,7 +161,7 @@
           </div>
           <div class="trader-detail__item">
             <span class="trader-detail__label">当前净值</span>
-            <span class="trader-detail__value"><%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @trader.current_capital_value, unit: "¥", precision: 2) %></span>
+            <span class="trader-detail__value"><%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @trader.current_capital_value, unit: "$", precision: 2) %></span>
           </div>
         </div>
 
@@ -170,8 +170,8 @@
             <h3 class="trader-detail__description-title">最近执行摘要</h3>
             <p class="trader-detail__description-text"><%= @latest_allocation_task.summary.presence || "暂无摘要" %></p>
             <p class="trader-detail__description-text">
-              现金：<%= number_to_currency(@latest_portfolio_snapshot&.cash_value || @latest_allocation_task.ending_cash, unit: "¥", precision: 2) %>，
-              组合净值：<%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @latest_allocation_task.portfolio_value, unit: "¥", precision: 2) %>
+              现金：<%= number_to_currency(@latest_portfolio_snapshot&.cash_value || @latest_allocation_task.ending_cash, unit: "$", precision: 2) %>，
+              组合净值：<%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @latest_allocation_task.portfolio_value, unit: "$", precision: 2) %>
               <% if @latest_allocation_task.allocation_decision.present? %>
                 ，<%= link_to "查看建议", allocation_decision_path(@latest_allocation_task.allocation_decision), class: "text-link" %>
               <% end %>
@@ -197,11 +197,11 @@
                   <tr>
                     <td><strong><%= position.asset.symbol %></strong> <span class="text-muted"><%= position.asset.name %></span></td>
                     <td><%= number_with_precision(position.quantity, precision: 6, strip_insignificant_zeros: true) %></td>
-                    <td><%= number_to_currency(position.average_cost, unit: "¥", precision: 2) %></td>
-                    <td><%= number_to_currency(position.current_price, unit: "¥", precision: 2) %></td>
-                    <td><%= number_to_currency(position.market_value, unit: "¥", precision: 2) %></td>
+                    <td><%= number_to_currency(position.average_cost, unit: "$", precision: 2) %></td>
+                    <td><%= number_to_currency(position.current_price, unit: "$", precision: 2) %></td>
+                    <td><%= number_to_currency(position.market_value, unit: "$", precision: 2) %></td>
                     <td class="<%= position.unrealized_pnl >= 0 ? 'positive' : 'negative' %>">
-                      <%= position.unrealized_pnl >= 0 ? '+' : '' %><%= number_to_currency(position.unrealized_pnl, unit: "¥", precision: 2) %>
+                      <%= position.unrealized_pnl >= 0 ? '+' : '' %><%= number_to_currency(position.unrealized_pnl, unit: "$", precision: 2) %>
                       (<%= position.unrealized_pnl_percent >= 0 ? '+' : '' %><%= position.unrealized_pnl_percent.to_f.round(2) %>%)
                     </td>
                   </tr>
@@ -238,8 +238,8 @@
                     <td><span class="action-badge action-badge--<%= trade.action %>"><%= trade.action.upcase %></span></td>
                     <td><strong><%= trade.asset.symbol %></strong></td>
                     <td><%= number_with_precision(trade.quantity, precision: 6, strip_insignificant_zeros: true) %></td>
-                    <td><%= number_to_currency(trade.price, unit: "¥", precision: 2) %></td>
-                    <td><%= number_to_currency(trade.amount, unit: "¥", precision: 2) %></td>
+                    <td><%= number_to_currency(trade.price, unit: "$", precision: 2) %></td>
+                    <td><%= number_to_currency(trade.amount, unit: "$", precision: 2) %></td>
                   </tr>
                 <% end %>
               </tbody>
