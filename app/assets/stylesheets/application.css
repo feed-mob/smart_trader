@@ -2,20 +2,14 @@
  * This is a manifest file that'll be compiled into application.css.
  *
  * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
- * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
- * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
+ * application-wide styles in this file, but keep in mind that CSS precedence will follow standard
+ * cascading order, meaning styles declared later in this document or manifest will override earlier ones,
  * depending on specificity.
- *
- * Consider organizing styles into separate files for maintainability.
  */
 
-/* Import page-specific styles */
-@import "sessions";
-@import "home";
-@import "traders";
-@import "assets";
-@import "factor_definitions";
-@import "trading_signals";
-@import "allocation_previews";
-@import "allocation_decisions";
-@import "job_executions";
+/* Basic styles - will be expanded as needed */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+}

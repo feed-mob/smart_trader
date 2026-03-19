@@ -7,6 +7,7 @@ module Admin
 
     def index
       @factors = FactorDefinition.ordered
+      @latest_report = DailyReport.latest_for_type('factor')
     end
 
     def matrix

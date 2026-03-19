@@ -43,6 +43,9 @@ gem "view_component"
 # Pagination
 gem "kaminari"
 
+# Markdown rendering
+gem "kramdown"
+
 # Google Sign-In authentication
 gem "google_sign_in"
 

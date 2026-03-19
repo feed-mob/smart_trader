@@ -1,4 +1,15 @@
 module ApplicationHelper
+  # 渲染 Markdown 内容
+  def render_markdown(text)
+    return '' if text.nil?
+
+    require 'kramdown'
+    Kramdown::Document.new(text).to_html.html_safe
+  rescue LoadError
+    # 如果 kramdown 不可用，使用简单的格式化
+    simple_format(text)
+  end
+
   # 根据资产类型返回对应的样式类
   def asset_type_badge(type)
     case type.to_s.downcase
@@ -38,6 +49,20 @@ module ApplicationHelper
       'hold'
     else
       ''
+    end
+  end
+
+  # 格式化统计值
+  def format_stat_value(value)
+    case value
+    when Hash
+      value.map { |k, v| "#{k}: #{format_stat_value(v)}" }.join(', ')
+    when Array
+      value.join(', ')
+    when TrueClass, FalseClass
+      value ? '是' : '否'
+    else
+      value.to_s
     end
   end
 

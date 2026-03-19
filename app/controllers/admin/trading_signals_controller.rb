@@ -28,6 +28,9 @@ module Admin
         hold: TradingSignal.hold_signals.count,
         high_confidence: TradingSignal.high_confidence.count
       }
+
+      # 获取最新信号日报
+      @latest_report = DailyReport.latest_for_type('signal')
     end
 
     def show; end

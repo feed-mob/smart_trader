@@ -1,0 +1,56 @@
+<% content_for :title, "新建信号日报 - SmartTrader" %>
+
+<div class="reports-container">
+  <!-- Background -->
+  <div class="signals-background">
+    <div class="signals-background__gradient"></div>
+    <div class="signals-background__grid"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="reports-header">
+    <div class="reports-header__left">
+      <%= link_to admin_signal_daily_reports_path, class: "back-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5"></path>
+          <path d="M12 19l-7-7 7-7"></path>
+        </svg>
+        返回列表
+      <% end %>
+      <h1>新建信号日报</h1>
+    </div>
+  </header>
+
+  <!-- Form -->
+  <div class="report-form-container">
+    <%= form_with model: @report, url: admin_signal_daily_reports_path, local: true, class: "report-form" do |f| %>
+      <div class="form-group">
+        <%= f.label :report_date, "日期", class: "form-label" %>
+        <%= f.date_field :report_date, value: Date.current, class: "form-input" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :summary, "摘要", class: "form-label" %>
+        <%= f.text_area :summary, rows: 3, class: "form-input form-input--textarea", placeholder: "简要描述今日要点" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :content, "内容 (Markdown)", class: "form-label" %>
+        <%= f.text_area :content, rows: 20, class: "form-input form-input--textarea", placeholder: "使用 Markdown 格式编写日报内容" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :published, "发布状态", class: "form-label" %>
+        <div class="form-checkbox">
+          <%= f.check_box :published %>
+          <%= f.label :published, "立即发布" %>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <%= f.submit "保存日报", class: "btn btn-primary" %>
+        <%= link_to "取消", admin_signal_daily_reports_path, class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+</div>

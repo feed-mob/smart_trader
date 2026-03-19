@@ -103,3 +103,7 @@ trading_strategies (trader_id, name, risk_level, market_condition, max_positions
 ## 代码风格
 
 使用 `rubocop-rails-omakase` 进行 Ruby 代码风格检查。提交前运行 `rubocop`。
+
+## 前端设计相关的辅助能力
+
+使用skill：frontend-design

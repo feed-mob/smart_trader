@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_17_113000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_18_141629) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -108,6 +108,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_17_113000) do
     t.index ["asset_id", "interval", "candle_time"], name: "index_candles_on_asset_id_and_interval_and_candle_time", unique: true
     t.index ["asset_id", "interval"], name: "index_candles_on_asset_id_and_interval"
     t.index ["candle_time"], name: "index_candles_on_candle_time"
+  end
+
+  create_table "daily_reports", force: :cascade do |t|
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.string "generated_by", default: "ai"
+    t.integer "generation_time_ms"
+    t.string "model_version"
+    t.boolean "published", default: false
+    t.date "report_date", null: false
+    t.string "report_type", null: false
+    t.jsonb "statistics", default: {}
+    t.text "summary"
+    t.datetime "updated_at", null: false
+    t.index ["published"], name: "index_daily_reports_on_published"
+    t.index ["report_date"], name: "index_daily_reports_on_report_date"
+    t.index ["report_type", "report_date"], name: "index_daily_reports_on_report_type_and_report_date", unique: true
+    t.index ["report_type"], name: "index_daily_reports_on_report_type"
   end
 
   create_table "factor_definitions", force: :cascade do |t|
