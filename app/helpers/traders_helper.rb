@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module TradersHelper
-  # Format currency with Chinese Yuan symbol
+  # Format currency with US Dollar symbol
   def format_currency(amount)
-    number_to_currency(amount, unit: "¥", precision: 0)
+    number_to_currency(amount, unit: "$", precision: 0)
   end
 
   # Format percentage with sign

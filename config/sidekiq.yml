@@ -42,21 +42,21 @@
 
   # 特殊加密货币历史数据 - special coin daily and history
   fetch_special_coins_history:
-    cron: "5 2,14 * * *"
+    cron: "0 2,14 * * *"
     class: "FetchSpecialCoinsHistoryJob"
     queue: default
     description: "每天两次拉取特殊加密货币历史数据"
 
   # Yahoo Finance 股票数据拉取 - stock daily（不能是中国IP）
   fetch_yahoo_stock_data:
-    cron: "10 2,14 * * *"
+    cron: "0 2,14 * * *"
     class: "FetchYahooStockDataJob"
     queue: yahoo_finance
     description: "每天两次拉取 Yahoo Finance Market Cap 前 100 股票数据"
 
   # 特殊股票历史数据 - special stock daily and history
   fetch_special_stocks_history:
-    cron: "15 2,14 * * *"
+    cron: "0 2,14 * * *"
     class: "FetchSpecialStocksHistoryJob"
     queue: default
     description: "每天两次拉取特殊股票历史数据"
@@ -65,7 +65,7 @@
 
   # 交易因子计算 - 依赖数据拉取完成
   calculate_factors:
-    cron: "30 2,14 * * *"
+    cron: "10 2,14 * * *"
     class: "CalculateFactorsJob"
     queue: default
     description: "每天两次计算交易因子（数据拉取后30分钟）"
@@ -74,7 +74,7 @@
 
   # 交易信号生成 - 依赖因子计算完成
   generate_signals:
-    cron: "0 3,15 * * *"
+    cron: "30 2,15 * * *"
     class: "GenerateSignalsJob"
     queue: default
     description: "每天两次生成交易信号（因子计算后30分钟）"
@@ -82,7 +82,7 @@
   # === 第四批：配置建议生成 (信号生成后10分钟，UTC 03:10 / 15:10) ===
 
   generate_daily_allocation_decisions:
-    cron: "10 3,15 * * *"
+    cron: "45 2,15 * * *"
     class: "GenerateDailyAllocationDecisionsJob"
     queue: default
     description: "每天两次为活跃 trader 自动生成 LLM 配置建议"
@@ -90,7 +90,7 @@
   # === 第五批：配置建议执行 (建议生成后10分钟，UTC 03:20 / 15:20) ===
 
   execute_daily_allocation_decisions:
-    cron: "20 3,15 * * *"
+    cron: "50 2,15 * * *"
     class: "ExecuteDailyAllocationDecisionsJob"
     queue: default
     description: "每天两次自动执行当天最新有效的 LLM 配置建议"
@@ -98,7 +98,7 @@
   # === 第六批：组合盯市快照 (执行后10分钟，UTC 03:30 / 15:30) ===
 
   mark_to_market_portfolio_snapshots:
-    cron: "30 3,15 * * *"
+    cron: "55 2,15 * * *"
     class: "MarkToMarketPortfolioSnapshotsJob"
     queue: default
     description: "每天两次按最新价格为活跃 trader 记录组合净值快照"

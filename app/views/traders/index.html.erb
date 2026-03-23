@@ -59,16 +59,16 @@
             <div class="trader-card__stats">
               <div class="trader-card__stat">
                 <span class="trader-card__stat-label">初始资金</span>
-                <span class="trader-card__stat-value"><%= number_to_currency(trader.initial_capital, unit: "¥", precision: 0) %></span>
+                <span class="trader-card__stat-value"><%= number_to_currency(trader.initial_capital, unit: "$", precision: 0) %></span>
               </div>
               <div class="trader-card__stat">
                 <span class="trader-card__stat-label">当前资金</span>
-                <span class="trader-card__stat-value"><%= number_to_currency(trader.current_capital_value, unit: "¥", precision: 0) %></span>
+                <span class="trader-card__stat-value"><%= number_to_currency(trader.current_capital_value, unit: "$", precision: 0) %></span>
               </div>
               <div class="trader-card__stat">
                 <span class="trader-card__stat-label">盈亏</span>
                 <span class="trader-card__stat-value <%= trader.profit_loss >= 0 ? 'positive' : 'negative' %>">
-                  <%= trader.profit_loss >= 0 ? '+' : '' %><%= number_to_currency(trader.profit_loss, unit: "¥", precision: 0) %>
+                  <%= trader.profit_loss >= 0 ? '+' : '' %><%= number_to_currency(trader.profit_loss, unit: "$", precision: 0) %>
                   <small>(<%= trader.profit_loss_percent >= 0 ? '+' : '' %><%= trader.profit_loss_percent %>%)</small>
                 </span>
               </div>

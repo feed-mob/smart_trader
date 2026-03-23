@@ -47,8 +47,8 @@
                   <td><%= task.run_on %></td>
                   <td><%= link_to task.trader.name, task.trader, class: "text-link" %></td>
                   <td><span class="status-pill status-pill--<%= task.status %>"><%= task.status %></span></td>
-                  <td><%= number_to_currency(task.ending_cash, unit: "¥", precision: 2) %></td>
-                  <td><%= number_to_currency(task.portfolio_value, unit: "¥", precision: 2) %></td>
+                  <td><%= number_to_currency(task.ending_cash, unit: "$", precision: 2) %></td>
+                  <td><%= number_to_currency(task.portfolio_value, unit: "$", precision: 2) %></td>
                   <td>
                     <% if task.allocation_decision.present? %>
                       <%= link_to "建议 ##{task.allocation_decision_id}", allocation_decision_path(task.allocation_decision), class: "text-link" %>

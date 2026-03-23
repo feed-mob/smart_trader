@@ -54,15 +54,15 @@
         </div>
         <div class="trader-detail__item">
           <span class="trader-detail__label">执行前现金</span>
-          <span class="trader-detail__value"><%= number_to_currency(@allocation_task.starting_cash, unit: "¥", precision: 2) %></span>
+          <span class="trader-detail__value"><%= number_to_currency(@allocation_task.starting_cash, unit: "$", precision: 2) %></span>
         </div>
         <div class="trader-detail__item">
           <span class="trader-detail__label">执行后现金</span>
-          <span class="trader-detail__value"><%= number_to_currency(@allocation_task.ending_cash, unit: "¥", precision: 2) %></span>
+          <span class="trader-detail__value"><%= number_to_currency(@allocation_task.ending_cash, unit: "$", precision: 2) %></span>
         </div>
         <div class="trader-detail__item">
           <span class="trader-detail__label">组合净值</span>
-          <span class="trader-detail__value"><%= number_to_currency(@allocation_task.portfolio_value, unit: "¥", precision: 2) %></span>
+          <span class="trader-detail__value"><%= number_to_currency(@allocation_task.portfolio_value, unit: "$", precision: 2) %></span>
         </div>
       </div>
 
@@ -110,8 +110,8 @@
                   <td><span class="action-badge action-badge--<%= trade.action %>"><%= trade.action.upcase %></span></td>
                   <td><strong><%= trade.asset.symbol %></strong></td>
                   <td><%= number_with_precision(trade.quantity, precision: 6, strip_insignificant_zeros: true) %></td>
-                  <td><%= number_to_currency(trade.price, unit: "¥", precision: 2) %></td>
-                  <td><%= number_to_currency(trade.amount, unit: "¥", precision: 2) %></td>
+                  <td><%= number_to_currency(trade.price, unit: "$", precision: 2) %></td>
+                  <td><%= number_to_currency(trade.amount, unit: "$", precision: 2) %></td>
                   <td class="text-small"><%= trade.reason %></td>
                 </tr>
               <% end %>
