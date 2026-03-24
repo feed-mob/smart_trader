@@ -168,11 +168,11 @@
           </div>
           <div class="trader-detail__item">
             <span class="trader-detail__label">执行后现金</span>
-            <span class="trader-detail__value"><%= number_to_currency(latest_task.ending_cash, unit: "¥", precision: 2) %></span>
+            <span class="trader-detail__value"><%= number_to_currency(latest_task.ending_cash, unit: "$", precision: 2) %></span>
           </div>
           <div class="trader-detail__item">
             <span class="trader-detail__label">组合净值</span>
-            <span class="trader-detail__value"><%= number_to_currency(latest_task.portfolio_value, unit: "¥", precision: 2) %></span>
+            <span class="trader-detail__value"><%= number_to_currency(latest_task.portfolio_value, unit: "$", precision: 2) %></span>
           </div>
         </div>
 

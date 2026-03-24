@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_18_141629) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -201,6 +201,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_141629) do
     t.index ["trader_id"], name: "index_portfolio_snapshots_on_trader_id"
   end
 
+  create_table "strategy_adjustment_logs", force: :cascade do |t|
+    t.decimal "after_value", precision: 12, scale: 4, null: false
+    t.datetime "applied_at", null: false
+    t.decimal "before_value", precision: 12, scale: 4, null: false
+    t.datetime "created_at", null: false
+    t.string "direction", null: false
+    t.string "parameter", null: false
+    t.text "reason"
+    t.bigint "trader_reflection_id", null: false
+    t.bigint "trading_strategy_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["trader_reflection_id"], name: "index_strategy_adjustment_logs_on_trader_reflection_id"
+    t.index ["trading_strategy_id"], name: "index_strategy_adjustment_logs_on_trading_strategy_id"
+  end
+
   create_table "trader_positions", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.bigint "asset_id", null: false
@@ -219,6 +234,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_141629) do
     t.index ["trader_id", "active"], name: "index_trader_positions_on_trader_id_and_active"
     t.index ["trader_id", "asset_id"], name: "index_trader_positions_on_trader_id_and_asset_id", unique: true
     t.index ["trader_id"], name: "index_trader_positions_on_trader_id"
+  end
+
+  create_table "trader_reflections", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.jsonb "findings", default: {}, null: false
+    t.datetime "generated_at"
+    t.text "llm_summary"
+    t.jsonb "metrics", default: {}, null: false
+    t.string "prompt_version", default: "v1", null: false
+    t.date "reflection_period_end", null: false
+    t.date "reflection_period_start", null: false
+    t.string "source", default: "llm", null: false
+    t.integer "status", default: 0, null: false
+    t.jsonb "suggested_adjustments", default: [], null: false
+    t.bigint "trader_id", null: false
+    t.bigint "trading_strategy_id"
+    t.datetime "updated_at", null: false
+    t.index ["trader_id", "reflection_period_start", "reflection_period_end"], name: "index_trader_reflections_on_trader_and_period", unique: true
+    t.index ["trader_id"], name: "index_trader_reflections_on_trader_id"
+    t.index ["trading_strategy_id"], name: "index_trader_reflections_on_trading_strategy_id"
   end
 
   create_table "trader_trades", force: :cascade do |t|
@@ -311,8 +347,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_141629) do
   add_foreign_key "factor_values", "factor_definitions"
   add_foreign_key "portfolio_snapshots", "allocation_tasks"
   add_foreign_key "portfolio_snapshots", "traders"
+  add_foreign_key "strategy_adjustment_logs", "trader_reflections"
+  add_foreign_key "strategy_adjustment_logs", "trading_strategies"
   add_foreign_key "trader_positions", "assets"
   add_foreign_key "trader_positions", "traders"
+  add_foreign_key "trader_reflections", "traders"
+  add_foreign_key "trader_reflections", "trading_strategies"
   add_foreign_key "trader_trades", "allocation_decisions"
   add_foreign_key "trader_trades", "allocation_tasks"
   add_foreign_key "trader_trades", "assets"

@@ -7,9 +7,14 @@
  * depending on specificity.
  */
 
-/* Basic styles - will be expanded as needed */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-}
+/* Import page-specific styles */
+@import "sessions";
+@import "home";
+@import "traders";
+@import "assets";
+@import "factor_definitions";
+@import "trading_signals";
+@import "allocation_previews";
+@import "allocation_decisions";
+@import "job_executions";
+@import "trader_reflections";

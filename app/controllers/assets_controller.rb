@@ -14,10 +14,9 @@ class AssetsController < ApplicationController
   # GET /assets/:id - Show asset detail page
   def show
     @asset = Asset.find(params[:id])
-    @timeframe = params[:timeframe] || "24h"
+    @timeframe = params[:timeframe] || "all"
     @snapshots = @asset.asset_snapshots
-                      .where(captured_at: parse_timeframe(@timeframe))
-                      .order(captured_at: :desc)
+                      .order(snapshot_date: :desc, captured_at: :desc)
                       .limit(200)
   rescue ActiveRecord::RecordNotFound
     redirect_to market_assets_path, alert: "Asset not found"
@@ -37,24 +36,43 @@ class AssetsController < ApplicationController
     yesterday = Date.yesterday
 
     # 股票中昨天涨幅最大的 - 使用子查询避免 DISTINCT + ORDER BY 冲突
-    top_stock_ids = AssetSnapshot
-                          .joins(:asset)
-                          .where(assets: { asset_type: 'stock', active: true })
-                          .where(snapshot_date: yesterday)
-                          .where('change_percent > 0')
-                          .order(change_percent: :desc)
-                          .limit(limit / 2)
-                          .pluck(:asset_id)
+    # 如果昨天没有数据，则使用最近的快照数据
+    stock_snapshots = AssetSnapshot
+                              .joins(:asset)
+                              .where(assets: { asset_type: 'stock', active: true })
+                              .where(snapshot_date: Date.yesterday.beginning_of_month..Date.yesterday)
 
-    # 加密货币中昨天涨幅最大的
-    top_crypto_ids = AssetSnapshot
-                          .joins(:asset)
-                          .where(assets: { asset_type: 'crypto', active: true })
-                          .where(snapshot_date: yesterday)
-                          .where('change_percent > 0')
-                          .order(change_percent: :desc)
-                          .limit(limit - top_stock_ids.size)
-                          .pluck(:asset_id)
+    top_stock_ids = if stock_snapshots.where(snapshot_date: yesterday).any?
+      stock_snapshots.where(snapshot_date: yesterday)
+                      .where('change_percent > 0')
+                      .order(change_percent: :desc)
+                      .limit(limit / 2)
+                      .pluck(:asset_id)
+    else
+      stock_snapshots.where('change_percent > 0')
+                      .order(snapshot_date: :desc, change_percent: :desc)
+                      .limit(limit / 2)
+                      .pluck(:asset_id)
+    end
+
+    # 加密货币中昨天涨幅最大的 - 同样处理
+    crypto_snapshots = AssetSnapshot
+                               .joins(:asset)
+                               .where(assets: { asset_type: 'crypto', active: true })
+                               .where(snapshot_date: Date.yesterday.beginning_of_month..Date.yesterday)
+
+    top_crypto_ids = if crypto_snapshots.where(snapshot_date: yesterday).any?
+      crypto_snapshots.where(snapshot_date: yesterday)
+                        .where('change_percent > 0')
+                        .order(change_percent: :desc)
+                        .limit(limit - top_stock_ids.size)
+                        .pluck(:asset_id)
+    else
+      crypto_snapshots.where('change_percent > 0')
+                        .order(snapshot_date: :desc, change_percent: :desc)
+                        .limit(limit - top_stock_ids.size)
+                        .pluck(:asset_id)
+    end
 
     # 合并 ID 并查询 Asset
     all_ids = (top_stock_ids + top_crypto_ids).uniq.first(limit)
