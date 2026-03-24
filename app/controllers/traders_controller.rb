@@ -13,7 +13,9 @@ class TradersController < ApplicationController
     @latest_allocation_task = @trader.allocation_tasks.recent.first
     @latest_portfolio_snapshot = @trader.portfolio_snapshots.recent.first
     @trader_positions = @trader.trader_positions.active.includes(:asset).ordered_by_value
+    @trader_position_rows = build_trader_position_rows(@trader_positions)
     @recent_trader_trades = @trader.trader_trades.recent.includes(:asset).limit(10)
+    @latest_trader_reflection = @trader.trader_reflections.recent.first
   end
 
   def new
@@ -72,5 +74,28 @@ class TradersController < ApplicationController
 
     trader.trading_strategies.destroy_all
     generate_strategies_for(trader)
+  end
+
+  def build_trader_position_rows(positions)
+    positions.map do |position|
+      quantity = position.quantity.to_d
+      latest_price = position.asset.latest_snapshot&.price&.to_d || position.current_price.to_d
+      market_value = (quantity * latest_price).round(2)
+      cost_basis = (quantity * position.average_cost.to_d).round(2)
+      unrealized_pnl = (market_value - cost_basis).round(2)
+      unrealized_pnl_percent = if cost_basis.positive?
+                                 ((unrealized_pnl / cost_basis) * 100).round(2)
+                               else
+                                 0
+                               end
+
+      {
+        position: position,
+        latest_price: latest_price,
+        market_value: market_value,
+        unrealized_pnl: unrealized_pnl,
+        unrealized_pnl_percent: unrealized_pnl_percent
+      }
+    end
   end
 end

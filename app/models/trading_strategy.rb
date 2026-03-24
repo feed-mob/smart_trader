@@ -3,6 +3,8 @@
 class TradingStrategy < ApplicationRecord
   belongs_to :trader
   has_many :allocation_decisions, dependent: :nullify
+  has_many :trader_reflections, dependent: :nullify
+  has_many :strategy_adjustment_logs, dependent: :nullify
 
   # Enums
   enum :risk_level, { conservative: 0, balanced: 1, aggressive: 2 }
