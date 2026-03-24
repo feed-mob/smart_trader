@@ -74,6 +74,9 @@ Rails.application.routes.draw do
     resource :allocation_preview, only: [:show] do
       get :recommendation, on: :collection
     end
+    resources :trader_reflections, only: %i[create show] do
+      post :apply_adjustment, on: :member
+    end
   end
 
   resources :allocation_decisions, only: [:index, :show] do

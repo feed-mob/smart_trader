@@ -5,6 +5,7 @@ class Trader < ApplicationRecord
   has_many :allocation_decisions, dependent: :destroy
   has_many :allocation_tasks, dependent: :destroy
   has_many :portfolio_snapshots, dependent: :destroy
+  has_many :trader_reflections, dependent: :destroy
   has_many :trader_positions, dependent: :destroy
   has_many :trader_trades, dependent: :destroy
   has_many :trading_strategies, dependent: :destroy

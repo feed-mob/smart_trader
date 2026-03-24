@@ -29,7 +29,8 @@
 
 # Schedule definitions (loaded by sidekiq-scheduler)
 # 所有任务每天跑两次：UTC 02:00 和 14:00（北京时间 10:00 和 22:00）
-# 执行顺序：数据拉取 -> 因子计算(30分钟后) -> 信号生成(再30分钟后) -> recommendation 生成 -> recommendation 执行 -> 盯市快照
+# 执行顺序：数据拉取 -> 因子计算 -> 信号生成 -> recommendation 生成 -> recommendation 执行 -> 盯市快照
+# 按近期实际耗时压缩缓冲，并修正下午批次误落到 15 点后的问题
 :schedule:
   # === 第一批：数据拉取 (UTC 02:00 / 14:00) ===
 
@@ -65,40 +66,40 @@
 
   # 交易因子计算 - 依赖数据拉取完成
   calculate_factors:
-    cron: "10 2,14 * * *"
+    cron: "5 2,14 * * *"
     class: "CalculateFactorsJob"
     queue: default
-    description: "每天两次计算交易因子（数据拉取后30分钟）"
+    description: "每天两次计算交易因子（数据拉取后约 5 分钟）"
 
-  # === 第三批：信号生成 (因子计算后30分钟，UTC 03:00 / 15:00) ===
+  # === 第三批：信号生成 (因子计算后，UTC 02:20 / 14:20) ===
 
   # 交易信号生成 - 依赖因子计算完成
   generate_signals:
-    cron: "30 2,15 * * *"
+    cron: "20 2,14 * * *"
     class: "GenerateSignalsJob"
     queue: default
-    description: "每天两次生成交易信号（因子计算后30分钟）"
+    description: "每天两次生成交易信号（因子计算后约 15 分钟）"
 
-  # === 第四批：配置建议生成 (信号生成后10分钟，UTC 03:10 / 15:10) ===
+  # === 第四批：配置建议生成 (信号生成后，UTC 02:30 / 14:30) ===
 
   generate_daily_allocation_decisions:
-    cron: "45 2,15 * * *"
+    cron: "30 2,14 * * *"
     class: "GenerateDailyAllocationDecisionsJob"
     queue: default
-    description: "每天两次为活跃 trader 自动生成 LLM 配置建议"
+    description: "每天两次为活跃 trader 自动生成 LLM 配置建议（信号生成后约 10 分钟）"
 
-  # === 第五批：配置建议执行 (建议生成后10分钟，UTC 03:20 / 15:20) ===
+  # === 第五批：配置建议执行 (建议生成后，UTC 02:40 / 14:40) ===
 
   execute_daily_allocation_decisions:
-    cron: "50 2,15 * * *"
+    cron: "40 2,14 * * *"
     class: "ExecuteDailyAllocationDecisionsJob"
     queue: default
-    description: "每天两次自动执行当天最新有效的 LLM 配置建议"
+    description: "每天两次自动执行当天最新有效的 LLM 配置建议（建议生成后约 10 分钟）"
 
-  # === 第六批：组合盯市快照 (执行后10分钟，UTC 03:30 / 15:30) ===
+  # === 第六批：组合盯市快照 (执行后，UTC 02:45 / 14:45) ===
 
   mark_to_market_portfolio_snapshots:
-    cron: "55 2,15 * * *"
+    cron: "45 2,14 * * *"
     class: "MarkToMarketPortfolioSnapshotsJob"
     queue: default
-    description: "每天两次按最新价格为活跃 trader 记录组合净值快照"
+    description: "每天两次按最新价格为活跃 trader 记录组合净值快照（执行后约 5 分钟）"
