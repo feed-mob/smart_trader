@@ -351,10 +351,42 @@ class AiAllocationService
     allocations = payload[:allocations]
     errors << "allocations must be an array" unless allocations.is_a?(Array)
 
+    normalized_allocations = Array(allocations).map do |allocation|
+      allocation.respond_to?(:deep_symbolize_keys) ? allocation.deep_symbolize_keys : allocation
+    end
+
+    duplicate_symbols = normalized_allocations
+      .map { |allocation| allocation[:symbol].to_s.upcase.presence }
+      .compact
+      .tally
+      .select { |_symbol, count| count > 1 }
+      .keys
+    errors << "allocations contain duplicate assets: #{duplicate_symbols.join(', ')}" if duplicate_symbols.any?
+
     cash_percent = payload.dig(:cash_reserve, :percent).to_f
-    allocation_percent = Array(allocations).sum { |allocation| allocation[:allocation_percent].to_f }
+    allocation_percent = normalized_allocations.sum { |allocation| allocation[:allocation_percent].to_f }
     total_percent = allocation_percent + cash_percent
     errors << "allocation percentages must sum to 100" unless total_percent.round(2) == 100.0
+
+    strategy = strategy_for(selected_strategy)
+    if strategy.present?
+      target_position_count = normalized_allocations.count { |allocation| allocation[:allocation_percent].to_d.positive? }
+      if target_position_count > strategy.max_positions
+        errors << "target positions exceed strategy max_positions (#{target_position_count} > #{strategy.max_positions})"
+      end
+
+      if cash_percent < (strategy.min_cash_reserve.to_d * 100)
+        errors << "cash reserve is below strategy min_cash_reserve"
+      end
+
+      normalized_allocations.each do |allocation|
+        symbol = allocation[:symbol].to_s.upcase
+        allocation_percent_decimal = allocation[:allocation_percent].to_d / 100
+        next unless allocation_percent_decimal > strategy.max_position_size.to_d
+
+        errors << "#{symbol} exceeds strategy max_position_size"
+      end
+    end
 
     errors
   end

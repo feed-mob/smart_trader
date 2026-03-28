@@ -85,10 +85,9 @@ Rails.application.routes.draw do
   resources :allocation_tasks, only: [:index, :show]
 
   # AI Analysis
-  get 'ai_analysis', to: 'ai_analysis#new', as: :new_ai_analysis
-  post 'ai_analysis', to: 'ai_analysis#create', as: :ai_analysis
-  get 'ai_analysis/result', to: 'ai_analysis#show', as: :ai_analysis_result
-  post 'ai_analysis/quick', to: 'ai_analysis#quick_analysis', as: :quick_ai_analysis
+  resources :ai_analysis, only: [ :index, :new, :create, :show ], controller: 'ai_analysis' do
+    get :status, on: :member
+  end
 
   # Admin namespace
   namespace :admin do

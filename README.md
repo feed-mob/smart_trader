@@ -17,6 +17,21 @@
 - Ruby 4.0.1
 - PostgreSQL
 - Node.js (for asset compilation)
+- libvips (ActiveStorage 图片分析依赖)
+
+### 安装 libvips
+
+ActiveStorage 文件上传需要 `libvips` 系统库（配合 `ruby-vips` gem）。
+
+| 平台 | 安装命令 |
+|------|----------|
+| **macOS** | `brew install vips` |
+| **Ubuntu / Debian** | `sudo apt install libvips-dev` |
+| **Windows** | 下载 [vips-dev-win](https://github.com/libvips/build-win64-mxe/releases) 并添加到 PATH |
+| **Alpine** | `apk add vips-dev` |
+| **Fedora / RHEL** | `sudo dnf install vips-devel` |
+
+安装完成后运行 `bundle install` 即可。Docker 生产环境已在 Dockerfile 中预装 `libvips`，无需额外操作。
 
 ### 安装步骤
 
@@ -30,6 +45,8 @@ cd smart_trader
 ```bash
 bundle install
 ```
+
+> 如果 `bundle install` 报 vips 相关错误，请先按上方 [安装 libvips](#安装-libvips) 安装系统库。
 
 3. 配置环境变量
 ```bash

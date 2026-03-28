@@ -4,6 +4,7 @@
 class User < ApplicationRecord
   # Associations
   has_many :traders, dependent: :destroy
+  has_many :ai_analysis_records, dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }

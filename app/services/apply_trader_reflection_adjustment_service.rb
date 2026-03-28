@@ -2,7 +2,7 @@
 
 class ApplyTraderReflectionAdjustmentService
   PARAMETER_RULES = {
-    "max_positions" => { step: 1, min: 2, max: 5, integer: true },
+    "max_positions" => { step: 1, min: 2, max: 10, integer: true },
     "buy_signal_threshold" => { step: 0.05, min: 0.3, max: 0.7, integer: false },
     "max_position_size" => { step: 0.05, min: 0.3, max: 0.7, integer: false },
     "min_cash_reserve" => { step: 0.05, min: 0.05, max: 0.4, integer: false }

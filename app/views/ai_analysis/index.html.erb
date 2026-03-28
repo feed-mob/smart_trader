@@ -1,0 +1,131 @@
+<% content_for :title, "Analysis History" %>
+
+<div class="neural-history">
+  <div class="neural-history__grid"></div>
+
+  <div class="neural-history-container">
+    <header class="neural-history-header">
+      <div class="neural-history-logo">
+        <div class="neural-history-logo__icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M16 10l6 3.5v7L16 24l-6-3.5v-7L16 10z" fill="currentColor" opacity="0.3"/>
+            <circle cx="16" cy="16" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="neural-history-logo__text">
+          <span class="neural-history-logo__eyebrow">SmartTrader AI</span>
+          <span class="neural-history-logo__title">Analysis History</span>
+        </div>
+      </div>
+      <div class="neural-history-header__actions">
+        <%= link_to new_ai_analysis_path, class: "neural-history-btn neural-history-btn--primary" do %>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>New Analysis</span>
+        <% end %>
+        <%= link_to root_path, class: "neural-history-btn" do %>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          </svg>
+          <span>Home</span>
+        <% end %>
+      </div>
+    </header>
+
+    <div class="neural-history-stats">
+      <div class="neural-history-stats__item">
+        <span class="neural-history-stats__value"><%= @records.total_count %></span>
+        <span class="neural-history-stats__label">Total</span>
+      </div>
+      <div class="neural-history-stats__item neural-history-stats__item--success">
+        <span class="neural-history-stats__value"><%= @records.select { |r| r.success? }.count %></span>
+        <span class="neural-history-stats__label">Success</span>
+      </div>
+      <div class="neural-history-stats__item neural-history-stats__item--error">
+        <span class="neural-history-stats__value"><%= @records.select { |r| r.failed? }.count %></span>
+        <span class="neural-history-stats__label">Failed</span>
+      </div>
+    </div>
+
+    <main class="neural-history-list">
+      <% if @records.any? %>
+        <% @records.each do |record| %>
+          <%= link_to ai_analysis_path(record), class: "neural-history-card neural-history-card--#{record.status}" do %>
+            <div class="neural-history-card__header">
+              <div class="neural-history-card__status">
+                <span class="neural-history-card__status-dot neural-history-card__status-dot--<%= record.status %>"></span>
+                <span class="neural-history-card__status-text"><%= record.status.upcase %></span>
+              </div>
+              <div class="neural-history-card__time">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span><%= time_ago_in_words(record.created_at) %> ago</span>
+              </div>
+            </div>
+
+            <div class="neural-history-card__prompt">
+              <%= record.truncated_prompt(200) %>
+            </div>
+
+            <div class="neural-history-card__meta">
+              <% if record.files_list.any? %>
+                <div class="neural-history-card__meta-item">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                  </svg>
+                  <span><%= pluralize(record.files_list.count, 'file') %></span>
+                </div>
+              <% end %>
+
+              <div class="neural-history-card__meta-item">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4"/>
+                </svg>
+                <span><%= record.permission_mode.presence || 'default' %></span>
+              </div>
+
+              <% if record.duration_text %>
+                <div class="neural-history-card__meta-item">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                  </svg>
+                  <span><%= record.duration_text %></span>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="neural-history-card__arrow">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+          <% end %>
+        <% end %>
+      <% else %>
+        <div class="neural-history-empty">
+          <div class="neural-history-empty__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+            </svg>
+          </div>
+          <h3>No Analysis Records</h3>
+          <p>Start by creating your first AI analysis</p>
+          <%= link_to "Create Analysis", new_ai_analysis_path, class: "neural-history-empty__btn" %>
+        </div>
+      <% end %>
+    </main>
+
+    <% if @records.total_pages > 1 %>
+      <div class="neural-history-pagination">
+        <%= paginate @records, window: 2 %>
+      </div>
+    <% end %>
+  </div>
+</div>
