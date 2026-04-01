@@ -30,30 +30,17 @@
         </svg>
         因子管理
       <% end %>
-      <% if @latest_report %>
-        <%= link_to admin_signal_daily_report_path(@latest_report),
-                    class: "signals-btn signals-btn--secondary",
-                    title: "查看最新日报" do %>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
-          </svg>
-          信号日报 <%= @latest_report.report_date.strftime('%m/%d') %>
-        <% end %>
-      <% else %>
-        <%= link_to generate_admin_signal_daily_reports_path(date: Date.current),
-                    method: :post,
-                    class: "signals-btn signals-btn--secondary",
-                    title: "生成今日日报",
-                    data: { turbo_confirm: "确定要生成今天的信号日报吗？" } do %>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          生成日报
-        <% end %>
+      <%= link_to admin_signal_daily_reports_path,
+                  class: "signals-btn signals-btn--secondary",
+                  title: "查看信号日报列表" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        信号日报<% if @latest_report %> <%= @latest_report.report_date.strftime('%m/%d') %><% end %>
       <% end %>
       <%= link_to admin_job_executions_path, class: "signals-btn signals-btn--secondary" do %>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

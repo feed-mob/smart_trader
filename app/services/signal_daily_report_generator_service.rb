@@ -33,7 +33,12 @@ class SignalDailyReportGeneratorService
     start_time = Time.current
     data = collect_data
 
-    return nil if data[:signals].empty?
+    # 如果没有信号数据，生成一个空日报
+    if data[:signals].empty?
+      content = build_empty_report
+      summary = "今日暂无交易信号数据"
+      return save_report(content, summary, data, start_time)
+    end
 
     prompt = build_prompt(data)
     content = @ai_service.ask(prompt)
@@ -163,5 +168,22 @@ class SignalDailyReportGeneratorService
     # 找到第一个非标题行
     first_non_header = lines.find { |l| !l.start_with?('#') }
     first_non_header || lines.first || "暂无摘要"
+  end
+
+  def build_empty_report
+    <<~MARKDOWN
+      # #{@date.strftime('%Y年%m月%d日')} 交易信号日报
+
+      ## 今日信号概览
+
+      **暂无交易信号数据**
+
+      请先生成交易信号后再查看日报。
+
+      ## 风险提示
+
+      - 当前日期 #{@date.strftime('%Y-%m-%d')} 没有可用的交易信号
+      - 建先生成交易信号，日报将包含详细分析
+    MARKDOWN
   end
 end

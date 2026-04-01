@@ -34,7 +34,13 @@ class FactorDailyReportGeneratorService
 
     # 收集数据
     data = collect_data
-    return nil if data[:factors].empty?
+
+    # 如果没有因子数据，生成一个空日报
+    if data[:factors].empty?
+      content = build_empty_report
+      summary = "今日暂无因子数据"
+      return save_report(content, summary, data, start_time)
+    end
 
     # 构建 prompt
     prompt = build_prompt(data)
@@ -142,5 +148,22 @@ class FactorDailyReportGeneratorService
     # 找到第一个非标题行
     first_non_header = lines.find { |l| !l.start_with?('#') }
     first_non_header || lines.first || "暂无摘要"
+  end
+
+  def build_empty_report
+    <<~MARKDOWN
+      # #{@date.strftime('%Y年%m月%d日')} 交易因子日报
+
+      ## 今日概览
+
+      **暂无因子数据**
+
+      请先添加因子后再查看日报。
+
+      ## 建议与洞察
+
+      - 当前日期 #{@date.strftime('%Y-%m-%d')} 没有可用的因子数据
+      - 建议在因子管理页面添加交易因子
+    MARKDOWN
   end
 end
