@@ -150,11 +150,11 @@ class SignalDailyReportGeneratorService
   def build_statistics(data)
     signals = data[:signals]
     stats = calculate_stats(signals)
-    latest_signals = data[:latest_signals]
+    latest_signals = data[:latest_signals].to_a
 
     # 按信号类型统计最新信号
     latest_stats = {
-      total: latest_signals.count,
+      total: latest_signals.size,
       buy: latest_signals.count { |s| s.buy? },
       sell: latest_signals.count { |s| s.sell? },
       hold: latest_signals.count { |s| s.hold? }
