@@ -100,7 +100,7 @@
   # === 第五批：配置建议生成 (日报生成后，UTC 03:20 / 15:20) ===
 
   generate_daily_allocation_decisions:
-    cron: "20 3,15 * * *"
+    cron: "30 2,14 * * *"
     class: "GenerateDailyAllocationDecisionsJob"
     queue: default
     description: "每天两次为活跃 trader 自动生成 LLM 配置建议（信号生成后约 10 分钟）"
@@ -108,15 +108,15 @@
   # === 第五批：配置建议执行 (建议生成后，UTC 02:40 / 14:40) ===
 
   execute_daily_allocation_decisions:
-    cron: "25 3,15 * * *"
+    cron: "40 2,14 * * *"
     class: "ExecuteDailyAllocationDecisionsJob"
     queue: default
     description: "每天两次自动执行当天最新有效的 LLM 配置建议（建议生成后约 10 分钟）"
 
-  # === 第六批：组合盯市快照 (执行后，UTC 03:30 / 15:30) ===
+  # === 第六批：组合盯市快照 (执行后，UTC 02:45 / 14:45) ===
 
   mark_to_market_portfolio_snapshots:
-    cron: "30 3,15 * * *"
+    cron: "45 2,14 * * *"
     class: "MarkToMarketPortfolioSnapshotsJob"
     queue: default
     description: "每天两次按最新价格为活跃 trader 记录组合净值快照（执行后约 5 分钟）"
