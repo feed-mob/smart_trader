@@ -111,6 +111,26 @@ Rails.application.routes.draw do
       end
     end
 
+    # 因子日报路由
+    resources :factor_daily_reports, only: %i[index show new create edit update destroy] do
+      member do
+        post :regenerate
+      end
+      collection do
+        post :generate
+      end
+    end
+
+    # 信号日报路由
+    resources :signal_daily_reports, only: %i[index show new create edit update destroy] do
+      member do
+        post :regenerate
+      end
+      collection do
+        post :generate
+      end
+    end
+
     resources :job_executions, only: %i[index show]
   end
 end

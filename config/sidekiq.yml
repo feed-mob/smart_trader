@@ -8,6 +8,7 @@
 # Queue priorities and concurrency limits
 :queues:
   - default
+  - reports
   - asset_collection
   - mailers
   - yahoo_finance
@@ -80,7 +81,23 @@
     queue: default
     description: "每天两次生成交易信号（因子计算后约 15 分钟）"
 
-  # === 第四批：配置建议生成 (信号生成后，UTC 02:30 / 14:30) ===
+  # === 第四批：日报生成 (信号生成后10-15分钟，UTC 03:10-03:15 / 15:10-15:15) ===
+
+  # 因子日报生成 - 依赖信号生成完成
+  generate_factor_daily_report:
+    cron: "10 3,15 * * *"
+    class: "GenerateFactorDailyReportJob"
+    queue: reports
+    description: "每天两次生成因子日报（信号生成后10分钟）"
+
+  # 信号日报生成 - 依赖因子日报生成
+  generate_signal_daily_report:
+    cron: "15 3,15 * * *"
+    class: "GenerateSignalDailyReportJob"
+    queue: reports
+    description: "每天两次生成信号日报（因子日报后5分钟）"
+
+  # === 第五批：配置建议生成 (日报生成后，UTC 03:20 / 15:20) ===
 
   generate_daily_allocation_decisions:
     cron: "30 2,14 * * *"

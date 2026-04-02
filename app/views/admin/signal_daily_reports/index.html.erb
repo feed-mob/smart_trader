@@ -1,0 +1,99 @@
+<% content_for :title, "信号日报列表 - SmartTrader" %>
+
+<div class="reports-container">
+  <!-- Header -->
+  <header class="reports-header">
+    <div class="reports-header__left">
+      <%= link_to admin_trading_signals_path, class: "back-link" do %>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5"></path>
+          <path d="M12 19l-7-7 7-7"></path>
+        </svg>
+        返回信号管理
+      <% end %>
+      <h1>信号日报</h1>
+    </div>
+    <div class="reports-header__right">
+      <%= form_with url: generate_admin_signal_daily_reports_path, method: :post, local: true, class: "reports-generate-form" do |f| %>
+        <%= date_field_tag :date, Date.current, class: "date-input" %>
+        <%= submit_tag "手动生成", class: "btn btn-primary" %>
+      <% end %>
+    </div>
+  </header>
+
+  <!-- Flash Messages -->
+  <% if notice.present? %>
+    <div class="alert alert-success">
+      <%= notice %>
+    </div>
+  <% end %>
+
+  <% if alert.present? %>
+    <div class="alert alert-error">
+      <%= alert %>
+    </div>
+  <% end %>
+
+  <!-- Reports List -->
+  <div class="reports-list">
+    <% if @reports.any? %>
+      <% @reports.each do |report| %>
+        <div class="report-card <%= report.published? ? 'published' : 'draft' %>">
+          <div class="report-card__date" data-day="<%= report.report_date.strftime('%A') %>">
+            <%= report.report_date.strftime('%Y年%m月%d日') %>
+          </div>
+          <div class="report-card__summary">
+            <%= truncate(report.summary, length: 100) %>
+          </div>
+          <div class="report-card__meta">
+            <span class="report-card__time">
+              <%= report.created_at.strftime('%H:%M') %>
+            </span>
+            <span class="report-card__status <%= report.published? ? 'published' : 'draft' %>">
+              <%= report.published_label %>
+            </span>
+            <div class="report-card__actions">
+              <%= link_to admin_signal_daily_report_path(report), class: "btn btn-sm", title: "查看详情" do %>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              <% end %>
+              <%= link_to edit_admin_signal_daily_report_path(report), class: "btn btn-sm btn-secondary", title: "编辑" do %>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+              <% end %>
+              <%= button_to admin_signal_daily_report_path(report),
+                          method: :delete,
+                          class: "btn btn-sm btn-danger",
+                          title: "删除",
+                          data: { turbo_confirm: "确定要删除此日报吗？" } do %>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+        <p>暂无日报记录</p>
+        <p class="empty-state__hint">点击上方"手动生成"按钮创建第一份日报</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Pagination -->
+  <% if @reports.respond_to?(:total_pages) && @reports.total_pages > 1 %>
+    <div class="pagination">
+      <%= paginate @reports %>
+    </div>
+  <% end %>
+</div>
