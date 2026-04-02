@@ -1,4 +1,4 @@
-<% content_for :title, "新建操盘手 - SmartTrader" %>
+<% content_for :title, "New Trader - SmartTrader" %>
 
 <div class="traders-container">
   <!-- Animated Background -->
@@ -16,7 +16,7 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       <% end %>
-      <h1 class="traders-header__title">新建操盘手</h1>
+      <h1 class="traders-header__title">New Trader</h1>
     </div>
   </header>
 
@@ -25,8 +25,8 @@
     <div class="form-container">
       <div class="form-card">
         <div class="form-card__header">
-          <h2 class="form-card__title">创建 AI 操盘手</h2>
-          <p class="form-card__subtitle">输入投资风格描述，AI 将自动生成个性化的交易策略</p>
+          <h2 class="form-card__title">Create AI Trader</h2>
+          <p class="form-card__subtitle">Enter your investment style description, AI will automatically generate personalized trading strategies</p>
         </div>
 
         <%= render "form", trader: @trader %>

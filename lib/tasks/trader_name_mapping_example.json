@@ -1,0 +1,20 @@
+[
+  {
+    "old_name": "保守型投资者",
+    "new_name": "Conservative Growth Fund",
+    "description": "Focus on capital preservation and steady income with minimal risk exposure",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "平衡型投资者",
+    "new_name": "Balanced Growth Portfolio",
+    "description": "Balance between growth and income with moderate risk tolerance",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "激进型投资者",
+    "new_name": "Aggressive Growth Fund",
+    "description": "Maximize returns through active trading and higher risk tolerance",
+    "risk_level": "aggressive"
+  }
+]

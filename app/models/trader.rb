@@ -48,11 +48,11 @@ class Trader < ApplicationRecord
   end
 
   def display_status
-    active? ? "启用" : "停用"
+    active? ? "Active" : "Inactive"
   end
 
   def display_risk_level
-    { "conservative" => "保守", "balanced" => "平衡", "aggressive" => "激进" }[risk_level]
+    { "conservative" => "Conservative", "balanced" => "Balanced", "aggressive" => "Aggressive" }[risk_level]
   end
 
   # Get strategy for a specific market condition

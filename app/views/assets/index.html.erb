@@ -1,4 +1,4 @@
-<% content_for :title, "资产数据采集 - SmartTrader" %>
+<% content_for :title, "Asset Data Collection - SmartTrader" %>
 
 <div class="assets-container">
   <!-- Animated Background -->
@@ -16,7 +16,7 @@
           <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
         </svg>
       <% end %>
-      <h1 class="assets-header__title">资产数据采集</h1>
+      <h1 class="assets-header__title">Asset Data Collection</h1>
     </div>
     <div class="assets-header__right">
       <div class="header-actions">
@@ -25,7 +25,7 @@
             <polyline points="23 4 23 10 17 10"></polyline>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
-          触发采集
+          Trigger Collection
         </button>
         <%= link_to "/sidekiq", class: "btn btn-secondary btn--icon", target: "_blank", rel: "noopener" do %>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -34,7 +34,7 @@
             <rect x="14" y="14" width="7" height="7"></rect>
             <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
-          任务队列
+          Job Queue
         <% end %>
       </div>
     </div>
@@ -60,7 +60,7 @@
         </div>
         <div class="stat-card__content">
           <span class="stat-card__value"><%= @assets.count %></span>
-          <span class="stat-card__label">监控资产</span>
+          <span class="stat-card__label">Monitored Assets</span>
         </div>
       </div>
 
@@ -73,7 +73,7 @@
         </div>
         <div class="stat-card__content">
           <span class="stat-card__value"><%= AssetSnapshot.count %></span>
-          <span class="stat-card__label">数据快照</span>
+          <span class="stat-card__label">Data Snapshots</span>
         </div>
       </div>
     </section>
@@ -81,7 +81,7 @@
     <!-- Top Assets Section -->
     <section class="assets-section">
       <div class="assets-section__header">
-        <h2 class="assets-section__title">热门资产</h2>
+        <h2 class="assets-section__title">Popular Assets</h2>
       </div>
       <div id="top-assets-container" class="assets-grid assets-grid--featured">
         <% if @top_assets.any? %>
@@ -135,15 +135,15 @@
                     <span class="asset-card__change-value <%= asset.latest_snapshot.change_percent >= 0 ? 'positive' : 'negative' %>">
                       <%= asset.latest_snapshot.change_percent >= 0 ? '+' : '' %><%= asset.latest_snapshot.change_percent.round(2) %>%
                     </span>
-                    <span class="asset-card__change-label">24小时</span>
+                    <span class="asset-card__change-label">24h</span>
                   </div>
                 <% end %>
                 <div class="asset-card__meta">
-                  <span class="asset-card__updated">热</span>
+                  <span class="asset-card__updated">Hot</span>
                   <span class="asset-card__snapshots">TOP</span>
                 </div>
                 <div class="asset-card__action">
-                  <span class="asset-card__action-text">查看详情</span>
+                  <span class="asset-card__action-text">View Details</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
@@ -153,7 +153,7 @@
             </div>
           <% end %>
         <% else %>
-          <div class="empty-state">暂无热门资产数据</div>
+          <div class="empty-state">No popular assets data yet</div>
         <% end %>
       </div>
     </section>
@@ -161,8 +161,8 @@
     <!-- All Assets Section -->
     <section class="assets-section">
       <div class="assets-section__header">
-        <h2 class="assets-section__title">所有资产</h2>
-        <p class="assets-section__subtitle">实时市场数据监控</p>
+        <h2 class="assets-section__title">All Assets</h2>
+        <p class="assets-section__subtitle">Real-time market data monitoring</p>
       </div>
 
       <% if @assets.any? %>
@@ -217,12 +217,12 @@
                     <span class="asset-card__change-value <%= asset.latest_snapshot.change_percent >= 0 ? 'positive' : 'negative' %>">
                       <%= asset.latest_snapshot.change_percent >= 0 ? '+' : '' %><%= asset.latest_snapshot.change_percent.round(2) %>%
                     </span>
-                    <span class="asset-card__change-label">24小时</span>
+                    <span class="asset-card__change-label">24h</span>
                   </div>
                 <% else %>
                   <div class="asset-card__change">
                     <span class="asset-card__change-value">-</span>
-                    <span class="asset-card__change-label">24小时</span>
+                    <span class="asset-card__change-label">24h</span>
                   </div>
                 <% end %>
                 <div class="asset-card__meta">
@@ -230,11 +230,11 @@
                     <%= asset.last_updated&.strftime('%H:%M') || '--:--' %>
                   </span>
                   <span class="asset-card__snapshots">
-                    <%= asset.asset_snapshots.count %> 快照
+                    <%= asset.asset_snapshots.count %> snapshots
                   </span>
                 </div>
                 <div class="asset-card__action">
-                  <span class="asset-card__action-text">查看详情</span>
+                  <span class="asset-card__action-text">View Details</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
@@ -251,10 +251,10 @@
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
             </svg>
           </div>
-          <h3 class="assets-empty__title">暂无资产数据</h3>
-          <p class="assets-empty__text">等待数据采集任务开始...</p>
+          <h3 class="assets-empty__title">No Asset Data Yet</h3>
+          <p class="assets-empty__text">Waiting for data collection to start...</p>
           <button onclick="triggerCollection()" class="btn btn-primary">
-            立即触发采集
+            Trigger Collection Now
           </button>
         </div>
       <% end %>
@@ -263,7 +263,7 @@
         <div class="pagination-container">
           <%= paginate @assets, window: 2, class: "pagination" %>
           <div class="pagination-info">
-            共 <%= @assets.total_count %> 个资产，当前第 <%= @assets.current_page %> / <%= @assets.total_pages %> 页
+            Total <%= @assets.total_count %> assets, Page <%= @assets.current_page %> of <%= @assets.total_pages %>
           </div>
         </div>
       <% end %>
@@ -285,14 +285,14 @@
       const result = await response.json();
 
       if (result.success) {
-        showToast('数据采集已触发！', 'success');
+        showToast('Data collection triggered!', 'success');
         setTimeout(() => location.reload(), 2000);
       } else {
-        showToast('触发失败: ' + (result.error || '未知错误'), 'error');
+        showToast('Failed: ' + (result.error || 'Unknown error'), 'error');
       }
     } catch (error) {
       console.error('Error triggering collection:', error);
-      showToast('网络错误，请稍后重试', 'error');
+      showToast('Network error, please try again later', 'error');
     }
   }
 

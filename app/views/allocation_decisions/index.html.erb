@@ -1,4 +1,4 @@
-<% content_for :title, "配置建议记录 - SmartTrader" %>
+<% content_for :title, "Allocation Records - SmartTrader" %>
 
 <div class="traders-container">
   <div class="traders-background">
@@ -14,17 +14,17 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       <% end %>
-      <h1 class="traders-header__title">配置建议记录</h1>
+      <h1 class="traders-header__title">Allocation Records</h1>
     </div>
     <div class="traders-header__right">
-      <%= link_to "返回操盘手", traders_path, class: "btn btn-secondary" %>
+      <%= link_to "Back to Traders", traders_path, class: "btn btn-secondary" %>
     </div>
   </header>
 
   <main class="traders-main">
     <div class="preview-section">
       <div class="preview-section__header">
-        <h2 class="preview-section__title">最近 100 条 Recommendation</h2>
+        <h2 class="preview-section__title">Recent 100 Recommendations</h2>
       </div>
 
       <% if @allocation_decisions.any? %>
@@ -32,14 +32,14 @@
           <table class="data-table">
             <thead>
               <tr>
-                <th>日期</th>
-                <th>操盘手</th>
-                <th>策略</th>
-                <th>来源</th>
-                <th>模型</th>
-                <th>生成状态</th>
-                <th>校验状态</th>
-                <th>查看</th>
+                <th>Date</th>
+                <th>Trader</th>
+                <th>Strategy</th>
+                <th>Source</th>
+                <th>Model</th>
+                <th>Status</th>
+                <th>Validation</th>
+                <th>View</th>
               </tr>
             </thead>
             <tbody>
@@ -52,7 +52,7 @@
                   <td><%= decision.llm_model_name.presence || "-" %></td>
                   <td><span class="status-pill status-pill--<%= decision.status %>"><%= decision.status %></span></td>
                   <td><span class="status-pill status-pill--<%= decision.validation_status %>"><%= decision.validation_status %></span></td>
-                  <td><%= link_to "详情", allocation_decision_path(decision), class: "btn btn-ghost btn-sm" %></td>
+                  <td><%= link_to "Details", allocation_decision_path(decision), class: "btn btn-ghost btn-sm" %></td>
                 </tr>
               <% end %>
             </tbody>
@@ -60,7 +60,7 @@
         </div>
       <% else %>
         <div class="empty-state">
-          <p>暂无配置建议记录</p>
+          <p>No allocation records yet</p>
         </div>
       <% end %>
     </div>

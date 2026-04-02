@@ -1,4 +1,4 @@
-<% content_for :title, "因子日报列表 - SmartTrader" %>
+<% content_for :title, "Factor Daily Reports - SmartTrader" %>
 
 <div class="reports-container">
   <!-- Header -->
@@ -9,14 +9,14 @@
           <path d="M19 12H5"></path>
           <path d="M12 19l-7-7 7-7"></path>
         </svg>
-        返回因子管理
+        Back to Factor Management
       <% end %>
-      <h1>因子日报</h1>
+      <h1>Factor Daily Reports</h1>
     </div>
     <div class="reports-header__right">
       <%= form_with url: generate_admin_factor_daily_reports_path, method: :post, local: true, class: "reports-generate-form" do |f| %>
         <%= date_field_tag :date, Date.current, class: "date-input" %>
-        <%= submit_tag "手动生成", class: "btn btn-primary" %>
+        <%= submit_tag "Generate", class: "btn btn-primary" %>
       <% end %>
     </div>
   </header>
@@ -40,7 +40,7 @@
       <% @reports.each do |report| %>
         <div class="report-card <%= report.published? ? 'published' : 'draft' %>">
           <div class="report-card__date" data-day="<%= report.report_date.strftime('%A') %>">
-            <%= report.report_date.strftime('%Y年%m月%d日') %>
+            <%= report.report_date.strftime('%Y-%m-%d') %>
           </div>
           <div class="report-card__summary">
             <%= truncate(report.summary, length: 100) %>
@@ -53,13 +53,13 @@
               <%= report.published_label %>
             </span>
             <div class="report-card__actions">
-              <%= link_to admin_factor_daily_report_path(report), class: "btn btn-sm", title: "查看详情" do %>
+              <%= link_to admin_factor_daily_report_path(report), class: "btn btn-sm", title: "View Details" do %>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               <% end %>
-              <%= link_to edit_admin_factor_daily_report_path(report), class: "btn btn-sm btn-secondary", title: "编辑" do %>
+              <%= link_to edit_admin_factor_daily_report_path(report), class: "btn btn-sm btn-secondary", title: "Edit" do %>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -68,8 +68,8 @@
               <%= button_to admin_factor_daily_report_path(report),
                           method: :delete,
                           class: "btn btn-sm btn-danger",
-                          title: "删除",
-                          data: { turbo_confirm: "确定要删除此日报吗？" } do %>
+                          title: "Delete",
+                          data: { turbo_confirm: "Are you sure you want to delete this report?" } do %>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -86,8 +86,8 @@
           <line x1="12" y1="8" x2="12" y2="16"></line>
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
-        <p>暂无日报记录</p>
-        <p class="empty-state__hint">点击上方"手动生成"按钮创建第一份日报</p>
+        <p>No daily reports yet</p>
+        <p class="empty-state__hint">Click the "Generate" button above to create the first report</p>
       </div>
     <% end %>
   </div>

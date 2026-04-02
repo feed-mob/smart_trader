@@ -54,7 +54,7 @@ module Admin
 
     def update
       if @factor.update(factor_params)
-        redirect_to admin_factor_definition_path(@factor), notice: "因子更新成功"
+        redirect_to admin_factor_definition_path(@factor), notice: "Factor updated successfully"
       else
         render :edit, status: :unprocessable_entity
       end
@@ -62,8 +62,8 @@ module Admin
 
     def toggle
       @factor.update!(active: !@factor.active)
-      status_text = @factor.active? ? "启用" : "禁用"
-      redirect_to admin_factor_definitions_path, notice: "因子已#{status_text}"
+      status_text = @factor.active? ? "enabled" : "disabled"
+      redirect_to admin_factor_definitions_path, notice: "Factor #{status_text}"
     end
 
     private

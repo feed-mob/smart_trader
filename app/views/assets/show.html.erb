@@ -28,7 +28,7 @@
       </span>
     </div>
     <div class="assets-header__right">
-      <%= link_to "返回列表", market_assets_path, class: "btn btn-ghost" %>
+      <%= link_to "Back to List", market_assets_path, class: "btn btn-ghost" %>
     </div>
   </header>
 
@@ -43,16 +43,16 @@
     <!-- Asset Hero Section -->
     <div class="asset-hero">
       <div class="asset-hero__content">
-        <div class="asset-hero__eyebrow">资产详情</div>
+        <div class="asset-hero__eyebrow">Asset Details</div>
         <h2 class="asset-hero__title"><%= @asset.name %></h2>
         <p class="asset-hero__subtitle">
-          在 <%= @asset.exchange %> 交易 · 以 <%= @asset.quote_currency %> 计价
+          Traded on <%= @asset.exchange %> · Quoted in <%= @asset.quote_currency %>
         </p>
       </div>
       <div class="asset-hero__metrics">
         <% if @asset.current_price %>
           <div class="asset-hero__metric">
-            <span class="asset-hero__metric-label">当前价格</span>
+            <span class="asset-hero__metric-label">Current Price</span>
             <span class="asset-hero__metric-value">
               <%= number_to_currency(@asset.current_price, precision: 4) %>
               <small><%= @asset.quote_currency %></small>
@@ -61,7 +61,7 @@
         <% end %>
         <% if @asset.latest_snapshot && @asset.latest_snapshot.change_percent %>
           <div class="asset-hero__metric <%= @asset.latest_snapshot.change_percent >= 0 ? 'asset-hero__metric--positive' : 'asset-hero__metric--negative' %>">
-            <span class="asset-hero__metric-label">24小时</span>
+            <span class="asset-hero__metric-label">24h</span>
             <span class="asset-hero__metric-value">
               <%= @asset.latest_snapshot.change_percent >= 0 ? '+' : '' %><%= @asset.latest_snapshot.change_percent.round(2) %>%
             </span>
@@ -69,7 +69,7 @@
         <% end %>
         <% if @asset.latest_snapshot && @asset.latest_snapshot.volume %>
           <div class="asset-hero__metric">
-            <span class="asset-hero__metric-label">成交量</span>
+            <span class="asset-hero__metric-label">Volume</span>
             <span class="asset-hero__metric-value">
               <%= number_with_delimiter(@asset.latest_snapshot.volume.to_i) %>
             </span>
@@ -88,11 +88,11 @@
             <line x1="12" y1="16" x2="12" y2="12"></line>
             <line x1="12" y1="8" x2="12.01" y2="8"></line>
           </svg>
-          基本信息
+          Basic Information
         </h2>
         <div class="trader-detail__grid">
           <div class="trader-detail__item">
-            <span class="trader-detail__label">资产类型</span>
+            <span class="trader-detail__label">Asset Type</span>
             <span class="trader-detail__value">
               <span class="asset-type-badge asset-type-badge--<%= @asset.asset_type %>">
                 <% case @asset.asset_type.to_s.downcase %>
@@ -127,35 +127,35 @@
             </span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">状态</span>
+            <span class="trader-detail__label">Status</span>
             <span class="trader-detail__value">
               <span class="status-indicator status-indicator--<%= @asset.active? ? 'active' : 'inactive' %>"></span>
-              <%= @asset.active? ? '活跃' : '非活跃' %>
+              <%= @asset.active? ? 'Active' : 'Inactive' %>
             </span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">交易所</span>
+            <span class="trader-detail__label">Exchange</span>
             <span class="trader-detail__value"><%= @asset.exchange %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">计价货币</span>
+            <span class="trader-detail__label">Quote Currency</span>
             <span class="trader-detail__value"><%= @asset.quote_currency %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">最后更新</span>
+            <span class="trader-detail__label">Last Updated</span>
             <span class="trader-detail__value">
               <%= @asset.last_updated&.strftime('%Y-%m-%d %H:%M') || '-' %>
             </span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">数据快照数</span>
+            <span class="trader-detail__label">Data Snapshots</span>
             <span class="trader-detail__value"><%= @snapshots.count %></span>
           </div>
         </div>
 
         <% if @asset.coingecko_id.present? || @asset.yahoo_symbol.present? %>
           <div class="trader-detail__description">
-            <h3 class="trader-detail__description-title">外部标识符</h3>
+            <h3 class="trader-detail__description-title">External Identifiers</h3>
             <div class="trader-detail__external-ids">
               <% if @asset.coingecko_id.present? %>
                 <div class="trader-detail__external-id">
@@ -181,13 +181,13 @@
             <path d="M3 3v18h18"></path>
             <path d="M18 9l-5 10-5-5-5 5"></path>
           </svg>
-          市场数据
-          <span class="strategy-matrix-hint">（基于最新快照）</span>
+          Market Data
+          <span class="strategy-matrix-hint">(Based on latest snapshot)</span>
         </h2>
         <div class="trader-detail__grid">
           <% if @asset.current_price %>
             <div class="trader-detail__item">
-              <span class="trader-detail__label">当前价格</span>
+              <span class="trader-detail__label">Current Price</span>
               <span class="trader-detail__value">
                 <%= number_to_currency(@asset.current_price, precision: 4) %>
                 <small class="trader-detail__value-currency"><%= @asset.quote_currency %></small>
@@ -196,7 +196,7 @@
           <% end %>
           <% if @asset.latest_snapshot && @asset.latest_snapshot.change_percent %>
             <div class="trader-detail__item">
-              <span class="trader-detail__label">24小时变化</span>
+              <span class="trader-detail__label">24h Change</span>
               <span class="trader-detail__value <%= @asset.latest_snapshot.change_percent >= 0 ? 'positive' : 'negative' %>">
                 <%= @asset.latest_snapshot.change_percent >= 0 ? '+' : '' %><%= @asset.latest_snapshot.change_percent.round(2) %>%
               </span>
@@ -204,7 +204,7 @@
           <% end %>
           <% if @asset.latest_snapshot && @asset.latest_snapshot.volume %>
             <div class="trader-detail__item">
-              <span class="trader-detail__label">成交量</span>
+              <span class="trader-detail__label">Volume</span>
               <span class="trader-detail__value">
                 <%= number_with_delimiter(@asset.latest_snapshot.volume.to_i) %>
               </span>
@@ -212,7 +212,7 @@
           <% end %>
           <% if @asset.market_cap %>
             <div class="trader-detail__item">
-              <span class="trader-detail__label">市值</span>
+              <span class="trader-detail__label">Market Cap</span>
               <span class="trader-detail__value">
                 <%= number_to_human(@asset.market_cap, format: '%n%u', units: { thousand: 'K', million: 'M', billion: 'B', trillion: 'T' }) %>
               </span>
@@ -220,13 +220,13 @@
           <% end %>
           <% if @asset.market_cap_rank %>
             <div class="trader-detail__item">
-              <span class="trader-detail__label">市值排名</span>
+              <span class="trader-detail__label">Market Cap Rank</span>
               <span class="trader-detail__value">#<%= @asset.market_cap_rank %></span>
             </div>
           <% end %>
           <% if @asset.latest_snapshot&.captured_at %>
             <div class="trader-detail__item">
-              <span class="trader-detail__label">快照时间</span>
+              <span class="trader-detail__label">Snapshot Time</span>
               <span class="trader-detail__value">
                 <%= @asset.latest_snapshot.captured_at.strftime('%Y-%m-%d %H:%M') %>
               </span>
@@ -242,10 +242,10 @@
             <circle cx="12" cy="12" r="10"></circle>
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          历史快照时间范围
+          Historical Snapshot Time Range
         </h2>
         <div class="timeframe-selector">
-          <span class="timeframe-selector__label">选择时间范围：</span>
+          <span class="timeframe-selector__label">Select Time Range:</span>
           <% ['all', '1h', '6h', '24h', '7d', '30d'].each do |tf| %>
             <%= link_to timeframe_label(tf), market_asset_path(@asset, timeframe: tf),
                   class: "timeframe-btn #{tf == @timeframe ? 'timeframe-btn--active' : ''}" %>
@@ -264,17 +264,17 @@
             <line x1="3" y1="12" x2="3.01" y2="12"></line>
             <line x1="3" y1="18" x2="3.01" y2="18"></line>
           </svg>
-          历史快照记录
-          <span class="strategy-matrix-hint"><%= @snapshots.count %> 条记录</span>
+          Historical Snapshots
+          <span class="strategy-matrix-hint"><%= @snapshots.count %> records</span>
         </h2>
 
         <% if @snapshots.any? %>
           <div class="snapshots-table-container">
             <div class="snapshots-header">
-              <div class="snapshots-header-cell">日期时间</div>
-              <div class="snapshots-header-cell snapshots-header-cell--right">价格</div>
-              <div class="snapshots-header-cell snapshots-header-cell--right">涨跌幅</div>
-              <div class="snapshots-header-cell snapshots-header-cell--right">成交量</div>
+              <div class="snapshots-header-cell">Date & Time</div>
+              <div class="snapshots-header-cell snapshots-header-cell--right">Price</div>
+              <div class="snapshots-header-cell snapshots-header-cell--right">Change %</div>
+              <div class="snapshots-header-cell snapshots-header-cell--right">Volume</div>
             </div>
             <div class="snapshots-body">
               <% @snapshots.each do |snapshot| %>
@@ -303,8 +303,8 @@
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
               </svg>
             </div>
-            <h3>暂无数据快照</h3>
-            <p>该资产暂时没有历史快照记录</p>
+            <h3>No Data Snapshots Yet</h3>
+            <p>This asset has no historical snapshot records yet.</p>
           </div>
         <% end %>
       </div>
@@ -312,7 +312,7 @@
 
     <!-- Back Link -->
     <div class="trader-actions">
-      <%= link_to "返回列表", market_assets_path, class: "btn btn-ghost" %>
+      <%= link_to "Back to List", market_assets_path, class: "btn btn-ghost" %>
     </div>
   </main>
 </div>

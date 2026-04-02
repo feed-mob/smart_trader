@@ -34,12 +34,12 @@ module AssetsHelper
   # Returns human-readable label for timeframe
   def timeframe_label(tf)
     labels = {
-      "all" => "全部",
-      "1h" => "1小时",
-      "6h" => "6小时",
-      "24h" => "24小时",
-      "7d" => "7天",
-      "30d" => "30天"
+      "all" => "All",
+      "1h" => "1h",
+      "6h" => "6h",
+      "24h" => "24h",
+      "7d" => "7d",
+      "30d" => "30d"
     }
     labels[tf] || tf
   end

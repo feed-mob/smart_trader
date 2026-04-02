@@ -36,7 +36,7 @@ export default class extends Controller {
       const statusCell = row.querySelector("td:last-child")
       if (statusCell) {
         if (isSelected) {
-          statusCell.innerHTML = '<span class="status-badge status-badge--selected">已选择</span>'
+          statusCell.innerHTML = '<span class="status-badge status-badge--selected">Selected</span>'
         } else {
           statusCell.innerHTML = ""
         }

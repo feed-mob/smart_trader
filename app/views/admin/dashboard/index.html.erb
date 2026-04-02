@@ -1,4 +1,4 @@
-<% content_for :title, "Admin 管理面板" %>
+<% content_for :title, "Admin Dashboard" %>
 
 <div class="signals-container">
   <!-- Background -->
@@ -17,8 +17,8 @@
         </svg>
       <% end %>
       <div>
-        <h1 class="signals-header__title">Admin 管理面板</h1>
-        <p class="signals-header__subtitle">系统管理入口</p>
+        <h1 class="signals-header__title">Admin Dashboard</h1>
+        <p class="signals-header__subtitle">System Management Portal</p>
       </div>
     </div>
   </div>
@@ -35,7 +35,7 @@
       </div>
       <div class="stat-card__content">
         <span class="stat-card__value"><%= @factor_count %></span>
-        <span class="stat-card__label">活跃因子</span>
+        <span class="stat-card__label">Active Factors</span>
       </div>
     </div>
     <div class="stat-card stat-card--buy">
@@ -46,7 +46,7 @@
       </div>
       <div class="stat-card__content">
         <span class="stat-card__value"><%= @signal_count %></span>
-        <span class="stat-card__label">交易信号</span>
+        <span class="stat-card__label">Trading Signals</span>
       </div>
     </div>
     <div class="stat-card stat-card--sell">
@@ -59,7 +59,7 @@
       </div>
       <div class="stat-card__content">
         <span class="stat-card__value"><%= @job_stats[:failed] %></span>
-        <span class="stat-card__label">失败 Job</span>
+        <span class="stat-card__label">Failed Jobs</span>
       </div>
     </div>
     <div class="stat-card stat-card--high">
@@ -71,7 +71,7 @@
       </div>
       <div class="stat-card__content">
         <span class="stat-card__value"><%= @job_stats[:total] %></span>
-        <span class="stat-card__label">总 Job 数</span>
+        <span class="stat-card__label">Total Jobs</span>
       </div>
     </div>
   </div>
@@ -88,8 +88,8 @@
         </svg>
       </div>
       <div class="admin-module-card__content">
-        <h3 class="admin-module-card__title">因子定义</h3>
-        <p class="admin-module-card__desc">管理交易因子，定义因子参数和权重</p>
+        <h3 class="admin-module-card__title">Factor Definitions</h3>
+        <p class="admin-module-card__desc">Manage trading factors, define parameters and weights</p>
       </div>
       <div class="admin-module-card__arrow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -106,8 +106,8 @@
         </svg>
       </div>
       <div class="admin-module-card__content">
-        <h3 class="admin-module-card__title">交易信号</h3>
-        <p class="admin-module-card__desc">查看 AI 生成的交易信号</p>
+        <h3 class="admin-module-card__title">Trading Signals</h3>
+        <p class="admin-module-card__desc">View AI-generated trading signals</p>
       </div>
       <div class="admin-module-card__arrow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -125,8 +125,8 @@
         </svg>
       </div>
       <div class="admin-module-card__content">
-        <h3 class="admin-module-card__title">Job 监控</h3>
-        <p class="admin-module-card__desc">查看后台任务执行记录</p>
+        <h3 class="admin-module-card__title">Job Monitor</h3>
+        <p class="admin-module-card__desc">View background task execution records</p>
       </div>
       <div class="admin-module-card__arrow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -145,8 +145,8 @@
         </svg>
       </div>
       <div class="admin-module-card__content">
-        <h3 class="admin-module-card__title">Sidekiq 监控</h3>
-        <p class="admin-module-card__desc">Sidekiq 队列管理界面</p>
+        <h3 class="admin-module-card__title">Sidekiq Monitor</h3>
+        <p class="admin-module-card__desc">Sidekiq queue management interface</p>
       </div>
       <div class="admin-module-card__arrow">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -159,15 +159,15 @@
 
   <!-- Recent Jobs -->
   <div class="signals-section">
-    <h2 class="signals-section__title">最近执行</h2>
+    <h2 class="signals-section__title">Recent Executions</h2>
     <div class="signals-table-wrapper">
       <table class="signals-table">
         <thead>
           <tr>
-            <th>Job 名称</th>
-            <th>状态</th>
-            <th>开始时间</th>
-            <th>耗时</th>
+            <th>Job Name</th>
+            <th>Status</th>
+            <th>Start Time</th>
+            <th>Duration</th>
           </tr>
         </thead>
         <tbody>

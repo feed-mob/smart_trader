@@ -30,7 +30,7 @@ class TradersController < ApplicationController
 
     if @trader.save
       generate_strategies_for(@trader)
-      redirect_to @trader, notice: "操盘手创建成功"
+      redirect_to @trader, notice: "Trader created successfully"
     else
       render :new, status: :unprocessable_entity
     end
@@ -39,7 +39,7 @@ class TradersController < ApplicationController
   def update
     if @trader.update(trader_params)
       regenerate_strategies_if_needed(@trader)
-      redirect_to @trader, notice: "操盘手更新成功"
+      redirect_to @trader, notice: "Trader updated successfully"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -47,7 +47,7 @@ class TradersController < ApplicationController
 
   def destroy
     @trader.destroy
-    redirect_to traders_url, notice: "操盘手已删除"
+    redirect_to traders_url, notice: "Trader deleted"
   end
 
   private

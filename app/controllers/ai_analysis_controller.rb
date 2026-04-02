@@ -15,18 +15,18 @@ class AiAnalysisController < ApplicationController
     @assets = @assets_input.split(/[,\s]+/).map(&:strip).map(&:upcase).reject(&:empty?)
 
     if @assets.empty?
-      flash[:alert] = "请至少输入一个资产"
+      flash[:alert] = "Please enter at least one asset"
       redirect_to new_ai_analysis_path and return
     end
 
-    # 执行分析（不再依赖 Trader）
+    # Execute analysis (no longer depends on Trader)
     @result = perform_analysis(@assets, @analysis_type)
 
-    # 将结果存入 Rails.cache 供 show 页面使用
+    # Store result in Rails.cache for show page
     result_cache_key = "ai_analysis_result_#{Time.current.to_i}"
     Rails.cache.write(result_cache_key, @result, expires_in: 10.minutes)
 
-    flash[:notice] = "分析完成！共分析 #{@assets.length} 个资产"
+    flash[:notice] = "Analysis completed! Analyzed #{@assets.length} assets"
     redirect_to ai_analysis_result_path(result_key: result_cache_key, assets: @assets.join(","))
   end
 

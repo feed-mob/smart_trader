@@ -1,4 +1,4 @@
-<% content_for :title, "#{@factor.name} - 因子详情 - SmartTrader" %>
+<% content_for :title, "#{@factor.name} - Factor Details - SmartTrader" %>
 
 <div class="factor-detail-container">
   <!-- Header -->
@@ -8,11 +8,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-back-link__icon">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
-        <span>返回列表</span>
+        <span>Back to List</span>
       <% end %>
     </div>
     <div class="factor-detail-header__right">
-      <%= link_to "编辑因子", edit_admin_factor_definition_path(@factor), class: "btn btn-primary" %>
+      <%= link_to "Edit Factor", edit_admin_factor_definition_path(@factor), class: "btn btn-primary" %>
     </div>
   </header>
 
@@ -78,25 +78,25 @@
         <div class="factor-detail-card__body">
           <div class="factor-info-grid">
             <div class="factor-info-item">
-              <span class="factor-info-item__label">分类</span>
+              <span class="factor-info-item__label">Category</span>
               <span class="factor-info-item__value"><%= @factor.display_category %></span>
             </div>
             <div class="factor-info-item">
-              <span class="factor-info-item__label">默认权重</span>
+              <span class="factor-info-item__label">Default Weight</span>
               <span class="factor-info-item__value"><%= @factor.display_weight %></span>
             </div>
             <div class="factor-info-item">
-              <span class="factor-info-item__label">更新频率</span>
-              <span class="factor-info-item__value">每 <%= @factor.update_frequency %> 分钟</span>
+              <span class="factor-info-item__label">Update Frequency</span>
+              <span class="factor-info-item__value">Every <%= @factor.update_frequency %> minutes</span>
             </div>
             <div class="factor-info-item">
-              <span class="factor-info-item__label">计算方法</span>
+              <span class="factor-info-item__label">Calculation Method</span>
               <span class="factor-info-item__value"><%= @factor.calculation_method %></span>
             </div>
           </div>
 
           <div class="factor-description">
-            <h3 class="factor-description__title">因子描述</h3>
+            <h3 class="factor-description__title">Factor Description</h3>
             <p class="factor-description__text"><%= @factor.description %></p>
           </div>
         </div>
@@ -105,7 +105,7 @@
       <!-- Right Column: Parameters -->
       <div class="factor-detail-card">
         <div class="factor-detail-card__header">
-          <h2 class="factor-detail-card__section-title">参数配置</h2>
+          <h2 class="factor-detail-card__section-title">Parameter Configuration</h2>
         </div>
 
         <div class="factor-detail-card__body">
@@ -119,7 +119,7 @@
               <% end %>
             </div>
           <% else %>
-            <p class="factor-empty-text">暂无参数配置</p>
+            <p class="factor-empty-text">No parameter configuration</p>
           <% end %>
         </div>
       </div>
@@ -127,7 +127,7 @@
       <!-- Calculation Formula Card -->
       <div class="factor-detail-card factor-detail-card--full">
         <div class="factor-detail-card__header">
-          <h2 class="factor-detail-card__section-title">计算说明</h2>
+          <h2 class="factor-detail-card__section-title">Calculation Description</h2>
         </div>
 
         <div class="factor-detail-card__body">
@@ -137,7 +137,7 @@
                 <%= simple_format(@factor.formula, class: "factor-formula__text") %>
               </div>
             <% else %>
-              <p class="factor-empty-text">暂无计算说明</p>
+              <p class="factor-empty-text">No calculation description</p>
             <% end %>
           </div>
         </div>

@@ -1,16 +1,16 @@
 module ApplicationHelper
-  # 渲染 Markdown 内容
+  # Render Markdown content
   def render_markdown(text)
     return '' if text.nil?
 
     require 'kramdown'
     Kramdown::Document.new(text).to_html.html_safe
   rescue LoadError
-    # 如果 kramdown 不可用，使用简单的格式化
+    # Use simple formatting if kramdown is not available
     simple_format(text)
   end
 
-  # 根据资产类型返回对应的样式类
+  # Return style class based on asset type
   def asset_type_badge(type)
     case type.to_s.downcase
     when 'crypto'
@@ -26,19 +26,19 @@ module ApplicationHelper
     end
   end
 
-  # 根据涨跌幅返回颜色类
+  # Return color class based on price change
   def change_color_class(value)
     value.to_f >= 0 ? 'text-green-600' : 'text-red-600'
   end
 
-  # 格式化涨跌幅百分比
+  # Format percentage change
   def format_change_percent(value)
     return '-' unless value.present?
     sign = value.to_f >= 0 ? '+' : ''
     "#{sign}#{value.to_f.round(2)}%"
   end
 
-  # Job 执行状态样式类
+  # Job execution status style class
   def status_badge_class(status)
     case status.to_s.downcase
     when 'success'
@@ -52,7 +52,7 @@ module ApplicationHelper
     end
   end
 
-  # 格式化统计值
+  # Format statistical value
   def format_stat_value(value)
     case value
     when Hash
@@ -60,21 +60,21 @@ module ApplicationHelper
     when Array
       value.join(', ')
     when TrueClass, FalseClass
-      value ? '是' : '否'
+      value ? 'Yes' : 'No'
     else
       value.to_s
     end
   end
 
-  # Job 执行状态标签
+  # Job execution status label
   def status_label(status)
     case status.to_s.downcase
     when 'success'
-      '成功'
+      'Success'
     when 'failed'
-      '失败'
+      'Failed'
     when 'running'
-      '运行中'
+      'Running'
     else
       status
     end

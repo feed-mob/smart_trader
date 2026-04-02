@@ -53,9 +53,9 @@ class TradingSignal < ApplicationRecord
 
   def signal_type_label
     {
-      "buy" => "买入",
-      "sell" => "卖出",
-      "hold" => "持有"
+      "buy" => "Buy",
+      "sell" => "Sell",
+      "hold" => "Hold"
     }[signal_type] || signal_type
   end
 end

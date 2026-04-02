@@ -19,11 +19,11 @@
       <h1 class="traders-header__title"><%= @trader.name %></h1>
     </div>
     <div class="traders-header__right">
-      <%= link_to "AI配置建议", trader_allocation_preview_path(@trader), class: "btn btn-primary" %>
-      <%= link_to "配置建议记录", allocation_decisions_path, class: "btn btn-secondary" %>
-      <%= link_to "执行任务记录", allocation_tasks_path, class: "btn btn-secondary" %>
-      <%= link_to "编辑", edit_trader_path(@trader), class: "btn btn-secondary" %>
-      <%= button_to "删除", @trader, method: :delete, class: "btn btn-danger", data: { turbo_confirm: "确定要删除这个操盘手吗？" } %>
+      <%= link_to "AI Allocation", trader_allocation_preview_path(@trader), class: "btn btn-primary" %>
+      <%= link_to "Allocation Records", allocation_decisions_path, class: "btn btn-secondary" %>
+      <%= link_to "Task Records", allocation_tasks_path, class: "btn btn-secondary" %>
+      <%= link_to "Edit", edit_trader_path(@trader), class: "btn btn-secondary" %>
+      <%= button_to "Delete", @trader, method: :delete, class: "btn btn-danger", data: { turbo_confirm: "Are you sure you want to delete this trader?" } %>
     </div>
   </header>
 
@@ -44,38 +44,38 @@
     <!-- Trader Info Card -->
     <div class="trader-detail">
       <div class="trader-detail__section">
-        <h2 class="trader-detail__section-title">基本信息</h2>
+        <h2 class="trader-detail__section-title">Basic Information</h2>
         <div class="trader-detail__grid">
           <div class="trader-detail__item">
-            <span class="trader-detail__label">风险等级</span>
+            <span class="trader-detail__label">Risk Level</span>
             <span class="trader-detail__value">
               <span class="risk-badge risk-badge--<%= @trader.risk_level %>"><%= @trader.display_risk_level %></span>
             </span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">状态</span>
+            <span class="trader-detail__label">Status</span>
             <span class="trader-detail__value">
               <span class="status-indicator status-indicator--<%= @trader.status %>"></span>
               <%= @trader.display_status %>
             </span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">初始资金</span>
+            <span class="trader-detail__label">Initial Capital</span>
             <span class="trader-detail__value"><%= number_to_currency(@trader.initial_capital, unit: "$", precision: 2) %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">当前资金</span>
+            <span class="trader-detail__label">Current Capital</span>
             <span class="trader-detail__value"><%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @trader.current_capital_value, unit: "$", precision: 2) %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">盈亏</span>
+            <span class="trader-detail__label">Profit/Loss</span>
             <% current_profit_loss = @latest_portfolio_snapshot&.profit_loss || @trader.profit_loss %>
             <span class="trader-detail__value <%= current_profit_loss >= 0 ? 'positive' : 'negative' %>">
               <%= current_profit_loss >= 0 ? '+' : '' %><%= number_to_currency(current_profit_loss, unit: "$", precision: 2) %>
             </span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">收益率</span>
+            <span class="trader-detail__label">Return Rate</span>
             <% current_profit_loss_percent = @latest_portfolio_snapshot&.profit_loss_percent || @trader.profit_loss_percent %>
             <span class="trader-detail__value <%= current_profit_loss_percent >= 0 ? 'positive' : 'negative' %>">
               <%= current_profit_loss_percent >= 0 ? '+' : '' %><%= current_profit_loss_percent %>%
@@ -85,7 +85,7 @@
 
         <% if @trader.description.present? %>
           <div class="trader-detail__description">
-            <h3 class="trader-detail__description-title">投资风格描述</h3>
+            <h3 class="trader-detail__description-title">Investment Style</h3>
             <p class="trader-detail__description-text"><%= @trader.description %></p>
           </div>
         <% end %>
@@ -94,8 +94,8 @@
       <!-- Multi-Strategy Matrix Section -->
       <div class="trader-detail__section">
         <h2 class="trader-detail__section-title">
-          策略矩阵
-          <span class="strategy-matrix-hint">（AI 将根据市场环境自动选择策略）</span>
+          Strategy Matrix
+          <span class="strategy-matrix-hint">(AI will automatically select strategy based on market conditions)</span>
         </h2>
 
         <% if @strategies.any? %>
@@ -116,19 +116,19 @@
 
                 <div class="strategy-card__params">
                   <div class="strategy-param">
-                    <span class="strategy-param__label">最大持仓数</span>
-                    <span class="strategy-param__value"><%= strategy.max_positions %> 个资产</span>
+                    <span class="strategy-param__label">Max Positions</span>
+                    <span class="strategy-param__value"><%= strategy.max_positions %> assets</span>
                   </div>
                   <div class="strategy-param">
-                    <span class="strategy-param__label">买入信号阈值</span>
+                    <span class="strategy-param__label">Buy Signal Threshold</span>
                     <span class="strategy-param__value"><%= (strategy.buy_signal_threshold * 100).to_i %>%</span>
                   </div>
                   <div class="strategy-param">
-                    <span class="strategy-param__label">单资产最大仓位</span>
+                    <span class="strategy-param__label">Max Position Size</span>
                     <span class="strategy-param__value"><%= (strategy.max_position_size * 100).to_i %>%</span>
                   </div>
                   <div class="strategy-param">
-                    <span class="strategy-param__label">最小现金保留</span>
+                    <span class="strategy-param__label">Min Cash Reserve</span>
                     <span class="strategy-param__value"><%= (strategy.min_cash_reserve * 100).to_i %>%</span>
                   </div>
                 </div>
@@ -143,43 +143,43 @@
           </div>
         <% else %>
           <div class="strategy-empty">
-            <p>暂无交易策略，请编辑操盘手信息以生成策略</p>
-            <%= link_to "编辑操盘手", edit_trader_path(@trader), class: "btn btn-secondary" %>
+            <p>No trading strategies yet. Please edit trader information to generate strategies.</p>
+            <%= link_to "Edit Trader", edit_trader_path(@trader), class: "btn btn-secondary" %>
           </div>
         <% end %>
       </div>
 
       <div class="trader-detail__section">
-        <h2 class="trader-detail__section-title">模拟盘概览</h2>
+        <h2 class="trader-detail__section-title">Simulation Overview</h2>
 
         <div class="trader-detail__grid">
           <div class="trader-detail__item">
-            <span class="trader-detail__label">最近执行状态</span>
+            <span class="trader-detail__label">Latest Execution Status</span>
             <span class="trader-detail__value"><%= @latest_allocation_task&.status || "-" %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">最近执行日期</span>
+            <span class="trader-detail__label">Latest Execution Date</span>
             <span class="trader-detail__value"><%= @latest_allocation_task&.run_on || "-" %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">当前持仓数</span>
+            <span class="trader-detail__label">Current Holdings Count</span>
             <span class="trader-detail__value"><%= @trader_positions.size %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">当前净值</span>
+            <span class="trader-detail__label">Current Net Value</span>
             <span class="trader-detail__value"><%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @trader.current_capital_value, unit: "$", precision: 2) %></span>
           </div>
         </div>
 
         <% if @latest_allocation_task.present? %>
           <div class="trader-detail__description">
-            <h3 class="trader-detail__description-title">最近执行摘要</h3>
-            <p class="trader-detail__description-text"><%= @latest_allocation_task.summary.presence || "暂无摘要" %></p>
+            <h3 class="trader-detail__description-title">Recent Execution Summary</h3>
+            <p class="trader-detail__description-text"><%= @latest_allocation_task.summary.presence || "No summary" %></p>
             <p class="trader-detail__description-text">
-              现金：<%= number_to_currency(@latest_portfolio_snapshot&.cash_value || @latest_allocation_task.ending_cash, unit: "$", precision: 2) %>，
-              组合净值：<%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @latest_allocation_task.portfolio_value, unit: "$", precision: 2) %>
+              Cash: <%= number_to_currency(@latest_portfolio_snapshot&.cash_value || @latest_allocation_task.ending_cash, unit: "$", precision: 2) %>,
+              Portfolio Value: <%= number_to_currency(@latest_portfolio_snapshot&.portfolio_value || @latest_allocation_task.portfolio_value, unit: "$", precision: 2) %>
               <% if @latest_allocation_task.allocation_decision.present? %>
-                ，<%= link_to "查看建议", allocation_decision_path(@latest_allocation_task.allocation_decision), class: "text-link" %>
+                , <%= link_to "View Recommendation", allocation_decision_path(@latest_allocation_task.allocation_decision), class: "text-link" %>
               <% end %>
             </p>
           </div>
@@ -190,12 +190,12 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>资产</th>
-                  <th>数量</th>
-                  <th>均价</th>
-                  <th>现价</th>
-                  <th>市值</th>
-                  <th>浮盈亏</th>
+                  <th>Asset</th>
+                  <th>Quantity</th>
+                  <th>Avg Cost</th>
+                  <th>Current Price</th>
+                  <th>Market Value</th>
+                  <th>Unrealized P/L</th>
                 </tr>
               </thead>
               <tbody>
@@ -218,24 +218,24 @@
           </div>
         <% else %>
           <div class="strategy-empty">
-            <p>当前还没有持仓。执行一条配置建议后，持仓会显示在这里。</p>
+            <p>No current holdings. After executing an allocation recommendation, holdings will be displayed here.</p>
           </div>
         <% end %>
 
         <% if @recent_trader_trades.any? %>
           <div class="trader-detail__description">
-            <h3 class="trader-detail__description-title">最近交易流水</h3>
+            <h3 class="trader-detail__description-title">Recent Trade History</h3>
           </div>
           <div class="data-table-wrapper">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>时间</th>
-                  <th>动作</th>
-                  <th>资产</th>
-                  <th>数量</th>
-                  <th>价格</th>
-                  <th>金额</th>
+                  <th>Time</th>
+                  <th>Action</th>
+                  <th>Asset</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -262,18 +262,18 @@
             <path d="M12 16v-4"></path>
             <path d="M12 8h.01"></path>
           </svg>
-          交易反思报告
+          Trading Reflection Report
         </h2>
 
         <div class="reflection-preview">
           <div class="reflection-preview__header">
             <div class="reflection-preview__intro">
               <p class="reflection-preview__description">
-                基于最近 30 天的策略、交易、执行记录、组合快照和当前持仓生成一份反思报告，帮助优化交易策略。
+                Generate a reflection report based on the last 30 days of strategies, trades, execution records, portfolio snapshots, and current holdings to help optimize trading strategies.
               </p>
             </div>
             <div class="reflection-preview__generate-btn">
-              <%= button_to "生成反思报告", trader_trader_reflections_path(@trader), method: :post, class: "reflection-report__btn reflection-report__btn--primary" %>
+              <%= button_to "Generate Reflection", trader_trader_reflections_path(@trader), method: :post, class: "reflection-report__btn reflection-report__btn--primary" %>
             </div>
           </div>
 
@@ -284,7 +284,7 @@
             <div class="reflection-preview__report-card">
               <div class="reflection-preview__report-header">
                 <div class="reflection-preview__report-meta">
-                  <span class="reflection-preview__report-eyebrow">最近一份报告</span>
+                  <span class="reflection-preview__report-eyebrow">Latest Report</span>
                   <div class="reflection-preview__report-period">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -292,11 +292,11 @@
                       <line x1="8" y1="2" x2="8" y2="6"></line>
                       <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    <%= @latest_trader_reflection.reflection_period_start %> 至 <%= @latest_trader_reflection.reflection_period_end %>
+                    <%= @latest_trader_reflection.reflection_period_start %> to <%= @latest_trader_reflection.reflection_period_end %>
                   </div>
                 </div>
                 <%= link_to trader_trader_reflection_path(@trader, @latest_trader_reflection), class: "reflection-preview__report-link" do %>
-                  查看完整报告
+                  View Full Report
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                     <polyline points="12 5 19 12 12 19"></polyline>
@@ -316,7 +316,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
                     </svg>
-                    优点
+                    Strengths
                   </div>
                   <div class="reflection-preview__finding-value">
                     <%= Array(findings["strengths"]).first.presence || "-" %>
@@ -330,7 +330,7 @@
                       <line x1="15" y1="9" x2="9" y2="15"></line>
                       <line x1="9" y1="9" x2="15" y2="15"></line>
                     </svg>
-                    问题
+                    Mistakes
                   </div>
                   <div class="reflection-preview__finding-value">
                     <%= Array(findings["mistakes"]).first.presence || "-" %>
@@ -344,7 +344,7 @@
                       <line x1="12" y1="9" x2="12" y2="13"></line>
                       <line x1="12" y1="17" x2="12.01" y2="17"></line>
                     </svg>
-                    风险提示
+                    Risk Warnings
                   </div>
                   <div class="reflection-preview__finding-value">
                     <%= Array(findings["risk_issues"]).first.presence || "-" %>
@@ -361,7 +361,7 @@
                       <line x1="20" y1="21" x2="20" y2="16"></line>
                       <line x1="20" y1="12" x2="20" y2="3"></line>
                     </svg>
-                    建议调整
+                    Suggested Adjustments
                   </div>
                   <div class="reflection-preview__finding-count">
                     <%= suggested_adjustments.size %>
@@ -375,7 +375,7 @@
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
-                  生成时间：<%= l(@latest_trader_reflection.generated_at, format: :short) if @latest_trader_reflection.generated_at.present? %>
+                  Generated: <%= l(@latest_trader_reflection.generated_at, format: :short) if @latest_trader_reflection.generated_at.present? %>
                 </div>
               </div>
             </div>
@@ -387,7 +387,7 @@
                 <line x1="9" y1="9" x2="15" y2="15"></line>
               </svg>
               <span class="reflection-preview__error-text">
-                最近一次反思报告生成失败：<%= @latest_trader_reflection.error_message %>
+                Last reflection report generation failed: <%= @latest_trader_reflection.error_message %>
               </span>
             </div>
           <% else %>
@@ -398,7 +398,7 @@
                 <line x1="12" y1="18" x2="12" y2="12"></line>
                 <line x1="9" y1="15" x2="15" y2="15"></line>
               </svg>
-              <p class="reflection-preview__empty-text">还没有反思报告。先生成一份最近 30 天的报告，帮助优化策略参数。</p>
+              <p class="reflection-preview__empty-text">No reflection reports yet. Generate a report for the last 30 days to help optimize strategy parameters.</p>
             </div>
           <% end %>
         </div>
@@ -407,7 +407,7 @@
 
     <!-- Back Link -->
     <div class="trader-actions">
-      <%= link_to "返回列表", traders_path, class: "btn btn-ghost" %>
+      <%= link_to "Back to List", traders_path, class: "btn btn-ghost" %>
     </div>
   </main>
 </div>

@@ -1,4 +1,4 @@
-<% content_for :title, "执行任务详情 - SmartTrader" %>
+<% content_for :title, "Execution Task Details - SmartTrader" %>
 
 <div class="traders-container">
   <div class="traders-background">
@@ -14,61 +14,61 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       <% end %>
-      <h1 class="traders-header__title">执行任务详情</h1>
+      <h1 class="traders-header__title">Execution Task Details</h1>
     </div>
     <div class="traders-header__right">
       <%= link_to @allocation_task.trader.name, @allocation_task.trader, class: "btn btn-secondary" %>
       <% if @allocation_task.allocation_decision.present? %>
-        <%= link_to "查看建议", allocation_decision_path(@allocation_task.allocation_decision), class: "btn btn-secondary" %>
+        <%= link_to "View Recommendation", allocation_decision_path(@allocation_task.allocation_decision), class: "btn btn-secondary" %>
       <% end %>
-      <%= link_to "返回列表", allocation_tasks_path, class: "btn btn-ghost" %>
+      <%= link_to "Back to List", allocation_tasks_path, class: "btn btn-ghost" %>
     </div>
   </header>
 
   <main class="traders-main">
     <div class="preview-section">
       <div class="preview-section__header">
-        <h2 class="preview-section__title">基本信息</h2>
+        <h2 class="preview-section__title">Basic Information</h2>
       </div>
 
       <div class="trader-detail__grid">
         <div class="trader-detail__item">
-          <span class="trader-detail__label">操盘手</span>
+          <span class="trader-detail__label">Trader</span>
           <span class="trader-detail__value"><%= @allocation_task.trader.name %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">执行日期</span>
+          <span class="trader-detail__label">Execution Date</span>
           <span class="trader-detail__value"><%= @allocation_task.run_on %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">状态</span>
+          <span class="trader-detail__label">Status</span>
           <span class="trader-detail__value"><%= @allocation_task.status %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">开始时间</span>
+          <span class="trader-detail__label">Start Time</span>
           <span class="trader-detail__value"><%= @allocation_task.started_at || "-" %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">结束时间</span>
+          <span class="trader-detail__label">End Time</span>
           <span class="trader-detail__value"><%= @allocation_task.completed_at || "-" %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">执行前现金</span>
+          <span class="trader-detail__label">Starting Cash</span>
           <span class="trader-detail__value"><%= number_to_currency(@allocation_task.starting_cash, unit: "$", precision: 2) %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">执行后现金</span>
+          <span class="trader-detail__label">Ending Cash</span>
           <span class="trader-detail__value"><%= number_to_currency(@allocation_task.ending_cash, unit: "$", precision: 2) %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">组合净值</span>
+          <span class="trader-detail__label">Portfolio Value</span>
           <span class="trader-detail__value"><%= number_to_currency(@allocation_task.portfolio_value, unit: "$", precision: 2) %></span>
         </div>
       </div>
 
       <% if @allocation_task.summary.present? %>
         <div class="trader-detail__description">
-          <h3 class="trader-detail__description-title">执行摘要</h3>
+          <h3 class="trader-detail__description-title">Execution Summary</h3>
           <p class="trader-detail__description-text"><%= @allocation_task.summary %></p>
         </div>
       <% end %>
@@ -82,7 +82,7 @@
 
     <div class="preview-section">
       <div class="preview-section__header">
-        <h2 class="preview-section__title">执行 Payload</h2>
+        <h2 class="preview-section__title">Execution Payload</h2>
       </div>
       <pre class="json-viewer"><%= JSON.pretty_generate(@allocation_task.execution_payload || {}) %></pre>
     </div>
@@ -90,18 +90,18 @@
     <% if @allocation_task.trader_trades.recent.any? %>
       <div class="preview-section">
         <div class="preview-section__header">
-          <h2 class="preview-section__title">交易流水</h2>
+          <h2 class="preview-section__title">Trade History</h2>
         </div>
         <div class="data-table-wrapper">
           <table class="data-table">
             <thead>
               <tr>
-                <th>动作</th>
-                <th>资产</th>
-                <th>数量</th>
-                <th>价格</th>
-                <th>金额</th>
-                <th>理由</th>
+                <th>Action</th>
+                <th>Asset</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Amount</th>
+                <th>Reason</th>
               </tr>
             </thead>
             <tbody>

@@ -17,9 +17,9 @@ class AllocationDecisionsController < ApplicationController
 
   def execute
     AllocationExecutionService.new(@allocation_decision).call
-    redirect_to allocation_decision_path(@allocation_decision), notice: "配置建议已执行"
+    redirect_to allocation_decision_path(@allocation_decision), notice: "Allocation recommendation executed"
   rescue StandardError => e
-    redirect_to allocation_decision_path(@allocation_decision), alert: "执行失败: #{e.message}"
+    redirect_to allocation_decision_path(@allocation_decision), alert: "Execution failed: #{e.message}"
   end
 
   private

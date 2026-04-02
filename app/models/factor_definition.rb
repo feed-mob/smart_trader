@@ -7,12 +7,12 @@ class FactorDefinition < ApplicationRecord
 
   # Categories
   CATEGORIES = {
-    'technical' => '技术因子',
-    'fundamental' => '基本面因子',
-    'sentiment' => '情绪因子',
-    'momentum' => '动量因子',
-    'risk' => '风险因子',
-    'volume' => '成交量因子'
+    'technical' => 'Technical Factor',
+    'fundamental' => 'Fundamental Factor',
+    'sentiment' => 'Sentiment Factor',
+    'momentum' => 'Momentum Factor',
+    'risk' => 'Risk Factor',
+    'volume' => 'Volume Factor'
   }.freeze
 
   # Validations
@@ -45,7 +45,7 @@ class FactorDefinition < ApplicationRecord
   end
 
   def display_status
-    active? ? '启用' : '禁用'
+    active? ? 'Active' : 'Inactive'
   end
 
   def parameter(key)

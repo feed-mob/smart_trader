@@ -1,4 +1,4 @@
-<% content_for :title, "编辑 #{@trader.name} - SmartTrader" %>
+<% content_for :title, "Edit #{@trader.name} - SmartTrader" %>
 
 <div class="traders-container">
   <!-- Animated Background -->
@@ -16,7 +16,7 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       <% end %>
-      <h1 class="traders-header__title">编辑 <%= @trader.name %></h1>
+      <h1 class="traders-header__title">Edit <%= @trader.name %></h1>
     </div>
   </header>
 
@@ -25,8 +25,8 @@
     <div class="form-container">
       <div class="form-card">
         <div class="form-card__header">
-          <h2 class="form-card__title">修改操盘手信息</h2>
-          <p class="form-card__subtitle">修改投资风格描述后，AI 将重新生成交易策略</p>
+          <h2 class="form-card__title">Edit Trader Information</h2>
+          <p class="form-card__subtitle">After modifying investment style description, AI will regenerate trading strategies</p>
         </div>
 
         <%= render "form", trader: @trader %>

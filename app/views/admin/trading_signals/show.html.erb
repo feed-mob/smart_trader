@@ -1,4 +1,4 @@
-<% content_for :title, "信号详情 - #{@signal.asset.symbol}" %>
+<% content_for :title, "Signal Details - #{@signal.asset.symbol}" %>
 
 <div class="signal-detail-page">
   <!-- Background -->
@@ -15,7 +15,7 @@
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
       </svg>
-      返回信号列表
+      Back to Signals
     <% end %>
     <div class="signal-detail-header__meta">
       <span class="signal-detail-header__time">
@@ -77,7 +77,7 @@
               <span class="confidence-ring__unit">%</span>
             </div>
           </div>
-          <div class="confidence-ring__label">置信度</div>
+          <div class="confidence-ring__label">Confidence</div>
         </div>
       </div>
     </section>
@@ -90,7 +90,7 @@
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
           </svg>
         </div>
-        <h2 class="signal-card__title">信号解读</h2>
+        <h2 class="signal-card__title">Signal Interpretation</h2>
       </div>
       <div class="signal-card__body">
         <p class="signal-reasoning"><%= @signal.reasoning %></p>
@@ -106,7 +106,7 @@
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
           </svg>
         </div>
-        <h2 class="signal-card__title">关键驱动因子</h2>
+        <h2 class="signal-card__title">Key Driving Factors</h2>
       </div>
       <div class="signal-card__body">
         <div class="key-factors-grid">
@@ -135,7 +135,7 @@
             <line x1="12" y1="17" x2="12.01" y2="17"></line>
           </svg>
         </div>
-        <h2 class="signal-card__title">风险提示</h2>
+        <h2 class="signal-card__title">Risk Warning</h2>
       </div>
       <div class="signal-card__body">
         <p class="signal-warning"><%= @signal.risk_warning %></p>
@@ -155,8 +155,8 @@
             <rect x="3" y="14" width="7" height="7" rx="1"></rect>
           </svg>
         </div>
-        <h2 class="signal-card__title">因子快照</h2>
-        <span class="signal-card__badge">生成时刻数据</span>
+        <h2 class="signal-card__title">Factor Snapshot</h2>
+        <span class="signal-card__badge">Data at Generation Time</span>
       </div>
       <div class="signal-card__body">
         <div class="factor-snapshot-cards">
@@ -164,7 +164,7 @@
           <div class="factor-snapshot-card">
             <div class="factor-snapshot-card__header">
               <span class="factor-snapshot-card__name"><%= data["name"] %></span>
-              <span class="factor-snapshot-card__weight">权重 <%= (data["weight"].to_f * 100).round(0) %>%</span>
+              <span class="factor-snapshot-card__weight">Weight <%= (data["weight"].to_f * 100).round(0) %>%</span>
             </div>
             <div class="factor-snapshot-card__value <%= factor_value_class(data["normalized_value"]) %>">
               <% if data["normalized_value"].present? %>
@@ -178,7 +178,7 @@
               <div class="percentile-bar">
                 <div class="percentile-bar__fill" style="width: <%= data["percentile"].to_f %>%"></div>
               </div>
-              <span>百分位 <%= data["percentile"].to_f.round(1) %>%</span>
+              <span>Percentile <%= data["percentile"].to_f.round(1) %>%</span>
             </div>
             <% end %>
           </div>
@@ -197,7 +197,7 @@
           <rect x="14" y="14" width="7" height="7" rx="1"></rect>
           <rect x="3" y="14" width="7" height="7" rx="1"></rect>
         </svg>
-        查看因子矩阵
+        View Factor Matrix
       <% end %>
       <%= button_to generate_admin_trading_signals_path(asset_id: @signal.asset_id), method: :post, class: "signal-action-btn signal-action-btn--primary" do %>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -206,7 +206,7 @@
           <path d="M3 22v-6h6"></path>
           <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
         </svg>
-        重新生成信号
+        Regenerate Signal
       <% end %>
     </section>
   </main>
