@@ -40,13 +40,13 @@ class StrategyGeneratorService
 
   def build_prompt(market_condition)
     <<~PROMPT
-      投资者描述：
+      Investor Description:
       "#{@description}"
 
-      风险偏好：#{@risk_level || 'balanced'}
-      市场环境：#{market_condition}
+      Risk Preference: #{@risk_level || 'balanced'}
+      Market Condition: #{market_condition}
 
-      请返回策略参数。
+      Please return the strategy parameters.
     PROMPT
   end
 
@@ -73,7 +73,7 @@ class StrategyGeneratorService
   end
 
   def sanitize_name(name)
-    name.to_s.strip[0..99].presence || "AI生成策略"
+    name.to_s.strip[0..99].presence || "AI Generated Strategy"
   end
 
   def sanitize_risk_level(level)
@@ -90,7 +90,7 @@ class StrategyGeneratorService
   end
 
   def sanitize_description(desc)
-    desc.to_s.strip[0..499].presence || "AI 根据投资风格描述自动生成"
+    desc.to_s.strip[0..499].presence || "AI auto-generated based on investment style description"
   end
 
   def fallback_strategies

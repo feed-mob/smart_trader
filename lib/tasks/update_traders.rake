@@ -125,8 +125,14 @@ namespace :traders do
         updates[:risk_level] = new_risk_level if new_risk_level.present?
 
         if trader.update(updates)
+          # Regenerate strategies with new English LLM prompts
+          trader.trading_strategies.destroy_all
+          service = StrategyGeneratorService.new(trader.description, risk_level: trader.risk_level)
+          strategies = service.generate_strategies
+          strategies.each { |params| trader.trading_strategies.create(params) }
+
           success_count += 1
-          puts "✓ Updated: '#{old_name}' -> '#{new_name}'"
+          puts "✓ Updated: '#{old_name}' -> '#{new_name}' (strategies regenerated)"
         else
           failed_count += 1
           puts "✗ Failed: '#{old_name}' - #{trader.errors.full_messages.join(', ')}"
@@ -164,6 +170,202 @@ namespace :traders do
     puts "=" * 100
     puts "Edit this file with the new names, then run:"
     puts "  rails traders:batch_rename FILE=#{mapping_file}"
+    puts "=" * 100
+  end
+
+  desc "Regenerate English strategies for all traders (using matrix strategies, already in English)"
+  task regenerate_strategies: :environment do
+    puts "=" * 100
+    puts "Regenerating English Strategies for All Traders"
+    puts "=" * 100
+
+    success_count = 0
+    failed_count = 0
+
+    Trader.all.each do |trader|
+      # Delete related records first to avoid foreign key issues
+      reflection_ids = trader.trader_reflections.pluck(:id)
+      StrategyAdjustmentLog.where(trader_reflection_id: reflection_ids).delete_all
+      trader.trading_strategies.destroy_all
+
+      # Use matrix strategies directly (already in English)
+      TradingStrategy.market_conditions.keys.each do |market_condition|
+        matrix_params = TradingStrategy.strategy_for(trader.risk_level, market_condition)
+        trader.trading_strategies.create(
+          name: matrix_params[:name],
+          risk_level: trader.risk_level,
+          max_positions: matrix_params[:max_positions],
+          buy_signal_threshold: matrix_params[:buy_signal_threshold],
+          max_position_size: matrix_params[:max_position_size],
+          min_cash_reserve: matrix_params[:min_cash_reserve],
+          description: matrix_params[:description],
+          market_condition: market_condition,
+          generated_by: :matrix
+        )
+      end
+
+      success_count += 1
+      puts "✓ Regenerated strategies for: '#{trader.name}' (ID: #{trader.id})"
+    rescue => e
+      failed_count += 1
+      puts "✗ Failed: '#{trader.name}' (ID: #{trader.id}) - #{e.message}"
+    end
+
+    puts "=" * 100
+    puts "Completed! Regenerated strategies for #{success_count} traders"
+    puts "Failed: #{failed_count}"
+    puts "=" * 100
+  end
+
+  desc "Rebuild allocation task summaries in English from existing data"
+  task rebuild_task_summaries: :environment do
+    puts "=" * 100
+    puts "Rebuilding Allocation Task Summaries in English"
+    puts "=" * 100
+
+    updated_count = 0
+
+    AllocationTask.find_each do |task|
+      # Rebuild summary based on task status and data
+      if task.status == "completed"
+        trade_count = task.trader_trades.count
+        portfolio_value = task.portfolio_value
+        new_summary = "Executed #{trade_count} position updates, latest portfolio value #{portfolio_value.to_f.round(2)}."
+      elsif task.status == "failed"
+        new_summary = "Execution failed: #{task.error_message || 'Unknown error'}"
+      elsif task.status == "running"
+        new_summary = "Starting execution of allocation decision ##{task.allocation_decision_id}"
+      else
+        new_summary = "Task status: #{task.status}"
+      end
+
+      if task.summary != new_summary
+        task.update(summary: new_summary)
+        updated_count += 1
+        puts "✓ Updated task #{task.id}: #{new_summary[0..60]}..."
+      end
+    end
+
+    puts "=" * 100
+    puts "Rebuilt #{updated_count} task summary(s)"
+    puts "=" * 100
+  end
+
+  desc "Translate allocation task summaries from Chinese to English"
+  task translate_task_summaries: :environment do
+    puts "=" * 100
+    puts "Translating Allocation Task Summaries"
+    puts "=" * 100
+
+    # Common translations
+    translations = {
+      "执行" => "Executed",
+      "个目标仓位更新" => "target position updates",
+      "最新组合净值" => "latest portfolio value",
+      "开始执行" => "Starting execution of",
+      "执行失败" => "Execution failed",
+      "资产不在最新 recommendation 目标组合中" => "Asset not in latest recommendation target portfolio"
+    }
+
+    updated_count = 0
+
+    AllocationTask.where.not(summary: [nil, ""]).find_each do |task|
+      original_summary = task.summary
+      translated = original_summary.dup
+
+      # Apply translations
+      translations.each do |chinese, english|
+        translated.gsub!(chinese, english)
+      end
+
+      # Only update if translation actually changed something
+      if translated != original_summary
+        task.update(summary: translated)
+        updated_count += 1
+        puts "✓ Updated: #{original_summary[0..50]}... -> #{translated[0..50]}..."
+      end
+    end
+
+    puts "=" * 100
+    puts "Translated #{updated_count} task summary(s)"
+    puts "=" * 100
+  end
+
+  desc "Clear old allocation task summaries (optional: these are historical records)"
+  task clear_task_summaries: :environment do
+    puts "=" * 100
+    puts "Clearing Old Allocation Task Summaries"
+    puts "=" * 100
+
+    updated_count = AllocationTask.where.not(summary: [nil, ""]).update_all(summary: nil)
+
+    puts "Cleared #{updated_count} task summary(s)"
+    puts "=" * 100
+    puts "Cleared! New tasks will have English summaries"
+    puts "=" * 100
+  end
+
+  desc "Clear all trader reflections (will be regenerated with English prompts)"
+  task clear_reflections: :environment do
+    puts "=" * 100
+    puts "Clearing All Trader Reflections"
+    puts "=" * 100
+
+    # Delete strategy adjustment logs first
+    reflection_ids = TraderReflection.pluck(:id)
+    deleted_logs = StrategyAdjustmentLog.where(trader_reflection_id: reflection_ids).delete_all
+
+    # Delete reflections
+    deleted_count = TraderReflection.delete_all
+
+    puts "Deleted #{deleted_count} reflection(s)"
+    puts "Deleted #{deleted_logs} strategy adjustment log(s)"
+    puts "=" * 100
+    puts "Cleared! Use 'traders:regenerate_reflections' to regenerate in English"
+    puts "=" * 100
+  end
+
+  desc "Regenerate all trader reflections with English prompts"
+  task regenerate_reflections: :environment do
+    puts "=" * 100
+    puts "Regenerating Trader Reflections with English Prompts"
+    puts "=" * 100
+
+    success_count = 0
+    failed_count = 0
+
+    Trader.all.each do |trader|
+      period_end = Date.current
+      period_start = 30.days.ago.to_date
+
+      begin
+        # Check if reflection already exists
+        existing = trader.trader_reflections.find_by(
+          reflection_period_start: period_start,
+          reflection_period_end: period_end
+        )
+
+        if existing
+          puts "⊘ Skipping: '#{trader.name}' (ID: #{trader.id}) - already exists"
+          next
+        end
+
+        service = TraderReflectionService.new(trader,
+          period_start: period_start,
+          period_end: period_end
+        )
+        service.call
+        success_count += 1
+        puts "✓ Generated: '#{trader.name}' (ID: #{trader.id})"
+      rescue => e
+        failed_count += 1
+        puts "✗ Failed: '#{trader.name}' (ID: #{trader.id}) - #{e.message}"
+      end
+    end
+
+    puts "=" * 100
+    puts "Completed! Generated #{success_count} reflections"
+    puts "Failed: #{failed_count}"
     puts "=" * 100
   end
 

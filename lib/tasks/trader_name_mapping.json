@@ -40,5 +40,59 @@
     "new_name": "Ray Dalio Style",
     "description": "All-weather portfolio approach with economic cycle diversification",
     "risk_level": "balanced"
+  },
+  {
+    "old_name": "保守型投资者",
+    "new_name": "Conservative Investor",
+    "description": "Focus on capital preservation with stable, low-risk investments",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "平衡型投资者",
+    "new_name": "Balanced Investor",
+    "description": "Balanced approach between risk and return with diversified portfolio",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "激进型投资者",
+    "new_name": "Aggressive Investor",
+    "description": "High-risk strategy seeking maximum returns with active trading",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "稳健投资",
+    "new_name": "Steady Investment Fund",
+    "description": "Conservative strategy focusing on steady growth and capital preservation",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "价值投资",
+    "new_name": "Value Investment Fund",
+    "description": "Value-oriented strategy seeking undervalued quality companies",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "成长投资",
+    "new_name": "Growth Investment Fund",
+    "description": "Growth-focused strategy investing in high-potential companies",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "量化交易",
+    "new_name": "Quantitative Trading Fund",
+    "description": "Data-driven strategy using quantitative models for trading decisions",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "趋势跟踪",
+    "new_name": "Trend Following Fund",
+    "description": "Strategy that follows market trends with momentum-based trading",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "指数增强",
+    "new_name": "Enhanced Index Fund",
+    "description": "Index-tracking strategy with active management for excess returns",
+    "risk_level": "balanced"
   }
 ]

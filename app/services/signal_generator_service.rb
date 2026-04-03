@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-# 信号生成服务 - 调用 LLM 生成交易信号并持久化
+# Signal generation service - calls LLM to generate trading signals and persists them
 class SignalGeneratorService
   def initialize(asset, strategy: nil)
     @asset = asset
     @strategy = strategy
   end
 
-  # 生成并保存信号
+  # Generate and save signal
   def generate_and_save!
     signal_data = generate_signal
     return nil unless signal_data
@@ -15,7 +15,7 @@ class SignalGeneratorService
     create_trading_signal(signal_data)
   end
 
-  # 仅生成信号（不保存）
+  # Generate signal only (without saving)
   def generate_signal
     factor_values = fetch_factor_values
     return nil if factor_values.empty?
@@ -30,7 +30,7 @@ class SignalGeneratorService
   private
 
   def fetch_factor_values
-    # 获取该资产最新的因子值
+    # Get latest factor values for this asset
     FactorValue.includes(:factor_definition)
               .where(asset: @asset)
               .joins(:factor_definition)
@@ -41,7 +41,7 @@ class SignalGeneratorService
   def create_trading_signal(signal_data)
     factor_values = fetch_factor_values
 
-    # 构建因子快照
+    # Build factor snapshot
     factor_snapshot = build_factor_snapshot(factor_values)
 
     TradingSignal.create!(

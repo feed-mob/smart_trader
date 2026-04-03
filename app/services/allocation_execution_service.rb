@@ -15,7 +15,7 @@ class AllocationExecutionService
       run_on: @run_at.to_date,
       status: :running,
       started_at: @run_at,
-      summary: "开始执行 allocation decision ##{@allocation_decision.id}"
+      summary: "Starting execution of allocation decision ##{@allocation_decision.id}"
     )
 
     ActiveRecord::Base.transaction do
@@ -61,7 +61,7 @@ class AllocationExecutionService
     @task&.update(
       status: :failed,
       error_message: e.message,
-      summary: "执行失败: #{e.message}",
+      summary: "Execution failed: #{e.message}",
       completed_at: Time.current
     )
     raise
@@ -185,7 +185,7 @@ class AllocationExecutionService
         previous_value: previous_value.to_f,
         target_value: 0.0,
         action: "sell",
-        reason: "资产不在最新 recommendation 目标组合中",
+        reason: "Asset not in latest recommendation target portfolio",
         trade_quantity: previous_quantity.to_f,
         trade_price: price.to_f,
         trade_amount: previous_value.to_f
@@ -229,7 +229,7 @@ class AllocationExecutionService
   end
 
   def build_summary(updates, portfolio_value)
-    "执行 #{updates.size} 个目标仓位更新，最新组合净值 #{portfolio_value.to_f.round(2)}。"
+    "Executed #{updates.size} target position updates, latest portfolio value #{portfolio_value.to_f.round(2)}."
   end
 
   def build_execution_payload(strategy, allocations, updates, starting_cash, ending_cash)

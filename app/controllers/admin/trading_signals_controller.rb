@@ -11,16 +11,16 @@ module Admin
                               .page(params[:page])
                               .per(20)
 
-      # 筛选
+      # Filter
       @signals = @signals.by_signal_type(params[:signal_type]) if params[:signal_type].present?
       @signals = @signals.where(asset_id: params[:asset_id]) if params[:asset_id].present?
 
-      # 获取每个资产的最新信号
+      # Get latest signal for each asset
       @latest_signals = TradingSignal.includes(:asset)
                                      .select("DISTINCT ON (asset_id) trading_signals.*")
                                      .order("asset_id, generated_at DESC")
 
-      # 统计
+      # Statistics
       @stats = {
         total: TradingSignal.count,
         buy: TradingSignal.buy_signals.count,
@@ -29,7 +29,7 @@ module Admin
         high_confidence: TradingSignal.high_confidence.count
       }
 
-      # 获取最新信号日报
+      # Get latest signal daily report
       @latest_report = DailyReport.latest_for_type('signal')
     end
 
@@ -41,15 +41,15 @@ module Admin
       signal = service.generate_and_save!
 
       if signal
-        redirect_to admin_trading_signal_path(signal), notice: "信号生成成功"
+        redirect_to admin_trading_signal_path(signal), notice: "Signal generated successfully"
       else
-        redirect_to admin_trading_signals_path, alert: "信号生成失败，请检查因子数据"
+        redirect_to admin_trading_signals_path, alert: "Signal generation failed, please check factor data"
       end
     end
 
     def generate_all
       GenerateSignalsJob.perform_later
-      redirect_to admin_trading_signals_path, notice: "正在后台生成信号，请稍后刷新页面"
+      redirect_to admin_trading_signals_path, notice: "Signals are being generated in background, please refresh later"
     end
 
     private
