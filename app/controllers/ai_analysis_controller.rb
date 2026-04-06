@@ -2,94 +2,71 @@
 
 class AiAnalysisController < ApplicationController
   before_action :require_user
+  before_action :set_record, only: [ :show ]
+
+  def index
+    @records = current_user.ai_analysis_records.recent.page(params[:page]).per(20)
+  end
 
   def new
-    @default_assets = "BTC, ETH"
+    @default_prompt = ""
+    @default_files = ""
   end
 
   def create
-    @assets_input = params[:assets] || "BTC, ETH"
-    @analysis_type = params[:analysis_type] || "full"
+    @prompt = params[:prompt].to_s.strip
+    @files_input = params[:files].to_s
+    @permission_mode = params[:permission_mode].presence || "default"
 
-    # 解析资产列表
-    @assets = @assets_input.split(/[,\s]+/).map(&:strip).map(&:upcase).reject(&:empty?)
-
-    if @assets.empty?
-      flash[:alert] = "请至少输入一个资产"
+    if @prompt.blank?
+      flash[:alert] = "请输入要发送给 Claude Code 的 prompt"
       redirect_to new_ai_analysis_path and return
     end
 
-    # 执行分析（不再依赖 Trader）
-    @result = perform_analysis(@assets, @analysis_type)
+    record = current_user.ai_analysis_records.create!(
+      prompt: @prompt,
+      files: @files_input,
+      permission_mode: @permission_mode,
+      status: AiAnalysisRecord::STATUS_PENDING
+    )
 
-    # 将结果存入 Rails.cache 供 show 页面使用
-    result_cache_key = "ai_analysis_result_#{Time.current.to_i}"
-    Rails.cache.write(result_cache_key, @result, expires_in: 10.minutes)
+    uploaded_files = params.dig(:ai_analysis_record, :uploaded_files)
+    if uploaded_files.present?
+      Array(uploaded_files).each do |file|
+        record.uploaded_files.attach(file) if file.present?
+      end
+    end
 
-    flash[:notice] = "分析完成！共分析 #{@assets.length} 个资产"
-    redirect_to ai_analysis_result_path(result_key: result_cache_key, assets: @assets.join(","))
+    ExecuteAiAnalysisJob.perform_later(record.id)
+
+    redirect_to ai_analysis_path(id: record.id)
   end
 
   def show
-    @result = Rails.cache.read(params[:result_key]) || {}
-    @assets = params[:assets]&.split(",") || []
-    @logs = @result[:logs] || []
-    @analysis_type = "full"
+    @prompt = @record.prompt
+    @files = @record.files_list
+    @permission_mode = @record.permission_mode
+    @result = {
+      success: @record.success?,
+      output: @record.output,
+      error: @record.error
+    }
   end
 
-  def quick_analysis
-    @assets = params[:assets]&.split(/[,\s]+/)&.map(&:upcase) || ["BTC", "ETH"]
-    @capital = params[:capital]&.to_f || 100_000
-    @risk_preference = params[:risk_preference] || "balanced"
-
-    # 使用新的独立分析服务
-    service = AiAllocationServiceV2.new(
-      symbols: @assets,
-      capital: @capital,
-      risk_preference: @risk_preference
-    )
-    @result = service.run_full_pipeline
-
+  def status
+    record = current_user.ai_analysis_records.find(params[:id])
     render json: {
-      success: true,
-      assets: @assets,
-      logs: @result[:logs],
-      signals: @result[:signals],
-      recommendation: @result[:recommendation]
-    }
-  rescue => e
-    render json: {
-      success: false,
-      error: e.message,
-      backtrace: e.backtrace.first(5)
+      status: record.status,
+      finished: record.finished?,
+      output: record.output,
+      error: record.error
     }
   end
 
   private
 
-  def perform_analysis(assets, analysis_type)
-    log "=" * 80
-    log "[AiAnalysis] 开始分析: #{assets.join(', ')}"
-    log "[AiAnalysis] 分析类型: #{analysis_type}"
-    log "=" * 80
-
-    # 使用独立的 AiAllocationServiceV2
-    service = AiAllocationServiceV2.new(
-      symbols: assets,
-      capital: 100_000,
-      risk_preference: "balanced"
-    )
-    result = service.run_full_pipeline
-
-    log "=" * 80
-    log "[AiAnalysis] 分析完成!"
-    log "=" * 80
-
-    result
-  end
-
-  def log(message)
-    Rails.logger.info message
+  def set_record
+    @record = current_user.ai_analysis_records.find(params[:id])
   end
 
   def current_user

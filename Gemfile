@@ -91,3 +91,5 @@ group :development do
 end
 
 gem "retriable", "~> 3.2"
+
+gem "ruby-vips", "~> 2.3"
