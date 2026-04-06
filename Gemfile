@@ -90,6 +90,6 @@ group :development do
   gem "web-console"
 end
 
-gem "retriable", "~> 3.2"
+gem "retriable", "~> 3.4"
 
 gem "ruby-vips", "~> 2.3"
