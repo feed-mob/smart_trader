@@ -16,6 +16,7 @@ class FactorLlmService
     - Concise and clear, avoid redundancy
     - Consider risk factors
     - Based on data, not speculation
+    - Generate English version
   PROMPT
 
   # Plain text response
