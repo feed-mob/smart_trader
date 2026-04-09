@@ -7,9 +7,9 @@ class TraderReflectionsController < ApplicationController
 
   def create
     reflection = TraderReflectionService.new(@trader).call
-    redirect_to trader_trader_reflection_path(@trader, reflection), notice: "反思报告生成成功"
+    redirect_to trader_trader_reflection_path(@trader, reflection), notice: "Reflection report generated successfully"
   rescue StandardError => e
-    redirect_to trader_path(@trader), alert: "反思报告生成失败：#{e.message}"
+    redirect_to trader_path(@trader), alert: "Failed to generate reflection report: #{e.message}"
   end
 
   def show; end
@@ -20,9 +20,9 @@ class TraderReflectionsController < ApplicationController
       parameter: params[:parameter]
     ).call
 
-    redirect_to trader_trader_reflection_path(@trader, @trader_reflection), notice: "策略参数已应用到当前策略"
+    redirect_to trader_trader_reflection_path(@trader, @trader_reflection), notice: "Strategy parameters applied to current strategy"
   rescue StandardError => e
-    redirect_to trader_trader_reflection_path(@trader, @trader_reflection), alert: "应用建议失败：#{e.message}"
+    redirect_to trader_trader_reflection_path(@trader, @trader_reflection), alert: "Failed to apply suggestion: #{e.message}"
   end
 
   private

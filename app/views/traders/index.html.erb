@@ -1,4 +1,4 @@
-<% content_for :title, "操盘手管理 - SmartTrader" %>
+<% content_for :title, "Traders - SmartTrader" %>
 
 <div class="traders-container">
   <!-- Animated Background -->
@@ -16,11 +16,11 @@
           <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
         </svg>
       <% end %>
-      <h1 class="traders-header__title">操盘手管理</h1>
+      <h1 class="traders-header__title">Traders</h1>
     </div>
     <div class="traders-header__right">
-      <%= link_to "配置建议记录", allocation_decisions_path, class: "btn btn-secondary" %>
-      <%= link_to "新建操盘手", new_trader_path, class: "btn btn-primary" %>
+      <%= link_to "Allocation Records", allocation_decisions_path, class: "btn btn-secondary" %>
+      <%= link_to "New Trader", new_trader_path, class: "btn btn-primary" %>
     </div>
   </header>
 
@@ -58,15 +58,15 @@
 
             <div class="trader-card__stats">
               <div class="trader-card__stat">
-                <span class="trader-card__stat-label">初始资金</span>
+                <span class="trader-card__stat-label">Initial Capital</span>
                 <span class="trader-card__stat-value"><%= number_to_currency(trader.initial_capital, unit: "$", precision: 0) %></span>
               </div>
               <div class="trader-card__stat">
-                <span class="trader-card__stat-label">当前资金</span>
+                <span class="trader-card__stat-label">Current Capital</span>
                 <span class="trader-card__stat-value"><%= number_to_currency(trader.current_capital_value, unit: "$", precision: 0) %></span>
               </div>
               <div class="trader-card__stat">
-                <span class="trader-card__stat-label">盈亏</span>
+                <span class="trader-card__stat-label">Profit/Loss</span>
                 <span class="trader-card__stat-value <%= trader.profit_loss >= 0 ? 'positive' : 'negative' %>">
                   <%= trader.profit_loss >= 0 ? '+' : '' %><%= number_to_currency(trader.profit_loss, unit: "$", precision: 0) %>
                   <small>(<%= trader.profit_loss_percent >= 0 ? '+' : '' %><%= trader.profit_loss_percent %>%)</small>
@@ -81,16 +81,16 @@
 
             <% if trader.default_strategy.present? %>
               <div class="trader-card__strategy">
-                <span class="strategy-label">策略:</span>
+                <span class="strategy-label">Strategy:</span>
                 <span class="strategy-name"><%= trader.default_strategy.name %></span>
-                <span class="strategy-count">(<%= trader.trading_strategies.count %>种市场环境)</span>
+                <span class="strategy-count">(<%= trader.trading_strategies.count %> market conditions)</span>
               </div>
             <% end %>
 
             <div class="trader-card__actions">
-              <%= link_to "查看详情", trader, class: "btn btn-secondary" %>
-              <%= link_to "AI配置建议", trader_allocation_preview_path(trader), class: "btn btn-outline" %>
-              <%= link_to "编辑", edit_trader_path(trader), class: "btn btn-ghost" %>
+              <%= link_to "View Details", trader, class: "btn btn-secondary" %>
+              <%= link_to "AI Allocation", trader_allocation_preview_path(trader), class: "btn btn-outline" %>
+              <%= link_to "Edit", edit_trader_path(trader), class: "btn btn-ghost" %>
             </div>
           </div>
         <% end %>
@@ -103,9 +103,9 @@
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </div>
-        <h3 class="traders-empty__title">还没有操盘手</h3>
-        <p class="traders-empty__text">创建你的第一个 AI 操盘手，开始智能投资之旅</p>
-        <%= link_to "创建操盘手", new_trader_path, class: "btn btn-primary" %>
+        <h3 class="traders-empty__title">No Traders Yet</h3>
+        <p class="traders-empty__text">Create your first AI trader to start your smart investment journey</p>
+        <%= link_to "Create Trader", new_trader_path, class: "btn btn-primary" %>
       </div>
     <% end %>
   </main>

@@ -1,4 +1,4 @@
-<% content_for :title, "配置建议详情 - SmartTrader" %>
+<% content_for :title, "Allocation Details - SmartTrader" %>
 
 <div class="traders-container">
   <div class="traders-background">
@@ -14,12 +14,12 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       <% end %>
-      <h1 class="traders-header__title">配置建议详情</h1>
+      <h1 class="traders-header__title">Allocation Details</h1>
     </div>
     <div class="traders-header__right">
-      <%= button_to "执行建议", execute_allocation_decision_path(@allocation_decision), method: :post, class: "btn btn-primary", data: { turbo_confirm: "确认执行这条配置建议？" } %>
+      <%= button_to "Execute Recommendation", execute_allocation_decision_path(@allocation_decision), method: :post, class: "btn btn-primary", data: { turbo_confirm: "Confirm execution of this allocation recommendation?" } %>
       <%= link_to @allocation_decision.trader.name, @allocation_decision.trader, class: "btn btn-secondary" %>
-      <%= link_to "返回列表", allocation_decisions_path, class: "btn btn-ghost" %>
+      <%= link_to "Back to List", allocation_decisions_path, class: "btn btn-ghost" %>
     </div>
   </header>
 
@@ -38,40 +38,40 @@
 
     <div class="preview-section">
       <div class="preview-section__header">
-        <h2 class="preview-section__title">基本信息</h2>
+        <h2 class="preview-section__title">Basic Information</h2>
       </div>
 
       <div class="trader-detail__grid">
         <div class="trader-detail__item">
-          <span class="trader-detail__label">操盘手</span>
+          <span class="trader-detail__label">Trader</span>
           <span class="trader-detail__value"><%= @allocation_decision.trader.name %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">建议日期</span>
+          <span class="trader-detail__label">Recommendation Date</span>
           <span class="trader-detail__value"><%= @allocation_decision.decision_date %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">来源</span>
+          <span class="trader-detail__label">Source</span>
           <span class="trader-detail__value"><%= @allocation_decision.source %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">模型</span>
+          <span class="trader-detail__label">Model</span>
           <span class="trader-detail__value"><%= @allocation_decision.llm_model_name.presence || "-" %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">生成状态</span>
+          <span class="trader-detail__label">Generation Status</span>
           <span class="trader-detail__value"><%= @allocation_decision.status %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">校验状态</span>
+          <span class="trader-detail__label">Validation Status</span>
           <span class="trader-detail__value"><%= @allocation_decision.validation_status %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">选中策略</span>
+          <span class="trader-detail__label">Selected Strategy</span>
           <span class="trader-detail__value"><%= @allocation_decision.selected_strategy.presence || "-" %></span>
         </div>
         <div class="trader-detail__item">
-          <span class="trader-detail__label">生成时间</span>
+          <span class="trader-detail__label">Generated At</span>
           <span class="trader-detail__value"><%= @allocation_decision.generated_at || @allocation_decision.created_at %></span>
         </div>
       </div>
@@ -79,17 +79,17 @@
 
     <div class="preview-section">
       <div class="preview-section__header">
-        <h2 class="preview-section__title">Recommendation 内容</h2>
+        <h2 class="preview-section__title">Recommendation Content</h2>
       </div>
 
       <% if @recommendation[:market_analysis].present? %>
         <div class="recommendation-summary">
           <div class="recommendation-summary__item">
-            <span class="recommendation-summary__label">市场分析</span>
+            <span class="recommendation-summary__label">Market Analysis</span>
             <span class="recommendation-summary__value"><%= @recommendation[:market_analysis] %></span>
           </div>
           <div class="recommendation-summary__item">
-            <span class="recommendation-summary__label">配置摘要</span>
+            <span class="recommendation-summary__label">Allocation Summary</span>
             <span class="recommendation-summary__value"><%= @recommendation[:summary] %></span>
           </div>
         </div>
@@ -98,12 +98,12 @@
           <table class="data-table data-table--allocations">
             <thead>
               <tr>
-                <th>资产</th>
-                <th>操作</th>
-                <th>比例</th>
-                <th>金额 (USD)</th>
-                <th>数量</th>
-                <th>理由</th>
+                <th>Asset</th>
+                <th>Action</th>
+                <th>Allocation</th>
+                <th>Amount (USD)</th>
+                <th>Shares</th>
+                <th>Reason</th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +120,7 @@
                 <% end %>
               <% else %>
                 <tr>
-                  <td colspan="6" class="text-center text-muted">暂无资产配置明细</td>
+                  <td colspan="6" class="text-center text-muted">No asset allocation details</td>
                 </tr>
               <% end %>
             </tbody>
@@ -129,13 +129,13 @@
 
         <% if @recommendation[:detailed_reasoning].present? %>
           <div class="detailed-reasoning">
-            <h3 class="detailed-reasoning__title">配置理由详解</h3>
+            <h3 class="detailed-reasoning__title">Detailed Allocation Reasoning</h3>
             <p class="detailed-reasoning__content"><%= @recommendation[:detailed_reasoning] %></p>
           </div>
         <% end %>
       <% else %>
         <div class="alert alert-error">
-          <p>这条 recommendation 当前没有可展示的结构化内容。</p>
+          <p>This recommendation currently has no structured content to display.</p>
           <% if @allocation_decision.error_message.present? %>
             <p class="text-small"><%= @allocation_decision.error_message %></p>
           <% end %>
@@ -145,7 +145,7 @@
 
     <div class="preview-section">
       <div class="preview-section__header">
-        <h2 class="preview-section__title">原始 JSON</h2>
+        <h2 class="preview-section__title">Raw JSON</h2>
       </div>
       <pre class="json-viewer"><%= JSON.pretty_generate(@allocation_decision.recommendation_payload) %></pre>
     </div>
@@ -154,32 +154,32 @@
     <% if latest_task.present? %>
       <div class="preview-section">
         <div class="preview-section__header">
-          <h2 class="preview-section__title">最近执行结果</h2>
+          <h2 class="preview-section__title">Latest Execution Result</h2>
         </div>
 
         <div class="trader-detail__grid">
           <div class="trader-detail__item">
-            <span class="trader-detail__label">状态</span>
+            <span class="trader-detail__label">Status</span>
             <span class="trader-detail__value"><%= latest_task.status %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">执行日期</span>
+            <span class="trader-detail__label">Execution Date</span>
             <span class="trader-detail__value"><%= latest_task.run_on %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">执行后现金</span>
+            <span class="trader-detail__label">Ending Cash</span>
             <span class="trader-detail__value"><%= number_to_currency(latest_task.ending_cash, unit: "$", precision: 2) %></span>
           </div>
           <div class="trader-detail__item">
-            <span class="trader-detail__label">组合净值</span>
+            <span class="trader-detail__label">Portfolio Value</span>
             <span class="trader-detail__value"><%= number_to_currency(latest_task.portfolio_value, unit: "$", precision: 2) %></span>
           </div>
         </div>
 
         <div class="trader-detail__description">
-          <h3 class="trader-detail__description-title">执行摘要</h3>
-          <p class="trader-detail__description-text"><%= latest_task.summary.presence || "暂无摘要" %></p>
-          <p class="trader-detail__description-text"><%= link_to "查看任务详情", allocation_task_path(latest_task), class: "text-link" %></p>
+          <h3 class="trader-detail__description-title">Execution Summary</h3>
+          <p class="trader-detail__description-text"><%= latest_task.summary.presence || "No summary" %></p>
+          <p class="trader-detail__description-text"><%= link_to "View Task Details", allocation_task_path(latest_task), class: "text-link" %></p>
         </div>
       </div>
     <% end %>

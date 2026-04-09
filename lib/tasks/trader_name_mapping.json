@@ -1,0 +1,98 @@
+[
+  {
+    "old_name": "沃伦·巴菲特",
+    "new_name": "Warren Buffett Style",
+    "description": "Value investing approach focusing on quality companies at fair prices with long-term holding periods",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "查理·芒格",
+    "new_name": "Charlie Munger Style",
+    "description": "Rational value investing with emphasis on patience and disciplined decision-making",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "疯狂投机者",
+    "new_name": "Aggressive Speculator",
+    "description": "High-risk high-reward trading strategy with aggressive position sizing",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "乔治·索罗斯",
+    "new_name": "George Soros Style",
+    "description": "Global macro approach with opportunistic trading and market trend following",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "本杰明·格雷厄姆",
+    "new_name": "Benjamin Graham Style",
+    "description": "Classic value investing focusing on margin of safety and fundamental analysis",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "彼得·林奇",
+    "new_name": "Peter Lynch Style",
+    "description": "Growth at reasonable price strategy investing in understandable businesses",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "雷·达里奥",
+    "new_name": "Ray Dalio Style",
+    "description": "All-weather portfolio approach with economic cycle diversification",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "保守型投资者",
+    "new_name": "Conservative Investor",
+    "description": "Focus on capital preservation with stable, low-risk investments",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "平衡型投资者",
+    "new_name": "Balanced Investor",
+    "description": "Balanced approach between risk and return with diversified portfolio",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "激进型投资者",
+    "new_name": "Aggressive Investor",
+    "description": "High-risk strategy seeking maximum returns with active trading",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "稳健投资",
+    "new_name": "Steady Investment Fund",
+    "description": "Conservative strategy focusing on steady growth and capital preservation",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "价值投资",
+    "new_name": "Value Investment Fund",
+    "description": "Value-oriented strategy seeking undervalued quality companies",
+    "risk_level": "conservative"
+  },
+  {
+    "old_name": "成长投资",
+    "new_name": "Growth Investment Fund",
+    "description": "Growth-focused strategy investing in high-potential companies",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "量化交易",
+    "new_name": "Quantitative Trading Fund",
+    "description": "Data-driven strategy using quantitative models for trading decisions",
+    "risk_level": "balanced"
+  },
+  {
+    "old_name": "趋势跟踪",
+    "new_name": "Trend Following Fund",
+    "description": "Strategy that follows market trends with momentum-based trading",
+    "risk_level": "aggressive"
+  },
+  {
+    "old_name": "指数增强",
+    "new_name": "Enhanced Index Fund",
+    "description": "Index-tracking strategy with active management for excess returns",
+    "risk_level": "balanced"
+  }
+]

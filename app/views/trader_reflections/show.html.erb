@@ -1,4 +1,4 @@
-<% content_for :title, "#{@trader.name} - 交易反思报告" %>
+<% content_for :title, "#{@trader.name} - Trading Reflection Report" %>
 
 <div class="reflection-report">
   <div class="reflection-report__background">
@@ -17,11 +17,11 @@
       <% end %>
       <div class="reflection-report__title-block">
         <span class="reflection-report__eyebrow">AI Analysis Report</span>
-        <h1 class="reflection-report__title">交易反思报告</h1>
+        <h1 class="reflection-report__title">Trading Reflection Report</h1>
       </div>
     </div>
     <div class="reflection-report__header-right">
-      <%= button_to "重新生成", trader_trader_reflections_path(@trader), method: :post, class: "reflection-report__btn reflection-report__btn--primary" %>
+      <%= button_to "Regenerate", trader_trader_reflections_path(@trader), method: :post, class: "reflection-report__btn reflection-report__btn--primary" %>
     </div>
   </header>
 
@@ -59,7 +59,7 @@
             <line x1="3" y1="10" x2="21" y2="10"></line>
           </svg>
           <span class="reflection-report__period-text">
-            <%= @trader_reflection.reflection_period_start %> 至 <%= @trader_reflection.reflection_period_end %>
+            <%= @trader_reflection.reflection_period_start %> to <%= @trader_reflection.reflection_period_end %>
           </span>
         </div>
         <div class="reflection-report__meta-grid">
@@ -68,7 +68,7 @@
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            <span class="reflection-report__meta-chip-label">状态</span>
+            <span class="reflection-report__meta-chip-label">Status</span>
             <span class="reflection-report__meta-chip-value"><%= @trader_reflection.status %></span>
           </div>
           <div class="reflection-report__meta-chip">
@@ -76,7 +76,7 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span class="reflection-report__meta-chip-label">来源</span>
+            <span class="reflection-report__meta-chip-label">Source</span>
             <span class="reflection-report__meta-chip-value"><%= @trader_reflection.source %></span>
           </div>
           <% if @trader_reflection.generated_at.present? %>
@@ -85,7 +85,7 @@
                 <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"></path>
                 <path d="M12 6v6l4 2"></path>
               </svg>
-              <span class="reflection-report__meta-chip-label">生成时间</span>
+              <span class="reflection-report__meta-chip-label">Generated At</span>
               <span class="reflection-report__meta-chip-value"><%= l(@trader_reflection.generated_at, format: :short) %></span>
             </div>
           <% end %>
@@ -94,26 +94,26 @@
 
       <!-- Key Metrics Card -->
       <div class="reflection-report__metrics-card">
-        <h3 class="reflection-report__metrics-title">关键指标快照</h3>
+        <h3 class="reflection-report__metrics-title">Key Metrics Snapshot</h3>
         <div class="reflection-report__metrics-list">
           <% metrics = @trader_reflection.metrics || {} %>
           <div class="reflection-report__metric">
-            <span class="reflection-report__metric-label">交易次数</span>
+            <span class="reflection-report__metric-label">Trade Count</span>
             <span class="reflection-report__metric-value"><%= metrics["trade_count"] || 0 %></span>
           </div>
           <div class="reflection-report__metric">
-            <span class="reflection-report__metric-label">完成任务数</span>
+            <span class="reflection-report__metric-label">Completed Tasks</span>
             <span class="reflection-report__metric-value"><%= metrics["completed_task_count"] || 0 %></span>
           </div>
           <div class="reflection-report__metric">
-            <span class="reflection-report__metric-label">累计盈亏</span>
+            <span class="reflection-report__metric-label">Cumulative P/L</span>
             <% total_pnl = metrics["total_profit_loss"] || 0 %>
             <span class="reflection-report__metric-value <%= total_pnl >= 0 ? 'positive' : 'negative' %>">
               <%= number_to_currency(total_pnl, unit: "$", precision: 2) %>
             </span>
           </div>
           <div class="reflection-report__metric">
-            <span class="reflection-report__metric-label">持仓浮盈亏</span>
+            <span class="reflection-report__metric-label">Unrealized P/L</span>
             <% unrealized_pnl = metrics["unrealized_pnl"] || 0 %>
             <span class="reflection-report__metric-value <%= unrealized_pnl >= 0 ? 'positive' : 'negative' %>">
               <%= number_to_currency(unrealized_pnl, unit: "$", precision: 2) %>
@@ -135,10 +135,10 @@
             <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
         </div>
-        <h2 class="reflection-report__section-title">反思总结</h2>
+        <h2 class="reflection-report__section-title">Reflection Summary</h2>
       </div>
       <p class="reflection-report__summary-text">
-        <%= @trader_reflection.llm_summary.presence || "暂无总结" %>
+        <%= @trader_reflection.llm_summary.presence || "No summary" %>
       </p>
     </section>
 
@@ -151,7 +151,7 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
-        <h2 class="reflection-report__section-title">核心发现</h2>
+        <h2 class="reflection-report__section-title">Core Findings</h2>
       </div>
 
       <% findings = @trader_reflection.findings || {} %>
@@ -162,10 +162,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
             </svg>
-            优点
+            Strengths
           </div>
           <div class="reflection-report__finding-content">
-            <%= Array(findings["strengths"]).join("；").presence || "-" %>
+            <%= Array(findings["strengths"]).join("; ").presence || "-" %>
           </div>
         </div>
 
@@ -176,10 +176,10 @@
               <line x1="15" y1="9" x2="9" y2="15"></line>
               <line x1="9" y1="9" x2="15" y2="15"></line>
             </svg>
-            问题
+            Issues
           </div>
           <div class="reflection-report__finding-content">
-            <%= Array(findings["mistakes"]).join("；").presence || "-" %>
+            <%= Array(findings["mistakes"]).join("; ").presence || "-" %>
           </div>
         </div>
 
@@ -188,10 +188,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
             </svg>
-            模式观察
+            Pattern Observations
           </div>
           <div class="reflection-report__finding-content">
-            <%= Array(findings["pattern_findings"]).join("；").presence || "-" %>
+            <%= Array(findings["pattern_findings"]).join("; ").presence || "-" %>
           </div>
         </div>
 
@@ -202,10 +202,10 @@
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
-            风险提示
+            Risk Warnings
           </div>
           <div class="reflection-report__finding-content">
-            <%= Array(findings["risk_issues"]).join("；").presence || "-" %>
+            <%= Array(findings["risk_issues"]).join("; ").presence || "-" %>
           </div>
         </div>
       </div>
@@ -218,7 +218,7 @@
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
-            总体建议
+            Overall Recommendation
           </div>
           <p class="reflection-report__recommendation-text"><%= findings["recommendation"] %></p>
         </div>
@@ -241,7 +241,7 @@
             <line x1="17" y1="16" x2="23" y2="16"></line>
           </svg>
         </div>
-        <h2 class="reflection-report__section-title">建议微调参数</h2>
+        <h2 class="reflection-report__section-title">Suggested Parameter Adjustments</h2>
       </div>
 
       <% current_strategy = @trader_reflection.trading_strategy || @trader.default_strategy %>
@@ -249,25 +249,25 @@
       <% if current_strategy.present? %>
         <div class="reflection-report__strategy-info">
           <div class="reflection-report__strategy-block">
-            <div class="reflection-report__strategy-block-title">当前生效策略</div>
+            <div class="reflection-report__strategy-block-title">Current Active Strategy</div>
             <div class="reflection-report__strategy-block-content">
-              策略名称：<strong><%= current_strategy.name %></strong><br>
-              市场环境：<strong><%= current_strategy.display_market_condition %></strong><br>
-              来源：<strong><%= current_strategy.display_generated_by %></strong>
+              Strategy Name: <strong><%= current_strategy.name %></strong><br>
+              Market Condition: <strong><%= current_strategy.display_market_condition %></strong><br>
+              Source: <strong><%= current_strategy.display_generated_by %></strong>
             </div>
           </div>
           <div class="reflection-report__strategy-block">
-            <div class="reflection-report__strategy-block-title">当前策略参数</div>
+            <div class="reflection-report__strategy-block-title">Current Strategy Parameters</div>
             <div class="reflection-report__strategy-block-content">
-              最大持仓数 <strong><%= current_strategy.max_positions %></strong>，
-              买入阈值 <strong><%= current_strategy.buy_signal_threshold %></strong>，
-              最大仓位 <strong><%= current_strategy.max_position_size %></strong>，
-              最小现金保留 <strong><%= current_strategy.min_cash_reserve %></strong>
+              Max Positions <strong><%= current_strategy.max_positions %></strong>,
+              Buy Threshold <strong><%= current_strategy.buy_signal_threshold %></strong>,
+              Max Position Size <strong><%= current_strategy.max_position_size %></strong>,
+              Min Cash Reserve <strong><%= current_strategy.min_cash_reserve %></strong>
             </div>
           </div>
         </div>
         <p style="font-size: 0.8125rem; color: var(--color-text-muted); margin-bottom: 1.5rem;">
-          💡 本页建议只会作用于这套策略，不会自动修改其他市场环境策略。
+          💡 Recommendations on this page only apply to this strategy and will not automatically modify other market condition strategies.
         </p>
       <% end %>
 
@@ -276,12 +276,12 @@
           <table class="reflection-report__table">
             <thead>
               <tr>
-                <th>参数</th>
-                <th>当前值</th>
-                <th>建议后值</th>
-                <th>方向</th>
-                <th>原因</th>
-                <th>操作</th>
+                <th>Parameter</th>
+                <th>Current Value</th>
+                <th>Suggested Value</th>
+                <th>Direction</th>
+                <th>Reason</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -324,10 +324,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                           <polyline points="20 6 9 17 4 12"></polyline>
                         </svg>
-                        已应用
+                        Applied
                       </span>
                     <% else %>
-                      <%= button_to "应用到这套策略", apply_adjustment_trader_trader_reflection_path(@trader, @trader_reflection, parameter: adjustment["parameter"]), method: :post, class: "reflection-report__btn reflection-report__btn--primary" %>
+                      <%= button_to "Apply to Strategy", apply_adjustment_trader_trader_reflection_path(@trader, @trader_reflection, parameter: adjustment["parameter"]), method: :post, class: "reflection-report__btn reflection-report__btn--primary" %>
                     <% end %>
                   </td>
                 </tr>
@@ -341,7 +341,7 @@
             <path d="M9 12l2 2 4-4"></path>
             <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
           </svg>
-          <p>当前没有建议微调的参数，说明这次反思更偏向复盘和观察。</p>
+          <p>No parameter adjustments suggested, indicating this reflection is more focused on review and observation.</p>
         </div>
       <% end %>
     </section>
@@ -356,17 +356,17 @@
               <circle cx="12" cy="12" r="10"></circle>
             </svg>
           </div>
-          <h2 class="reflection-report__section-title">已应用调整记录</h2>
+          <h2 class="reflection-report__section-title">Applied Adjustment Records</h2>
         </div>
         <div class="reflection-report__table-wrapper">
           <table class="reflection-report__table">
             <thead>
               <tr>
-                <th>时间</th>
-                <th>参数</th>
-                <th>方向</th>
-                <th>变更</th>
-                <th>原因</th>
+                <th>Time</th>
+                <th>Parameter</th>
+                <th>Direction</th>
+                <th>Change</th>
+                <th>Reason</th>
               </tr>
             </thead>
             <tbody>
@@ -397,7 +397,7 @@
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
-        返回操盘手详情
+        Back to Trader Details
       <% end %>
     </footer>
   </main>

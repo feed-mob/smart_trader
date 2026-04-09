@@ -13,21 +13,21 @@ module Admin
     def matrix
       @factors = FactorDefinition.active.ordered
 
-      # 获取最新的因子值，按 asset_id 和 factor_definition_id 分组
+      # Get latest factor values, grouped by asset_id and factor_definition_id
       @factor_values = FactorValue.latest.includes(:asset, :factor_definition)
       @latest_calculated_at = @factor_values.maximum(:calculated_at)
       @values_by_asset = @factor_values.group_by(&:asset_id).transform_values do |values|
         values.index_by { |v| v.factor_definition_id }
       end
 
-      # 获取市值前 50 的资产并计算排序
+      # Get top 50 assets by market cap and calculate ranking
       @assets = sort_assets(
         Asset.where.not(market_cap_rank: nil).where("market_cap_rank <= 50").to_a,
         @factors,
         @values_by_asset
       )
 
-      # 当前排序参数
+      # Current sort parameters
       @sort_by = params[:sort_by] || "composite"
       @sort_order = params[:sort_order] || "desc"
     end
@@ -35,16 +35,16 @@ module Admin
     def correlations
       @factors = FactorDefinition.active.ordered
 
-      # 获取最新的因子值
+      # Get latest factor values
       @factor_values = FactorValue.latest.includes(:factor_definition)
 
-      # 按因子分组，得到每个因子在所有资产上的值
+      # Group by factor to get each factor's values across all assets
       @values_by_factor = @factor_values.group_by(&:factor_definition_id)
 
-      # 计算因子间相关性矩阵
+      # Calculate factor correlation matrix
       @correlation_matrix = calculate_correlation_matrix(@factors, @values_by_factor)
 
-      # 识别高相关性因子对
+      # Identify highly correlated factor pairs
       @high_correlations = find_high_correlations(@factors, @correlation_matrix)
     end
 
@@ -54,7 +54,7 @@ module Admin
 
     def update
       if @factor.update(factor_params)
-        redirect_to admin_factor_definition_path(@factor), notice: "因子更新成功"
+        redirect_to admin_factor_definition_path(@factor), notice: "Factor updated successfully"
       else
         render :edit, status: :unprocessable_entity
       end
@@ -62,8 +62,8 @@ module Admin
 
     def toggle
       @factor.update!(active: !@factor.active)
-      status_text = @factor.active? ? "启用" : "禁用"
-      redirect_to admin_factor_definitions_path, notice: "因子已#{status_text}"
+      status_text = @factor.active? ? "enabled" : "disabled"
+      redirect_to admin_factor_definitions_path, notice: "Factor #{status_text}"
     end
 
     private
@@ -94,11 +94,11 @@ module Admin
           if factor_a.id == factor_b.id
             matrix[factor_a.id][factor_b.id] = 1.0
           else
-            # 获取两个因子的值序列
+            # Get value sequences for both factors
             values_a = values_by_factor[factor_a.id]&.map(&:normalized_value) || []
             values_b = values_by_factor[factor_b.id]&.map(&:normalized_value) || []
 
-            # 计算相关系数
+            # Calculate correlation coefficient
             correlation = calculate_pearson_correlation(values_a, values_b)
             matrix[factor_a.id][factor_b.id] = correlation
           end
@@ -130,7 +130,7 @@ module Admin
 
       factors.each_with_index do |factor_a, i|
         factors.each_with_index do |factor_b, j|
-          next if i >= j  # 只计算上三角，避免重复
+          next if i >= j  # Only calculate upper triangle, avoid duplicates
 
           correlation = matrix[factor_a.id][factor_b.id]
           if correlation.abs >= threshold
@@ -150,11 +150,11 @@ module Admin
       sort_by = params[:sort_by] || "composite"
       sort_order = params[:sort_order] || "desc"
 
-      # 计算每个资产的排序值
+      # Calculate ranking score for each asset
       assets_with_scores = assets.map do |asset|
         asset_values = values_by_asset[asset.id] || {}
 
-        # 计算综合评分
+        # Calculate composite score
         total_score = 0
         total_weight = 0
         factors.each do |factor|
@@ -166,7 +166,7 @@ module Admin
         end
         composite_score = total_weight > 0 ? (total_score / total_weight) : 0
 
-        # 获取指定因子的值
+        # Get specified factor's value
         factor_score = if sort_by != "composite"
           factor = factors.find { |f| f.id.to_s == sort_by }
           factor_value = asset_values[factor&.id]
@@ -182,7 +182,7 @@ module Admin
         }
       end
 
-      # 排序
+      # Sort
       sorted = assets_with_scores.sort_by { |item| item[:score] }
       sorted = sorted.reverse if sort_order == "desc"
 

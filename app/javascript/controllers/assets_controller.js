@@ -193,11 +193,11 @@ export default class extends Controller {
   // Format trend direction
   formatTrend(trend) {
     const trends = {
-      bullish: "看涨 ↗",
-      bearish: "看跌 ↘",
-      neutral: "中性 →"
+      bullish: "Bullish ↗",
+      bearish: "Bearish ↘",
+      neutral: "Neutral →"
     }
-    return trends[trend] || "未知"
+    return trends[trend] || "Unknown"
   }
 
   // Get trend color class

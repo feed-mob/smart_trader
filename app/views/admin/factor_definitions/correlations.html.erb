@@ -1,4 +1,4 @@
-<% content_for :title, "因子相关性 - SmartTrader" %>
+<% content_for :title, "Factor Correlations - SmartTrader" %>
 
 <div class="factor-correlation-container">
   <!-- Header -->
@@ -8,9 +8,9 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-back-link__icon">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
-        <span>返回列表</span>
+        <span>Back to List</span>
       <% end %>
-      <h1 class="factor-correlation-header__title">因子相关性分析</h1>
+      <h1 class="factor-correlation-header__title">Factor Correlation Analysis</h1>
     </div>
   </header>
 
@@ -19,7 +19,7 @@
     <!-- Correlation Matrix -->
     <div class="factor-correlation-card">
       <div class="factor-correlation-card__header">
-        <h2 class="factor-correlation-card__title">相关性矩阵</h2>
+        <h2 class="factor-correlation-card__title">Correlation Matrix</h2>
       </div>
 
       <div class="factor-correlation-card__body">
@@ -70,7 +70,7 @@
               <line x1="12" y1="9" x2="12" y2="13"></line>
               <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
-            高相关性警告 (>0.6)
+            High Correlation Warning (>0.6)
           </h2>
         </div>
 
@@ -89,7 +89,7 @@
                   </span>
                 </div>
                 <div class="factor-correlation-warning__suggestion">
-                  建议降低其中一个因子的权重
+                  Consider reducing the weight of one factor
                 </div>
               </div>
             <% end %>
@@ -104,7 +104,7 @@
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
-            <span>所有因子相关性均在合理范围内</span>
+            <span>All factor correlations are within reasonable range</span>
           </div>
         </div>
       </div>
@@ -114,23 +114,23 @@
     <div class="factor-correlation-legend">
       <div class="factor-correlation-legend__item">
         <span class="factor-correlation-legend__color factor-correlation-legend__color--high-positive"></span>
-        <span>强正相关 (>0.6)</span>
+        <span>Strong Positive (>0.6)</span>
       </div>
       <div class="factor-correlation-legend__item">
         <span class="factor-correlation-legend__color factor-correlation-legend__color--low-positive"></span>
-        <span>弱正相关 (0.3~0.6)</span>
+        <span>Weak Positive (0.3~0.6)</span>
       </div>
       <div class="factor-correlation-legend__item">
         <span class="factor-correlation-legend__color factor-correlation-legend__color--neutral"></span>
-        <span>无相关 (-0.3~0.3)</span>
+        <span>No Correlation (-0.3~0.3)</span>
       </div>
       <div class="factor-correlation-legend__item">
         <span class="factor-correlation-legend__color factor-correlation-legend__color--low-negative"></span>
-        <span>弱负相关 (-0.6~-0.3)</span>
+        <span>Weak Negative (-0.6~-0.3)</span>
       </div>
       <div class="factor-correlation-legend__item">
         <span class="factor-correlation-legend__color factor-correlation-legend__color--high-negative"></span>
-        <span>强负相关 (<-0.6)</span>
+        <span>Strong Negative (<-0.6)</span>
       </div>
     </div>
   </main>

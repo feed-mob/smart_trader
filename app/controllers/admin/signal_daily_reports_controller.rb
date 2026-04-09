@@ -26,7 +26,7 @@ module Admin
       @report = DailyReport.new(report_params.merge(report_type: REPORT_TYPE))
 
       if @report.save
-        redirect_to admin_signal_daily_report_path(@report), notice: '日报创建成功'
+        redirect_to admin_signal_daily_report_path(@report), notice: 'Daily report created successfully'
       else
         render :new, status: :unprocessable_entity
       end
@@ -36,7 +36,7 @@ module Admin
 
     def update
       if @report.update(report_params)
-        redirect_to admin_signal_daily_report_path(@report), notice: '日报更新成功'
+        redirect_to admin_signal_daily_report_path(@report), notice: 'Daily report updated successfully'
       else
         render :edit, status: :unprocessable_entity
       end
@@ -44,7 +44,7 @@ module Admin
 
     def destroy
       @report.destroy
-      redirect_to admin_signal_daily_reports_path, notice: '日报已删除'
+      redirect_to admin_signal_daily_reports_path, notice: 'Daily report deleted'
     end
 
     def generate
@@ -52,7 +52,7 @@ module Admin
 
       existing = DailyReport.find_by(report_type: REPORT_TYPE, report_date: date)
       if existing
-        redirect_to admin_signal_daily_report_path(existing), alert: '该日期的日报已存在'
+        redirect_to admin_signal_daily_report_path(existing), alert: 'Daily report for this date already exists'
         return
       end
 
@@ -60,9 +60,9 @@ module Admin
       report = DailyReport.find_by(report_type: REPORT_TYPE, report_date: date)
 
       if report
-        redirect_to admin_signal_daily_report_path(report), notice: '日报生成成功'
+        redirect_to admin_signal_daily_report_path(report), notice: 'Daily report generated successfully'
       else
-        redirect_to admin_signal_daily_reports_path, alert: '日报生成失败'
+        redirect_to admin_signal_daily_reports_path, alert: 'Failed to generate daily report'
       end
     end
 
@@ -72,9 +72,9 @@ module Admin
       report = DailyReport.find_by(report_type: REPORT_TYPE, report_date: date)
 
       if report
-        redirect_to admin_signal_daily_report_path(report), notice: '日报重新生成成功'
+        redirect_to admin_signal_daily_report_path(report), notice: 'Daily report regenerated successfully'
       else
-        redirect_to admin_signal_daily_report_path(@report), alert: '日报重新生成失败'
+        redirect_to admin_signal_daily_report_path(report), alert: 'Failed to regenerate daily report'
       end
     end
 

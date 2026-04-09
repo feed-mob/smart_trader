@@ -4,40 +4,43 @@ class TraderReflectionAgent < RubyLLM::Agent
   model "gpt-5.2"
 
   instructions <<~PROMPT
-    你是一位交易复盘与策略微调助手。请基于给定的 trader、策略、交易记录、执行结果、组合表现和当前持仓，生成一份结构化反思报告。
+    You are a trading review and strategy adjustment assistant. Generate a structured reflection report based on the given trader, strategy, trading records, execution results, portfolio performance, and current positions.
 
-    目标：
-    1. 总结最近一段时间的表现。
-    2. 识别策略执行中的优点、错误、模式和风险问题。
-    3. 只对有限参数给出微调建议，不要直接改写整套策略。
+    IMPORTANT: All output must be in ENGLISH language.
 
-    可建议的参数只有：
+    Goals:
+    1. Summarize performance over the recent period.
+    2. Identify strengths, mistakes, patterns, and risk issues in strategy execution.
+    3. Provide limited adjustment suggestions for specific parameters only, do not rewrite the entire strategy.
+
+    Suggested parameters are limited to:
     - max_positions
     - buy_signal_threshold
     - max_position_size
     - min_cash_reserve
 
-    输出要求：
-    - 必须严格返回 JSON
-    - 不要输出 markdown 代码块
-    - 不要输出解释性前后文
-    - 如果你认为无需调整参数，suggested_adjustments 返回空数组
+    Output requirements:
+    - Must return valid JSON only
+    - Do not output markdown code blocks
+    - Do not output explanatory context
+    - If you believe no parameter adjustments are needed, return an empty array for suggested_adjustments
+    - ALL text values must be in English
 
-    返回格式：
+    Return format:
     {
-      "summary": "string",
-      "strengths": ["string"],
-      "mistakes": ["string"],
-      "pattern_findings": ["string"],
-      "risk_issues": ["string"],
+      "summary": "string (in English)",
+      "strengths": ["string (in English)"],
+      "mistakes": ["string (in English)"],
+      "pattern_findings": ["string (in English)"],
+      "risk_issues": ["string (in English)"],
       "suggested_adjustments": [
         {
           "parameter": "max_positions|buy_signal_threshold|max_position_size|min_cash_reserve",
           "direction": "increase|decrease|keep",
-          "reason": "string"
+          "reason": "string (in English)"
         }
       ],
-      "recommendation": "string"
+      "recommendation": "string (in English)"
     }
   PROMPT
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class JobExecution < ApplicationRecord
-  # 状态常量
+  # Status constants
   STATUS_RUNNING = "running"
   STATUS_SUCCESS = "success"
   STATUS_FAILED = "failed"
@@ -11,7 +11,7 @@ class JobExecution < ApplicationRecord
   validates :status, presence: true, inclusion: { in: [ STATUS_RUNNING, STATUS_SUCCESS, STATUS_FAILED ] }
   validates :started_at, presence: true
 
-  # 作用域
+  # Scopes
   scope :by_job_name, ->(name) { where(job_name: name) if name.present? }
   scope :by_status, ->(status) { where(status: status) if status.present? }
   scope :recent_first, -> { order(started_at: :desc) }
@@ -19,13 +19,13 @@ class JobExecution < ApplicationRecord
     where(started_at: start_date..end_date) if start_date.present? && end_date.present?
   }
 
-  # 计算执行时长（秒）
+  # Calculate duration in seconds
   def duration_seconds
     return nil unless duration_ms
     (duration_ms / 1000.0).round(2)
   end
 
-  # 格式化执行时长
+  # Format duration for display
   def formatted_duration
     return "-" unless duration_ms
 
@@ -40,7 +40,7 @@ class JobExecution < ApplicationRecord
     end
   end
 
-  # 格式化参数显示
+  # Format arguments for display
   def formatted_arguments
     return "-" unless arguments.present?
 
@@ -54,7 +54,7 @@ class JobExecution < ApplicationRecord
     end
   end
 
-  # 标记为成功
+  # Mark as success
   def mark_success!
     now = Time.current
     update!(
@@ -64,7 +64,7 @@ class JobExecution < ApplicationRecord
     )
   end
 
-  # 标记为失败
+  # Mark as failed
   def mark_failed!(error_message)
     now = Time.current
     update!(

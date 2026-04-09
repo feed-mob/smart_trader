@@ -19,7 +19,7 @@ class AiAnalysisController < ApplicationController
     @permission_mode = params[:permission_mode].presence || "default"
 
     if @prompt.blank?
-      flash[:alert] = "请输入要发送给 Claude Code 的 prompt"
+      flash[:alert] = "Please enter a prompt for Claude Code"
       redirect_to new_ai_analysis_path and return
     end
 

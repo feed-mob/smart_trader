@@ -1,4 +1,4 @@
-<% content_for :title, "因子管理 - SmartTrader" %>
+<% content_for :title, "Factor Management - SmartTrader" %>
 
 <div class="factors-container">
   <!-- Animated Background -->
@@ -16,16 +16,16 @@
           <path d="M12 24L14 22L16 23L20 19L22 21" stroke="#06b6d4" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
         </svg>
       <% end %>
-      <h1 class="factors-header__title">因子管理</h1>
+      <h1 class="factors-header__title">Factor Management</h1>
       <span class="factors-header__count">
-        共 <%= @factors.count %> 个因子 · 总权重 <%= (@factors.sum(:weight) * 100).round(0) %>%
+        <%= @factors.count %> factors · Total weight <%= (@factors.sum(:weight) * 100).round(0) %>%
       </span>
     </div>
     <div class="factors-header__right">
       <div class="factors-header__btn-group">
         <%= link_to admin_factor_daily_reports_path,
                     class: "factors-header__report-btn",
-                    title: "查看因子日报列表" do %>
+                    title: "View factor daily reports" do %>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               <polyline points="14 2 14 8 20 8"></polyline>
@@ -33,7 +33,7 @@
               <line x1="16" y1="17" x2="8" y2="17"></line>
               <polyline points="10 9 9 9 8 9"></polyline>
             </svg>
-            <span>因子日报<% if @latest_report %> <%= @latest_report.report_date.strftime('%m/%d') %><% end %></span>
+            <span>Factor Reports<% if @latest_report %> <%= @latest_report.report_date.strftime('%m/%d') %><% end %></span>
           <% end %>
         <%= link_to matrix_admin_factor_definitions_path, class: "factors-header__matrix-btn" do %>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -42,7 +42,7 @@
             <rect x="14" y="14" width="7" height="7"></rect>
             <rect x="3" y="14" width="7" height="7"></rect>
           </svg>
-          <span>因子矩阵</span>
+          <span>Factor Matrix</span>
         <% end %>
         <%= link_to correlations_admin_factor_definitions_path, class: "factors-header__matrix-btn" do %>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -50,7 +50,7 @@
             <path d="M12 20V4"></path>
             <path d="M6 20v-6"></path>
           </svg>
-          <span>相关性</span>
+          <span>Correlations</span>
         <% end %>
       </div>
     </div>
@@ -126,18 +126,18 @@
 
           <div class="factor-card__stats">
             <div class="factor-card__stat">
-              <span class="factor-card__stat-label">权重</span>
+              <span class="factor-card__stat-label">Weight</span>
               <span class="factor-card__stat-value"><%= factor.display_weight %></span>
             </div>
             <div class="factor-card__stat">
-              <span class="factor-card__stat-label">周期</span>
-              <span class="factor-card__stat-value"><%= factor.calculation_days %>日</span>
+              <span class="factor-card__stat-label">Period</span>
+              <span class="factor-card__stat-value"><%= factor.calculation_days %>d</span>
             </div>
           </div>
 
           <div class="factor-card__actions">
-            <%= link_to "详情", admin_factor_definition_path(factor), class: "btn btn-secondary btn-sm" %>
-            <%= button_to factor.active? ? "禁用" : "启用",
+            <%= link_to "Details", admin_factor_definition_path(factor), class: "btn btn-secondary btn-sm" %>
+            <%= button_to factor.active? ? "Disable" : "Enable",
                 toggle_admin_factor_definition_path(factor),
                 method: :post,
                 class: factor.active? ? "btn btn-danger btn-sm" : "btn btn-primary btn-sm" %>

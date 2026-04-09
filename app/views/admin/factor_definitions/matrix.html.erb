@@ -1,4 +1,4 @@
-<% content_for :title, "因子矩阵 - SmartTrader" %>
+<% content_for :title, "Factor Matrix - SmartTrader" %>
 
 <%
   def sort_link(column, label, current_sort_by, current_sort_order)
@@ -23,13 +23,13 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="factor-back-link__icon">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
-        <span>返回列表</span>
+        <span>Back to List</span>
       <% end %>
-      <h1 class="factor-matrix-header__title">因子矩阵</h1>
+      <h1 class="factor-matrix-header__title">Factor Matrix</h1>
     </div>
     <div class="factor-matrix-header__right">
       <span class="factor-matrix-header__info">
-        更新时间: <%= @latest_calculated_at&.strftime('%Y-%m-%d %H:%M') || '暂无数据' %>
+        Updated: <%= @latest_calculated_at&.strftime('%Y-%m-%d %H:%M') || 'No data' %>
       </span>
     </div>
   </header>
@@ -45,8 +45,8 @@
             <line x1="9" y1="21" x2="9" y2="9"></line>
           </svg>
         </div>
-        <h3 class="factor-matrix-empty__title">暂无资产数据</h3>
-        <p class="factor-matrix-empty__text">请先添加资产并采集数据</p>
+        <h3 class="factor-matrix-empty__title">No asset data</h3>
+        <p class="factor-matrix-empty__text">Please add assets and collect data first</p>
       </div>
     <% elsif @factor_values.empty? %>
       <div class="factor-matrix-empty">
@@ -56,16 +56,16 @@
             <polyline points="12 6 12 12 16 14"></polyline>
           </svg>
         </div>
-        <h3 class="factor-matrix-empty__title">暂无因子数据</h3>
-        <p class="factor-matrix-empty__text">请先运行因子计算任务</p>
-        <%= button_to "计算因子", "#", class: "btn btn-primary", disabled: true %>
+        <h3 class="factor-matrix-empty__title">No factor data</h3>
+        <p class="factor-matrix-empty__text">Please run factor calculation tasks first</p>
+        <%= button_to "Calculate Factors", "#", class: "btn btn-primary", disabled: true %>
       </div>
     <% else %>
       <div class="factor-matrix-table-wrapper">
         <table class="factor-matrix-table">
           <thead>
             <tr>
-              <th class="factor-matrix-table__header factor-matrix-table__header--asset">资产</th>
+              <th class="factor-matrix-table__header factor-matrix-table__header--asset">Asset</th>
               <% @factors.each do |factor| %>
                 <th class="factor-matrix-table__header">
                   <%= sort_link(factor.id.to_s, factor.name, @sort_by, @sort_order) %>
@@ -73,7 +73,7 @@
                 </th>
               <% end %>
               <th class="factor-matrix-table__header factor-matrix-table__header--score">
-                <%= sort_link("composite", "综合评分", @sort_by, @sort_order) %>
+                <%= sort_link("composite", "Composite Score", @sort_by, @sort_order) %>
               </th>
             </tr>
           </thead>
@@ -128,15 +128,15 @@
       <div class="factor-matrix-legend">
         <div class="factor-matrix-legend__item">
           <span class="factor-matrix-legend__color factor-matrix-legend__color--positive"></span>
-          <span>正分 (> 0.3)</span>
+          <span>Positive (> 0.3)</span>
         </div>
         <div class="factor-matrix-legend__item">
           <span class="factor-matrix-legend__color factor-matrix-legend__color--neutral"></span>
-          <span>中性 (-0.3 ~ 0.3)</span>
+          <span>Neutral (-0.3 ~ 0.3)</span>
         </div>
         <div class="factor-matrix-legend__item">
           <span class="factor-matrix-legend__color factor-matrix-legend__color--negative"></span>
-          <span>负分 (< -0.3)</span>
+          <span>Negative (< -0.3)</span>
         </div>
       </div>
     <% end %>

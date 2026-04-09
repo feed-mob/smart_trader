@@ -28,91 +28,91 @@ class TradingStrategy < ApplicationRecord
   STRATEGY_MATRIX = {
     # Normal market
     conservative_normal: {
-      name: "稳健配置策略",
+      name: "Stable Allocation Strategy",
       max_positions: 2, buy_signal_threshold: 0.60,
       max_position_size: 0.40, min_cash_reserve: 0.30,
-      description: "注重本金保护，持仓集中，严格筛选买入信号，保留充足现金"
+      description: "Focus on capital preservation, concentrated holdings, strict buy signal filtering, maintain ample cash reserves"
     },
     balanced_normal: {
-      name: "均衡配置策略",
+      name: "Balanced Allocation Strategy",
       max_positions: 3, buy_signal_threshold: 0.50,
       max_position_size: 0.50, min_cash_reserve: 0.20,
-      description: "平衡风险与收益，适度分散持仓，灵活调整仓位"
+      description: "Balance risk and return, moderately diversified holdings, flexible position adjustments"
     },
     aggressive_normal: {
-      name: "积极成长策略",
+      name: "Growth Strategy",
       max_positions: 4, buy_signal_threshold: 0.40,
       max_position_size: 0.60, min_cash_reserve: 0.10,
-      description: "追求高收益，分散持仓，积极捕捉机会，保持高仓位运作"
+      description: "Pursue high returns, diversified holdings, actively capture opportunities, maintain high position levels"
     },
 
     # Volatile market
     conservative_volatile: {
-      name: "减仓观望策略",
+      name: "Wait and See Strategy",
       max_positions: 2, buy_signal_threshold: 0.65,
       max_position_size: 0.30, min_cash_reserve: 0.40,
-      description: "高波动期减少持仓，提高买入门槛，保留更多现金等待机会"
+      description: "Reduce holdings during high volatility, raise buy threshold, preserve more cash for opportunities"
     },
     balanced_volatile: {
-      name: "适度防御策略",
+      name: "Moderate Defense Strategy",
       max_positions: 3, buy_signal_threshold: 0.55,
       max_position_size: 0.40, min_cash_reserve: 0.30,
-      description: "适度降低仓位，提高选股标准，保持防御姿态"
+      description: "Moderately reduce positions, raise selection standards, maintain defensive posture"
     },
     aggressive_volatile: {
-      name: "波段操作策略",
+      name: "Swing Trading Strategy",
       max_positions: 4, buy_signal_threshold: 0.45,
       max_position_size: 0.50, min_cash_reserve: 0.20,
-      description: "利用波动进行波段操作，快进快出，灵活应对"
+      description: "Utilize volatility for swing trading, quick entry and exit, flexible response"
     },
 
     # Crash market
     conservative_crash: {
-      name: "防守保本策略",
+      name: "Capital Preservation Strategy",
       max_positions: 2, buy_signal_threshold: 0.70,
       max_position_size: 0.25, min_cash_reserve: 0.50,
-      description: "崩盘时期以保本为主，极低仓位，等待市场企稳"
+      description: "Prioritize capital preservation during market crash, very low positions, wait for market stabilization"
     },
     balanced_crash: {
-      name: "小幅抄底策略",
+      name: "Moderate Dip Buying Strategy",
       max_positions: 3, buy_signal_threshold: 0.50,
       max_position_size: 0.40, min_cash_reserve: 0.30,
-      description: "适度参与抄底，分批建仓，控制风险敞口"
+      description: "Moderately participate in dip buying, build positions in batches, control risk exposure"
     },
     aggressive_crash: {
-      name: "逆向买入策略",
+      name: "Contrarian Buying Strategy",
       max_positions: 5, buy_signal_threshold: 0.35,
       max_position_size: 0.65, min_cash_reserve: 0.05,
-      description: "逆向投资，在恐慌中积极买入优质资产，追求超额收益"
+      description: "Contrarian investment, actively buy quality assets during panic, pursue excess returns"
     },
 
     # Bubble market
     conservative_bubble: {
-      name: "获利了结策略",
+      name: "Profit Taking Strategy",
       max_positions: 2, buy_signal_threshold: 0.70,
       max_position_size: 0.30, min_cash_reserve: 0.45,
-      description: "泡沫期逐步获利了结，降低仓位，锁定收益"
+      description: "Gradually take profits during bubble phase, reduce positions, lock in gains"
     },
     balanced_bubble: {
-      name: "逐步减仓策略",
+      name: "Gradual Position Reduction Strategy",
       max_positions: 3, buy_signal_threshold: 0.60,
       max_position_size: 0.40, min_cash_reserve: 0.35,
-      description: "逐步降低仓位，提高现金比例，防范回调风险"
+      description: "Gradually reduce positions, increase cash ratio, guard against pullback risk"
     },
     aggressive_bubble: {
-      name: "趋势跟随策略",
+      name: "Trend Following Strategy",
       max_positions: 4, buy_signal_threshold: 0.40,
       max_position_size: 0.55, min_cash_reserve: 0.15,
-      description: "顺势而为，跟随趋势但设置严格止损，及时止盈"
+      description: "Follow the trend, set strict stop-loss, take profits timely"
     }
   }.freeze
 
   # Market condition display names
   MARKET_CONDITION_DISPLAY = {
-    "normal" => "正常市场",
-    "volatile" => "高波动市场",
-    "crash" => "崩盘市场",
-    "bubble" => "泡沫市场"
+    "normal" => "Normal Market",
+    "volatile" => "Volatile Market",
+    "crash" => "Crash Market",
+    "bubble" => "Bubble Market"
   }.freeze
 
   # Class methods
@@ -146,6 +146,6 @@ class TradingStrategy < ApplicationRecord
   end
 
   def display_generated_by
-    { "llm" => "AI 生成", "manual" => "手动配置", "default_template" => "默认模板", "matrix" => "矩阵策略" }[generated_by]
+    { "llm" => "AI Generated", "manual" => "Manual", "default_template" => "Default Template", "matrix" => "Matrix Strategy" }[generated_by]
   end
 end

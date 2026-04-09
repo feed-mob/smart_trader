@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class TraderReflectionService
-  PROMPT_VERSION = "v1"
+  PROMPT_VERSION = "v3_en_strict"
 
   def initialize(trader, period_start: 30.days.ago.to_date, period_end: Date.current)
     @trader = trader
@@ -80,29 +80,29 @@ class TraderReflectionService
     total_profit_loss = metrics["total_profit_loss"].to_d
     trade_count = metrics["trade_count"].to_i
     risk_issues = []
-    risk_issues << "近期交易次数偏少，样本有限，结论置信度较低。" if trade_count < 3
-    risk_issues << "当前持仓浮亏较大，需复核入场时机与仓位控制。" if metrics["unrealized_pnl"].to_d < -1000
+    risk_issues << "Recent trading volume is low, sample size is limited, conclusion confidence is low." if trade_count < 3
+    risk_issues << "Current positions have significant unrealized loss, need to review entry timing and position control." if metrics["unrealized_pnl"].to_d < -1000
 
     {
       summary: if total_profit_loss.positive?
-                 "最近一段时间整体仍有盈利，但需要继续复核持仓质量与风险控制。"
+                 "Overall profitable in the recent period, but need to continue reviewing position quality and risk control."
                elsif total_profit_loss.zero?
-                 "最近一段时间整体接近打平，说明策略尚未形成明显优势。"
+                 "Overall break-even recently, indicating the strategy has not yet established a clear advantage."
                else
-                 "最近一段时间整体表现偏弱，应优先复核买入门槛、仓位集中度和现金保留比例。"
+                 "Overall performance is weak recently, should prioritize reviewing buy threshold, position concentration, and cash reserve ratio."
                end,
       findings: {
         "strengths" => [
-          "当前策略和交易执行链路完整，能够持续产出 recommendation 并落地执行。"
+          "Current strategy and trading execution pipeline is complete, able to continuously produce recommendations and execute them."
         ],
         "mistakes" => [
-          "近期表现说明策略参数与市场环境之间可能存在错配。"
+          "Recent performance indicates possible mismatch between strategy parameters and market conditions."
         ],
         "pattern_findings" => [
-          "反思结果基于最近 30 天执行记录、交易流水、组合快照和当前持仓。"
+          "Reflection results are based on execution records, trading history, portfolio snapshots, and current positions from the last 30 days."
         ],
         "risk_issues" => risk_issues,
-        "recommendation" => "建议先阅读反思报告，再决定是否人工微调现有策略参数。"
+        "recommendation" => "Recommend reading the reflection report first, then decide whether to manually fine-tune existing strategy parameters."
       },
       suggested_adjustments: suggested_adjustments_from_metrics(metrics)
     }
@@ -115,7 +115,7 @@ class TraderReflectionService
       adjustments << {
         "parameter" => "buy_signal_threshold",
         "direction" => "increase",
-        "reason" => "近期持仓浮亏偏大，建议提高买入门槛，减少边际信号质量不足的入场。"
+        "reason" => "Recent positions have significant unrealized losses, recommend raising buy threshold to reduce entries with marginal signal quality."
       }
     end
 
@@ -123,7 +123,7 @@ class TraderReflectionService
       adjustments << {
         "parameter" => "min_cash_reserve",
         "direction" => "increase",
-        "reason" => "当前现金比例偏低，建议提高现金保留，增强回撤期缓冲能力。"
+        "reason" => "Current cash ratio is low, recommend increasing cash reserve to enhance buffer capacity during drawdowns."
       }
     end
 
@@ -132,25 +132,26 @@ class TraderReflectionService
 
   def prompt
     <<~PROMPT
-      请基于以下 trader 反思上下文，输出 JSON：
+      Please output JSON in ENGLISH based on the following trader reflection context.
+      IMPORTANT: All output must be in English language.
 
       #{JSON.pretty_generate(reflection_payload)}
 
-      返回格式：
+      Return format (all values in English):
       {
-        "summary": "string",
-        "strengths": ["string"],
-        "mistakes": ["string"],
-        "pattern_findings": ["string"],
-        "risk_issues": ["string"],
+        "summary": "string (in English)",
+        "strengths": ["string (in English)"],
+        "mistakes": ["string (in English)"],
+        "pattern_findings": ["string (in English)"],
+        "risk_issues": ["string (in English)"],
         "suggested_adjustments": [
           {
             "parameter": "max_positions|buy_signal_threshold|max_position_size|min_cash_reserve",
             "direction": "increase|decrease|keep",
-            "reason": "string"
+            "reason": "string (in English)"
           }
         ],
-        "recommendation": "string"
+        "recommendation": "string (in English)"
       }
     PROMPT
   end

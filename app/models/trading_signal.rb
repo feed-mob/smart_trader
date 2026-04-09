@@ -17,7 +17,7 @@ class TradingSignal < ApplicationRecord
   scope :hold_signals, -> { where(signal_type: "hold") }
   scope :high_confidence, -> { where("confidence >= ?", 0.7) }
 
-  # 获取每个资产的最新信号
+  # Get latest signal for each asset
   def self.latest_for_all_assets
     select("DISTINCT ON (asset_id) *").order("asset_id, generated_at DESC")
   end
@@ -53,9 +53,9 @@ class TradingSignal < ApplicationRecord
 
   def signal_type_label
     {
-      "buy" => "买入",
-      "sell" => "卖出",
-      "hold" => "持有"
+      "buy" => "Buy",
+      "sell" => "Sell",
+      "hold" => "Hold"
     }[signal_type] || signal_type
   end
 end
