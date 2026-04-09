@@ -82,7 +82,7 @@ class StrategyGeneratorService
   end
 
   def sanitize_max_positions(value)
-    [[value.to_i, 2].max, 5].min
+    [[value.to_i, 2].max, 10].min
   end
 
   def sanitize_threshold(value, min_value, max_value)

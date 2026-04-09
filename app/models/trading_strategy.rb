@@ -13,7 +13,7 @@ class TradingStrategy < ApplicationRecord
 
   # Validations
   validates :name, presence: true, length: { maximum: 100 }
-  validates :max_positions, inclusion: { in: 2..5 }
+  validates :max_positions, inclusion: { in: 2..10 }
   validates :buy_signal_threshold, inclusion: { in: 0.3..0.7 }
   validates :max_position_size, inclusion: { in: 0.3..0.7 }
   validates :min_cash_reserve, inclusion: { in: 0.05..0.4 }

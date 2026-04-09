@@ -1,628 +1,178 @@
-<% content_for :title, "AI 资产配置分析" %>
+<% content_for :title, "Neural Terminal" %>
 
-<div class="ai-terminal">
-  <!-- Scanline Effect -->
-  <div class="ai-terminal__scanline"></div>
+<div class="neural-terminal">
+  <div class="neural-grid"></div>
 
-  <!-- Grid Background -->
-  <div class="ai-terminal__grid"></div>
+  <div class="neural-particles">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
 
-  <!-- Header -->
-  <header class="ai-header">
-    <div class="ai-header__left">
-      <%= link_to root_path, class: "ai-logo" do %>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-        </svg>
-      <% end %>
-      <div class="ai-header__title-group">
-        <h1 class="ai-header__title">AI ALLOCATION TERMINAL</h1>
-        <span class="ai-header__status">
-          <span class="status-dot"></span>
-          SYSTEM ONLINE
-        </span>
+  <div class="neural-container">
+    <header class="neural-header">
+      <div class="neural-logo">
+        <div class="neural-logo__icon">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 2L4 9v14l12 7 12-7V9L16 2z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M16 10l6 3.5v7L16 24l-6-3.5v-7L16 10z" fill="currentColor" opacity="0.3"/>
+            <circle cx="16" cy="16" r="3" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="neural-logo__text">
+          <span class="neural-logo__eyebrow">SmartTrader AI</span>
+          <span class="neural-logo__title">Neural Terminal</span>
+        </div>
       </div>
-    </div>
-    <div class="ai-header__right">
-      <div class="ai-time" id="terminal-time"></div>
-    </div>
-  </header>
+      <nav class="neural-nav">
+        <%= link_to ai_analysis_index_path, class: "neural-nav__link" do %>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span>History</span>
+        <% end %>
+        <%= link_to root_path, class: "neural-nav__link" do %>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span>Dashboard</span>
+        <% end %>
+      </nav>
+    </header>
 
-  <!-- Main Content -->
-  <main class="ai-main">
-    <!-- Input Panel -->
-    <section class="ai-panel ai-panel--input">
-      <div class="ai-panel__header">
-        <span class="ai-panel__icon">◈</span>
-        <h2 class="ai-panel__title">ASSET INPUT</h2>
-        <span class="ai-panel__badge">v2.0</span>
-      </div>
+    <main class="neural-panel">
+      <div class="neural-panel__glow"></div>
 
-      <%= form_with url: '/ai_analysis', method: :post, local: true, class: "ai-form" do |f| %>
-        <div class="ai-form__group">
-          <label class="ai-form__label">
-            <span class="label-text">TARGET ASSETS</span>
-            <span class="label-hint">Comma or space separated</span>
-          </label>
-          <div class="ai-input-wrapper">
-            <%= f.text_field :assets,
-                value: @default_assets,
-                class: "ai-input",
-                placeholder: "BTC, ETH, SOL",
-                autocomplete: "off" %>
-            <div class="ai-input__decoration"></div>
-          </div>
+      <div class="neural-terminal-header">
+        <div class="neural-terminal-header__dots">
+          <span></span><span></span><span></span>
         </div>
-
-        <div class="ai-form__group">
-          <label class="ai-form__label">
-            <span class="label-text">ANALYSIS MODE</span>
-          </label>
-          <div class="ai-radio-group">
-            <label class="ai-radio">
-              <%= f.radio_button :analysis_type, "full", checked: true %>
-              <span class="ai-radio__box">
-                <span class="ai-radio__indicator"></span>
-              </span>
-              <span class="ai-radio__content">
-                <span class="ai-radio__title">FULL ANALYSIS</span>
-                <span class="ai-radio__desc">MCP → Factors → Signals → Allocation</span>
-              </span>
-            </label>
-
-            <label class="ai-radio">
-              <%= f.radio_button :analysis_type, "quick" %>
-              <span class="ai-radio__box">
-                <span class="ai-radio__indicator"></span>
-              </span>
-              <span class="ai-radio__content">
-                <span class="ai-radio__title">QUICK SCAN</span>
-                <span class="ai-radio__desc">Allocation recommendation only</span>
-              </span>
-            </label>
-          </div>
+        <div class="neural-terminal-header__title">
+          <span class="neural-cursor">claude</span>@neural:~$
         </div>
-
-        <div class="ai-form__actions">
-          <%= f.submit "INITIATE ANALYSIS", class: "ai-btn ai-btn--primary" %>
-        </div>
-      <% end %>
-    </section>
-
-    <!-- Info Panel -->
-    <section class="ai-panel ai-panel--info">
-      <div class="ai-panel__header">
-        <span class="ai-panel__icon">◉</span>
-        <h2 class="ai-panel__title">SYSTEM INFO</h2>
-      </div>
-
-      <div class="ai-info-grid">
-        <div class="ai-info-item">
-          <span class="ai-info-item__label">DATA SOURCE</span>
-          <span class="ai-info-item__value">MCP Real-time</span>
-        </div>
-        <div class="ai-info-item">
-          <span class="ai-info-item__label">ANALYSIS ENGINE</span>
-          <span class="ai-info-item__value">Claude Sonnet</span>
-        </div>
-        <div class="ai-info-item">
-          <span class="ai-info-item__label">EST. TIME</span>
-          <span class="ai-info-item__value">30-60s</span>
-        </div>
-        <div class="ai-info-item">
-          <span class="ai-info-item__label">FACTORS</span>
-          <span class="ai-info-item__value">12 Active</span>
+        <div class="neural-terminal-header__status">
+          <span class="neural-status neural-status--ready">READY</span>
         </div>
       </div>
 
-      <div class="ai-process-flow">
-        <div class="ai-process-flow__title">ANALYSIS PIPELINE</div>
-        <div class="ai-process-flow__steps">
-          <div class="ai-step">
-            <span class="ai-step__num">01</span>
-            <span class="ai-step__text">Data Fetch</span>
+      <div class="neural-content">
+        <%= form_with url: ai_analysis_index_path, method: :post, local: true, class: "neural-form", multipart: true do |f| %>
+          <div class="neural-field">
+            <div class="neural-field__header">
+              <div class="neural-field__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                </svg>
+              </div>
+              <div class="neural-field__label-group">
+                <%= f.label :prompt, "Command Prompt", class: "neural-field__label" %>
+                <span class="neural-field__hint">Natural language instructions for Claude</span>
+              </div>
+            </div>
+            <div class="neural-textarea-wrapper">
+              <%= f.text_area :prompt,
+                  value: @default_prompt,
+                  rows: 8,
+                  class: "neural-textarea",
+                  placeholder: "Enter your request...",
+                  spellcheck: false %>
+            </div>
           </div>
-          <div class="ai-step__arrow">→</div>
-          <div class="ai-step">
-            <span class="ai-step__num">02</span>
-            <span class="ai-step__text">Factor Calc</span>
+
+          <div class="neural-columns">
+            <div class="neural-field">
+              <div class="neural-field__header">
+                <div class="neural-field__icon neural-field__icon--files">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                </div>
+                <div class="neural-field__label-group">
+                  <%= f.label :uploaded_files, "Context Files", class: "neural-field__label" %>
+                  <span class="neural-field__hint">Upload images, documents, or any files</span>
+                </div>
+              </div>
+              <div class="neural-upload-area" data-controller="file-upload" data-file-upload-placeholder-value="Drop files here or click to browse">
+                <input type="file" name="ai_analysis_record[uploaded_files][]" id="ai_analysis_record_uploaded_files" multiple class="neural-upload-input" data-file-upload-target="input">
+                <div class="neural-upload-content" data-file-upload-target="content">
+                  <svg class="neural-upload-content__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                  <span class="neural-upload-content__text">Drop files here or click to browse</span>
+                  <span class="neural-upload-content__hint">Supports images, documents, and any file type</span>
+                </div>
+                <div class="neural-upload-list" data-file-upload-target="list"></div>
+              </div>
+            </div>
+
+            <div class="neural-field">
+              <div class="neural-field__header">
+                <div class="neural-field__icon neural-field__icon--mode">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                  </svg>
+                </div>
+                <div class="neural-field__label-group">
+                  <%= f.label :permission_mode, "Permission Mode", class: "neural-field__label" %>
+                  <span class="neural-field__hint">Control Claude's autonomy level</span>
+                </div>
+              </div>
+              <div class="neural-mode-grid">
+                <% modes = [
+                  ["acceptEdits", "Auto-Accept", "Full autonomy"],
+                  ["default", "Default", "Ask permission"]
+                ] %>
+                <% modes.each do |value, label, hint| %>
+                  <label class="neural-mode-option <%= "is-selected" if value == "acceptEdits" %>">
+                    <%= f.radio_button :permission_mode, value, checked: value == "acceptEdits" %>
+                    <div class="neural-mode-option__content">
+                      <span class="neural-mode-option__label"><%= label %></span>
+                      <span class="neural-mode-option__hint"><%= hint %></span>
+                    </div>
+                    <div class="neural-mode-option__indicator"></div>
+                  </label>
+                <% end %>
+              </div>
+            </div>
           </div>
-          <div class="ai-step__arrow">→</div>
-          <div class="ai-step">
-            <span class="ai-step__num">03</span>
-            <span class="ai-step__text">Signal Gen</span>
+
+          <div class="neural-actions">
+            <button type="submit" class="neural-submit">
+              <div class="neural-submit__bg"></div>
+              <div class="neural-submit__content">
+                <svg class="neural-submit__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                <span>Execute Command</span>
+              </div>
+              <div class="neural-submit__glow"></div>
+            </button>
           </div>
-          <div class="ai-step__arrow">→</div>
-          <div class="ai-step">
-            <span class="ai-step__num">04</span>
-            <span class="ai-step__text">Allocation</span>
-          </div>
-        </div>
+        <% end %>
       </div>
-    </section>
-  </main>
+    </main>
+
+    <footer class="neural-footer">
+      <div class="neural-footer__item">
+        <span class="neural-footer__key">Model</span>
+        <span class="neural-footer__value">Claude Sonnet 4.6</span>
+      </div>
+      <div class="neural-footer__divider"></div>
+      <div class="neural-footer__item">
+        <span class="neural-footer__key">Engine</span>
+        <span class="neural-footer__value">Claude Code CLI</span>
+      </div>
+      <div class="neural-footer__divider"></div>
+      <div class="neural-footer__item">
+        <span class="neural-footer__key">Status</span>
+        <span class="neural-footer__value neural-footer__value--active">Online</span>
+      </div>
+    </footer>
+  </div>
 </div>
-
-<style>
-/* AI Terminal Base */
-.ai-terminal {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0a0f1a 0%, #0d1520 50%, #0a1018 100%);
-  color: #e2e8f0;
-  font-family: 'Inter', -apple-system, sans-serif;
-  position: relative;
-  overflow: hidden;
-}
-
-.ai-terminal__scanline {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 255, 200, 0.01) 2px,
-    rgba(0, 255, 200, 0.01) 4px
-  );
-  pointer-events: none;
-  z-index: 1000;
-}
-
-.ai-terminal__grid {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image:
-    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  pointer-events: none;
-}
-
-/* Header */
-.ai-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
-  background: rgba(10, 15, 26, 0.8);
-  backdrop-filter: blur(10px);
-}
-
-.ai-header__left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.ai-logo {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.05));
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #06b6d4;
-}
-
-.ai-logo svg {
-  width: 28px;
-  height: 28px;
-}
-
-.ai-header__title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.ai-header__title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: #f1f5f9;
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-}
-
-.ai-header__status {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  color: #22c55e;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  background: #22c55e;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
-  50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
-}
-
-.ai-time {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  color: #06b6d4;
-  padding: 0.5rem 1rem;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 6px;
-}
-
-/* Main Content */
-.ai-main {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-@media (max-width: 1024px) {
-  .ai-main {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Panels */
-.ai-panel {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(6, 182, 212, 0.15);
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.ai-panel__header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  background: rgba(6, 182, 212, 0.05);
-  border-bottom: 1px solid rgba(6, 182, 212, 0.1);
-}
-
-.ai-panel__icon {
-  color: #06b6d4;
-  font-size: 1rem;
-}
-
-.ai-panel__title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: #94a3b8;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.ai-panel__badge {
-  margin-left: auto;
-  font-size: 0.625rem;
-  padding: 0.25rem 0.5rem;
-  background: rgba(6, 182, 212, 0.15);
-  color: #06b6d4;
-  border-radius: 4px;
-  font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.05em;
-}
-
-/* Form */
-.ai-form {
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.ai-form__group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.ai-form__label {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.label-text {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: #64748b;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.label-hint {
-  font-size: 0.625rem;
-  color: #475569;
-}
-
-.ai-input-wrapper {
-  position: relative;
-}
-
-.ai-input {
-  width: 100%;
-  padding: 1rem 1.25rem;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 8px;
-  color: #f1f5f9;
-  font-size: 1rem;
-  font-family: 'JetBrains Mono', monospace;
-  transition: all 0.2s;
-}
-
-.ai-input::placeholder {
-  color: #475569;
-}
-
-.ai-input:focus {
-  outline: none;
-  border-color: #06b6d4;
-  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1), inset 0 0 20px rgba(6, 182, 212, 0.05);
-}
-
-.ai-input__decoration {
-  position: absolute;
-  bottom: 0;
-  left: 1rem;
-  right: 1rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.3), transparent);
-}
-
-/* Radio Group */
-.ai-radio-group {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
-}
-
-.ai-radio {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(6, 182, 212, 0.15);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.ai-radio:hover {
-  border-color: rgba(6, 182, 212, 0.3);
-  background: rgba(6, 182, 212, 0.05);
-}
-
-.ai-radio input {
-  display: none;
-}
-
-.ai-radio__box {
-  width: 18px;
-  height: 18px;
-  border: 2px solid rgba(6, 182, 212, 0.4);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.2s;
-}
-
-.ai-radio__indicator {
-  width: 8px;
-  height: 8px;
-  background: #06b6d4;
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0);
-  transition: all 0.2s;
-}
-
-.ai-radio input:checked ~ .ai-radio__box {
-  border-color: #06b6d4;
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
-}
-
-.ai-radio input:checked ~ .ai-radio__box .ai-radio__indicator {
-  opacity: 1;
-  transform: scale(1);
-}
-
-.ai-radio__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.ai-radio__title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: #e2e8f0;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.ai-radio__desc {
-  font-size: 0.625rem;
-  color: #64748b;
-}
-
-/* Button */
-.ai-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 2rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  font-family: 'JetBrains Mono', monospace;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.ai-btn--primary {
-  background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-  color: #0a0f1a;
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
-}
-
-.ai-btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 30px rgba(6, 182, 212, 0.4);
-}
-
-.ai-btn--primary:active {
-  transform: translateY(0);
-}
-
-.ai-header__btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: 6px;
-  color: #06b6d4;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  font-family: 'JetBrains Mono', monospace;
-  text-decoration: none;
-  transition: all 0.2s;
-}
-
-.ai-header__btn:hover {
-  background: rgba(6, 182, 212, 0.2);
-  border-color: #06b6d4;
-}
-
-/* Info Panel */
-.ai-panel--info {
-  display: flex;
-  flex-direction: column;
-}
-
-.ai-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: rgba(6, 182, 212, 0.1);
-  margin: 1px;
-}
-
-.ai-info-item {
-  padding: 1rem;
-  background: rgba(15, 23, 42, 0.6);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.ai-info-item__label {
-  font-size: 0.625rem;
-  color: #64748b;
-  letter-spacing: 0.1em;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.ai-info-item__value {
-  font-size: 0.875rem;
-  color: #06b6d4;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-/* Process Flow */
-.ai-process-flow {
-  padding: 1.25rem;
-  border-top: 1px solid rgba(6, 182, 212, 0.1);
-  margin-top: auto;
-}
-
-.ai-process-flow__title {
-  font-size: 0.625rem;
-  color: #64748b;
-  letter-spacing: 0.1em;
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 0.75rem;
-}
-
-.ai-process-flow__steps {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.ai-step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.ai-step__num {
-  font-size: 0.75rem;
-  color: #06b6d4;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 600;
-}
-
-.ai-step__text {
-  font-size: 0.5rem;
-  color: #94a3b8;
-  letter-spacing: 0.05em;
-}
-
-.ai-step__arrow {
-  color: rgba(6, 182, 212, 0.3);
-  font-size: 0.75rem;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Update time display
-  function updateTime() {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-US', {
-      hour12: false,
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-    const dateStr = now.toLocaleDateString('en-US', {
-      month: 'short',
-      day: '2-digit'
-    });
-    document.getElementById('terminal-time').textContent = `${dateStr} ${timeStr}`;
-  }
-  updateTime();
-  setInterval(updateTime, 1000);
-});
-</script>

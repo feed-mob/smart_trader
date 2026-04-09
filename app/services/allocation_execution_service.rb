@@ -83,7 +83,21 @@ class AllocationExecutionService
 
   def validate_execution!(strategy, allocations)
     raise "Recommendation payload is missing cash_reserve" unless @recommendation[:cash_reserve].is_a?(Hash)
-    raise "Allocations exceed strategy max_positions" if allocations.size > strategy.max_positions
+
+    duplicate_symbols = allocations
+      .map { |allocation| allocation[:symbol].to_s.upcase.presence }
+      .compact
+      .tally
+      .select { |_symbol, count| count > 1 }
+      .keys
+    raise "Recommendation contains duplicate assets: #{duplicate_symbols.join(', ')}" if duplicate_symbols.any?
+
+    target_allocations = allocations.select { |allocation| allocation[:allocation_percent].to_d.positive? }
+    target_position_count = target_allocations.size
+    if target_position_count > strategy.max_positions
+      symbols = target_allocations.map { |allocation| allocation[:symbol].to_s.upcase }
+      raise "Allocations exceed strategy max_positions (#{target_position_count} > #{strategy.max_positions}): #{symbols.join(', ')}"
+    end
 
     cash_percent = @recommendation.dig(:cash_reserve, :percent).to_f
     total_percent = allocations.sum { |allocation| allocation[:allocation_percent].to_f } + cash_percent
